@@ -2,12 +2,17 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
+import productRoutes from "./routes/productRoutes.js";
 
 const app = express();
 
 const allowedOrigins = ["http://localhost:5173"];
 
 app.use(cors());
+
+import cookieParser from "cookie-parser";
+app.use(cookieParser());
+
 
 
 // app.use(cors({
@@ -38,6 +43,8 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
+
+app.use("/api/products", productRoutes);
 
 const PORT = process.env.PORT || 3000;
 const mongodb_url = process.env.MONGO_URL;
