@@ -8,6 +8,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["buyer", "manufacturer", "admin"], // ✅ roles
     default: "buyer",
+  },
+  manufacturerProfile: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Manufacturer"
   }
 }, { timestamps: true });
 

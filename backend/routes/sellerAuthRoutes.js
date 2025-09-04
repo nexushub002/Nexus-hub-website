@@ -2,11 +2,12 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+require("dotenv").config();
 
 const router = express.Router();
 
 // ✅ Register
-router.post("/user-register", async (req, res) => {
+router.post("/seller-register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -15,6 +16,7 @@ router.post("/user-register", async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      role: "manufacturer"
     });
 
     await user.save();
@@ -26,7 +28,7 @@ router.post("/user-register", async (req, res) => {
 });
 
 // ✅ Login
-router.post("/user-login", async (req, res) => {
+router.post("/seller-login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -59,7 +61,6 @@ router.post("/user-login", async (req, res) => {
   }
 });
 
-
 router.post("/logout", (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
@@ -67,6 +68,49 @@ router.post("/logout", (req, res) => {
     sameSite: "strict",
   });
   res.status(200).json({ success: true, message: "Logged out successfully" });
+});
+
+
+
+router.post("/become-seller", async (req, res) => {
+  try {
+    const { companyName, contactPerson, phone, factoryAddress } = req.body;
+
+    // Current logged-in user
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    // Already a seller?
+    if (user.role === "manufacturer") {
+      return res.status(400).json({ success: false, message: "You are already a seller" });
+    }
+
+    // Update user role
+    user.role = "manufacturer";
+
+    // Create manufacturer profile
+    const manufacturer = await Manufacturer.create({
+      companyName,
+      contactPerson,
+      phone,
+      factoryAddress,
+      user: user._id,
+    });
+
+    // Link manufacturer to user
+    user.manufacturerProfile = manufacturer._id;
+    await user.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: "Upgraded to seller successfully", 
+      user, 
+      manufacturer 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 });
 
 export default router;
