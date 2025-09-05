@@ -1,15 +1,22 @@
 import express from "express";
+import session from "express-session";
 import cors from "cors";
 import mongoose from "mongoose";
+import MongoStore from "connect-mongo";
 import dotenv from "dotenv";
 dotenv.config();
 
 import productRoutes from "./routes/productRoutes.js";
 import Product from "./models/Product.js"; // ✅ You forgot to import Product
+import Otp from "./models/Otp.js";
+import User from "./models/User.js";
 
 const app = express();
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
+
+import cookieParser from "cookie-parser";
+app.use(cookieParser());
 
 // Enable CORS
 app.use(cors({
@@ -17,10 +24,50 @@ app.use(cors({
   credentials: true
 }));
 
-import cookieParser from "cookie-parser";
-app.use(cookieParser());
+// const allowedOrigins = ["http://localhost:5173"];
 
-const allowedOrigins = ["http://localhost:5173"];
+
+// // ✅ Session middleware
+// app.use(session({
+//   secret: process.env.SESSION_SECRET || "nexushub_secret",
+//   resave: false,
+//   saveUninitialized: false,
+//   store: MongoStore.create({
+//     mongoUrl: process.env.MONGO_URI, // your MongoDB connection
+//     ttl: 60 * 60 * 24 * 7 // 7 days (in seconds)
+//   }),
+//   cookie: {
+//     httpOnly: true,
+//     secure: false,   // ❌ false for localhost, ✅ true for production (HTTPS)
+//     maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+//   }
+// }));
+
+// // 1. Send OTP
+// app.post("/api/auth/send-otp", async (req, res) => {
+//   try {
+//     const { phone } = req.body;
+
+//     if (!phone) return res.status(400).json({ message: "Phone required" });
+
+//     // Generate 6-digit OTP
+//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+//     // Save OTP in DB (valid for 5 minutes)
+//     await Otp.create({
+//       phone,
+//       otp,
+//       expiresAt: new Date(Date.now() + 5 * 60 * 1000)
+//     });
+
+//     // 👉 Here you’d integrate SMS provider like Twilio
+//     console.log(`OTP for ${phone}: ${otp}`);
+
+//     res.json({ message: "OTP sent" });
+//   } catch (err) {
+//     res.status(500).json({ message: "Error sending OTP", error: err.message });
+//   }
+// });
 
 
 
@@ -445,10 +492,6 @@ app.get("/api/addData", async (req, res) => {
   }
 
 });
-
-
-
-app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
