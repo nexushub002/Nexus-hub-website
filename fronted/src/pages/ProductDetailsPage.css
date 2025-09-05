@@ -1,0 +1,148 @@
+/* Container */
+.product-details-container {
+  width: 100%;
+  box-sizing: border-box;
+  gap: 20px;
+  padding: 20px;
+  background-color: #fff;
+}
+
+/* Images Section */
+.image-section {
+  flex: 1;
+  position: relative;
+  display: flex;
+  margin-right: 30px;
+}
+
+/* Thumbnails (for desktop) */
+.thumbnails {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-height: 500px;
+  overflow-y: auto;
+  margin-left: 20px;
+}
+
+.thumb {
+  width: 80px;
+  height: 112px;
+  object-fit: cover;
+  object-position: top;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: 0.3s;
+  border-radius: 4px;
+}
+
+.thumb.active {
+  border-color: black;
+}
+
+/* Main Image */
+.main-image-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 700px;
+  margin-left: 20px;
+}
+
+.main-image {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+/* Info Section */
+.info-section {
+  flex: 1;
+  padding: 10px 20px;
+}
+
+.pd-name {
+  font-size: 24px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+/* Mobile Slider */
+.slider-wrapper {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+}
+
+.slider-track {
+  display: flex;
+  transition: transform 0.4s ease-in-out;
+  margin-left: 10px;
+}
+
+.slide-image {
+  min-width: 100%;
+  height: auto;
+  object-fit: cover;
+  cursor: zoom-in;
+  border-radius: 6px;
+}
+
+/* Dots below mobile slider */
+.slider-dots {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.dot {
+  height: 12px;
+  width: 12px;
+  margin: 0 5px;
+  background-color: #ccc;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.dot.active {
+  background-color: black;
+}
+
+/* Mobile thumbnails below dots */
+.mobile-thumbnails {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.mobile-thumbnails .thumb {
+  width: 80px;
+  height: 80px;
+}
+
+/* Loading Screen */
+.loading {
+  padding: 50px;
+  text-align: center;
+  font-size: 24px;
+  color: #555;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .product-details-container {
+    display: block;
+  }
+
+  .info-section {
+    padding: 20px 10px;
+  }
+
+  .thumbnails {
+    display: none;
+  }
+
+  /* .arrow {
+    display: none;
+  } */
+}

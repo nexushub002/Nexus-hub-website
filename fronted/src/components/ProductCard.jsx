@@ -21,6 +21,8 @@ const ProductCard = ({ product }) => {
     const handleProductCardClick = () => {
         console.log(_id);
         const slug = name.toLowerCase().split(" ").join("-");
+        console.log("Navigating with product id:", product._id);
+
         navigate(`/product-detail/${_id}`);
     };
 

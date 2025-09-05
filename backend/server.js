@@ -465,6 +465,7 @@ app.get("/api/showAllProducts", async (req, res) => {
 
 app.get('/api/product/:id', async (req, res) => {
   const { id } = req.params;
+  console.log(id);
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ message: "Invalid product ID" });
@@ -489,6 +490,6 @@ const mongodb_url = process.env.MONGO_URL;
  
 mongoose.connect(mongodb_url).then(() => {
   console.log("Connected to MongoDB!");
-  app.listen(PORT, () => console.log(`App is running on port ${PORT})`));
+  app.listen(PORT, () => console.log(`App is running on port ${PORT}`));
 })
   .catch((err) => console.error("MongoDB connection error:", err));

@@ -1,15 +1,15 @@
 import React from 'react'
 
-const navbar = () => {
+const Navbar = () => {
   return (
     <div>
           <div className="nav bg-[#134490] px-4 py-3 md:px-10 md:py-6 flex justify-between items-center">
              <div className="logo opacity-0 md:opacity-100">
-                 <img className =" md:w-45 w-0" src="./src/assets/nex logo.jpg"/>
+                 <img className =" md:w-45 w-0" src="/nex-logo.jpg" alt="Nexus-hub logo"/>
             </div>
 
             <div className="m md:py-5 py-4 md:w-[600px] w-[65%] md:h-[35px] h-[25px] bg-gray-100 flex rounded-full border-black border-1 items-center focus-within:border-indigo-600" >
-                 <span class="material-symbols-outlined md:mx-3 mx-1.5  ">
+                 <span className="material-symbols-outlined md:mx-3 mx-1.5  ">
                        search
                       </span>
 
@@ -110,4 +110,4 @@ const navbar = () => {
   )
 }
 
-export default navbar
+export default Navbar

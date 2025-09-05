@@ -1,19 +1,13 @@
-// src/components/ProductDetailsPage.jsx
-import React, { useState, useEffect } from "react";
-// import { useCart } from "../context/CartContext";
 import { useParams } from "react-router-dom";
-// import AddToCartButton from "../Component/AddToCartButton";
-// import "./ProductDetailsPage.css";
+import { useState, useEffect } from "react";
+import "./ProductDetailsPage.css";
 
 const ProductDetailsPage = () => {
-  const { id } = useParams();
-  console.log("Product ID from URL:", id);
+  const { id } = useParams();  // matches /product/:id
 
   const [product, setProduct] = useState(null);
   const [mainIndex, setMainIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
-  // const { addToCart } = useCart();
 
   // Fetch product
   useEffect(() => {
@@ -46,7 +40,6 @@ const ProductDetailsPage = () => {
     );
   }
 
-
   const { images = [], name, description, priceRange, moq, sampleAvailable, samplePrice, warranty, customization } = product;
 
   // Image logic
@@ -54,7 +47,6 @@ const ProductDetailsPage = () => {
 
   return (
     <div className="product-details-container" style={{ display: isMobile ? "block" : "flex" }}>
-      {/* Left Image Section */}
       <div className="image-section">
         {!isMobile ? (
           <>
@@ -82,7 +74,7 @@ const ProductDetailsPage = () => {
           <>
             {/* Mobile View */}
             <div className="slider-wrapper">
-              <div className="slider-track" style={{transform: `translateX(-${mainIndex * 100}%)` }}>
+              <div className="slider-track" style={{ transform: `translateX(-${mainIndex * 100}%)` }}>
                 {images.map((src, i) => (
                   <img
                     key={i}
@@ -101,7 +93,7 @@ const ProductDetailsPage = () => {
                   ></span>
                 ))}
               </div>
-              
+
               <div className="mobile-thumbnails">
                 {images.map((src, idx) => (
                   <img
@@ -116,31 +108,14 @@ const ProductDetailsPage = () => {
             </div>
           </>
         )}
-        
       </div>
-
-      {/* Right Info Section */}
+        
       <div className="info-section">
-        <h1 className="pd-title">{name}</h1>
-        <div className="pd-rating">
-          {"★".repeat(Math.floor(rating)) + "☆".repeat(5 - Math.floor(rating))}
-        </div>
-        <div className="pd-price">
-          <strong>MRP</strong>
-          <span className="old">₹{oldPrice}</span>
-          <span className="new">₹{price}</span>
-          {discount && <span className="disc">{discount}</span>}
-        </div>
-        <p className="pd-description">{description}</p>
-        {/* You can add buttons like "Add to Cart" and "Wishlist" here */}
-        <div>
-          <p>{product._id}</p>
-          <p>{product.title}</p>
-        </div>
-        <AddToCartButton product={product}/>
+<h1 className="pd-name">{name}</h1>
       </div>
     </div>
+
   );
-};
+}
 
 export default ProductDetailsPage;

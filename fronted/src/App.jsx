@@ -1,13 +1,19 @@
+import { Routes, Route } from "react-router-dom";
 import { useState } from 'react'
-import './App.css'
+
 import Homepage from './pages/Homepage' 
+import ProductDetailsPage from './pages/ProductDetailsPage'
+import './App.css'
 
 
 function App() {
 
   return (
     <>
-     <Homepage/>
+      <Routes>
+        <Route path="/" element={<Homepage />} />
+        <Route path="/product-detail/:id" element={<ProductDetailsPage />} />
+      </Routes>
     </>
   )
 }
