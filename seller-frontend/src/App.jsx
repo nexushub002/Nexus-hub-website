@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import './App.css'
+import Nav from './compo/nav'
 
 function App() {
 
   return (
     <div>
-      <h1>Seller Dashboard</h1>
-      <p>Welcome seller! Upload and manage your products here.</p>
+     <Nav/>
     </div>
   );
 }
