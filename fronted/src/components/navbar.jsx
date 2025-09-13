@@ -22,7 +22,7 @@ const Navbar = () => {
 
         <div className="l cursor-pointer flex justify-between items-center md:space-x-8  space-x-4 text-white">
           <div onClick={() => window.open("http://localhost:5174", "_blank")} className="icon flex flex-col items-center">
-            {window.innerWidth > 768 && <span class="material-symbols-outlined">
+            {window.innerWidth > 768 && <span className="material-symbols-outlined">
               storefront
             </span>}
 
@@ -33,7 +33,7 @@ const Navbar = () => {
 
           </div>
           <div className="icon flex flex-col items-center">
-            <span class="material-symbols-outlined">
+            <span className="material-symbols-outlined">
               shopping_cart
             </span>
             <h1>
@@ -42,7 +42,7 @@ const Navbar = () => {
           </div>
 
           <div onClick={() => navigate("/my-profile")} className="icon flex flex-col items-center">
-            <span class=" material-symbols-outlined">
+            <span className="material-symbols-outlined">
               person
             </span>
             <h1>
@@ -61,7 +61,7 @@ const Navbar = () => {
 
       {window.innerWidth < 768 && <div className="reso py-3 flex justify-around items-center text-sm fixed bottom-0 left-0 w-full  shadow-[0_-2px_5px_rgba(0,0,0,0.2)] z-50">
         <div className="icon flex flex-col items-center">
-          <span class="material-symbols-outlined">
+          <span className="material-symbols-outlined">
             Home
           </span>
           <h1>
@@ -69,7 +69,7 @@ const Navbar = () => {
           </h1>
         </div>
         <div className="icon flex flex-col items-center">
-          <span class="material-symbols-outlined">
+          <span className="material-symbols-outlined">
             view_cozy
           </span>
           <h1>
@@ -79,7 +79,7 @@ const Navbar = () => {
 
 
         <div className="icon flex flex-col items-center">
-          <span class="material-symbols-outlined">
+          <span className="material-symbols-outlined">
             search
           </span>
           <h1>
@@ -88,7 +88,7 @@ const Navbar = () => {
         </div>
 
         <div className="icon flex flex-col items-center">
-          <span class="material-symbols-outlined">
+          <span className="material-symbols-outlined">
             shopping_cart
           </span>
           <h1>
@@ -97,7 +97,7 @@ const Navbar = () => {
         </div>
 
         <div className="icon flex flex-col items-center">
-          <span class="material-symbols-outlined">
+          <span className="material-symbols-outlined">
             account_circle
           </span>
           <h1>
