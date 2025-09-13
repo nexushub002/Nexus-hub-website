@@ -120,8 +120,29 @@
     }
   });
 
+  // Get current user (session)
+  app.get("/api/auth/me", async (req, res) => {
+    try {
+      if (!req.session.userId) return res.status(401).json({ message: "Not authenticated" });
 
+      const user = await User.findById(req.session.userId);
+      if (!user) return res.status(404).json({ message: "User not found" });
 
+      res.json({ user });
+    } catch (err) {
+      res.status(500).json({ message: "Error getting user info", error: err.message });
+    }
+  });
+
+  // Logout
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Error logging out", error: err.message });
+      }
+      res.json({ message: "Logout successful" });
+    });
+  });
 
   // app.use(cors({
   //   origin: function (origin, callback) {

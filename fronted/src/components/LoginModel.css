@@ -1,4 +1,4 @@
-LoginModel.css
+/* LoginModel.css */
 .modal-backdrop {
   position: fixed; top:0; left:0; right:0; bottom:0;
   background: rgba(0,0,0,0.5);
@@ -7,7 +7,7 @@ LoginModel.css
 }
 
 .modal {
-  background: #fff; padding: 2rem; border-radius: 8px;
+  background: #9e4242; padding: 2rem; border-radius: 8px;
   width: 90%; max-width: 400px; position: relative;
 }
 

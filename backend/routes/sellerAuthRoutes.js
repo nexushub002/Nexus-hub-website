@@ -12,12 +12,20 @@ router.post("/seller-register", async (req, res) => {
     const { name, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Check if user already exists then to show signin option in fronted and disble signup
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "User already exists" });
+    }
+
+    // Create new user
     const user = new User({
       name,
       email,
       password: hashedPassword,
-      role: "manufacturer"
     });
+
+    if(!user.roles.includes('Manufacturer')) user.roles.push('Manufacturer');
 
     await user.save();
 

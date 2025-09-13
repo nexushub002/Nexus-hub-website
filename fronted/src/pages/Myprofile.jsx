@@ -6,7 +6,6 @@ const Myprofile = () => {
 
   const handleLoginSuccess = () => {
     setShowLogin(false);
-    // optionally trigger a re-fetch of user info or update global auth state
   };
 
   return (
@@ -17,8 +16,8 @@ const Myprofile = () => {
                 <h1 className=" text-2xl my-3">My Profile</h1>
                 <h1 className="text-sm">UserName</h1>
                </div>
-                 
-                 <button className="bg-white hover:scale-105 text-[#134490] font-semibold text-xl px-5 py-2 flex items-center justify-center rounded-full">Log in</button>
+
+                 <button onClick={() => setShowLogin(true)} className="bg-white hover:scale-105 text-[#134490] font-semibold text-xl px-5 py-2 flex items-center justify-center rounded-full">Log in</button>
 
                   {showLogin && <LoginModel onClose={() => setShowLogin(false)} onLoginSuccess={handleLoginSuccess} />}
           </div>

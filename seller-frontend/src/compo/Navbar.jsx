@@ -1,10 +1,12 @@
 import React from "react";
-
+import { useNavigate } from 'react-router-dom'
 import { useState } from "react";
 
-const nav = () => {
+const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [clicked, setClicked] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleClick = () => {
     if (clicked) {
@@ -59,7 +61,7 @@ const nav = () => {
           )}
         </h1>
 
-        <button className="mr-20 bg-[#134490] text-white px-6 py-3 rounded-full mb-2 font-bold hover:scale-105 transition-all duration-300 ">
+        <button onClick={() => navigate("/seller-signup")} className="mr-20 bg-[#134490] text-white px-6 py-3 rounded-full mb-2 font-bold hover:scale-105 transition-all duration-300 ">
           Login
         </button>
       </div>
@@ -206,4 +208,4 @@ const nav = () => {
   );
 };
 
-export default nav;
+export default Navbar;
