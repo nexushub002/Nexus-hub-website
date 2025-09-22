@@ -1,16 +1,70 @@
-// const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
+const sellerSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6, // recommend bcrypt hashing
+    },
+    phone: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    companyName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    gstNumber: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    address: {
+      street: String,
+      city: String,
+      state: String,
+      pincode: String,
+      country: {
+        type: String,
+        default: "India",
+      },
+    },
+    role: {
+      type: String,
+      enum: ["seller"],
+      default: "seller",
+    },
+    isVerified: {
+      type: Boolean,
+      default: false, // set true once email/phone verification is done
+    },
+    products: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
-// const sellerSchema = new mongoose.Schema({
-// userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-// manufacturerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Manufacturer' },
-// companyName: { type: String },
-// businessType: { type: String },
-// kycStatus: { type: String, enum: ['pending','verified','rejected'], default: 'pending' },
-// kycDocs: [{ type: String }],
-// storefront: { logo: String, banner: String, description: String },
-// createdAt: { type: Date, default: Date.now }
-// });
+const Seller = mongoose.model("Seller", sellerSchema);
 
-
-// module.exports = mongoose.model('SellerProfile', sellerSchema);
+export default Seller;

@@ -1,11 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useContext  } from 'react';
+import { UserContext } from "../context/UserContext"; // adjust path if different
 import LoginModel from '../components/LoginModel';
 
 const Myprofile = () => {
     const [showLogin, setShowLogin] = useState(false);
 
+    const { user, setUser } = useContext(UserContext);
+
   const handleLoginSuccess = () => {
     setShowLogin(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/auth/logout", {
+        method: "POST",
+        credentials: "include", // important for sessions/cookies
+      });
+
+      const data = await res.json();
+      console.log("Logout response:", data);
+
+      if (res.ok) {
+        // Clear context user
+        setUser(null);
+
+        // Redirect to homepage
+        window.location.href = "/";
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
   };
 
   return (
@@ -15,11 +40,13 @@ const Myprofile = () => {
                <div className="pr ">
                 <h1 className=" text-2xl my-3">My Profile</h1>
                 <h1 className="text-sm">UserName</h1>
+                {user ? (
+              <button onClick={handleLogout}>Logout</button>
+            ) : (
+              <button onClick={() => setShowLogin(true)}>Login</button>
+            )}
                </div>
-
-                 <button onClick={() => setShowLogin(true)} className="bg-white hover:scale-105 text-[#134490] font-semibold text-xl px-5 py-2 flex items-center justify-center rounded-full">Log in</button>
-
-                  {showLogin && <LoginModel onClose={() => setShowLogin(false)} onLoginSuccess={handleLoginSuccess} />}
+               
           </div>
 
             <div className="con px-6 py-6">

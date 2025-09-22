@@ -11,6 +11,9 @@
   import Otp from "./models/Otp.js";
   import User from "./models/User.js";
 
+ 
+
+  // Import middleware
   import { authMiddleware } from "./middleware/auth.js";
 
   const app = express();
@@ -26,18 +29,11 @@
 
     
 
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-  });
-
   // Enable CORS
   app.use(cors({
-    origin: 'http://localhost:5173', // frontend origin
+    origin: ["http://localhost:5173", "http://localhost:5174"], // frontend + seller frontend
     credentials: true
   }));
-
-  // const allowedOrigins = ["http://localhost:5173"];
 
 
   // ✅ Session middleware
@@ -143,6 +139,16 @@
       res.json({ message: "Logout successful" });
     });
   });
+
+
+   // Import routes
+  import sellerRoutes from "./routes/sellerRoutes.js";
+  import sellerAuthRoutes from "./routes/sellerAuthRoutes.js";
+
+  //use seller routes
+  app.use("/api/seller", sellerRoutes);
+  app.use("/api/seller/auth", sellerAuthRoutes);
+
 
   // app.use(cors({
   //   origin: function (origin, callback) {
@@ -571,6 +577,28 @@
     res.send("Backend is running 🚀");
   });
 
+  app.get("/api/search", async (req, res) => {
+  try {
+    const q = req.query.q?.toLowerCase() || "";
+
+    if (!q) {
+      return res.status(400).json({ message: "Query is required" });
+    }
+
+    const products = await Product.find({
+      $or: [
+        { title: { $regex: q, $options: "i" } },         // case-insensitive title match
+        { description: { $regex: q, $options: "i" } }    // case-insensitive description match
+      ]
+    });
+
+    res.json(products);
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
   // In homepage, show All products
   app.get("/api/showAllProducts", async (req, res) => {
@@ -581,6 +609,8 @@
       res.status(500).json({ error: "Failed to fetch products" });
     }
   });
+
+
 
 
   // Get product by ID
@@ -605,3 +635,8 @@
   });
 
   // app.use("/api/products", productRoutes);
+
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  });

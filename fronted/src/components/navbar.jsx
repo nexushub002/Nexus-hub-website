@@ -1,9 +1,44 @@
-import React from 'react'
+import React, { useContext, useState, useEffect } from "react";
+import { UserContext } from "../context/UserContext";
+import LoginModel from "./LoginModel";
 import { useNavigate } from 'react-router-dom'
+import { useLocation } from "react-router-dom";
 
 const Navbar = () => {
 
+  const { user, setUser } = useContext(UserContext);
+  const [showLogin, setShowLogin] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+  const delayDebounce = setTimeout(() => {
+    const query = inputValue.trim();
+
+    if (query) {
+      // Always push new query to /search even if already there
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+    } else {
+      // If cleared input, go back to homepage
+      if (location.pathname.startsWith("/search")) {
+        navigate("/");
+      }
+    }
+  }, 300); // Short debounce: 300ms
+
+  return () => clearTimeout(delayDebounce); // Cancel previous timer on every keystroke
+}, [inputValue, navigate, location]);
+
+
+  const handleLogout = async () => {
+    await fetch("http://localhost:3000/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    setUser(null);
+  };
 
   return (
     <div>
@@ -17,7 +52,13 @@ const Navbar = () => {
             search
           </span>
 
-          <input placeholder='Search Nexus Hub' className='outline-none w-full ' />
+          <input 
+            type="text"
+            placeholder='Search Nexus Hub' 
+            className='outline-none w-full'
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+          />
         </div>
 
         <div className="l cursor-pointer flex justify-between items-center md:space-x-8  space-x-4 text-white">
@@ -41,16 +82,40 @@ const Navbar = () => {
             </h1>
           </div>
 
-          <div onClick={() => navigate("/my-profile")} className="icon flex flex-col items-center">
+          {/* <div onClick={() => navigate("/my-profile")} className="icon flex flex-col items-center">
             <span className="material-symbols-outlined">
               person
             </span>
             <h1>
               {window.innerWidth > 768 && <span>Log in</span>}
             </h1>
-          </div>
+          </div> */}
+          {!user ? (
+            <div onClick={() => setShowLogin(true)} className="icon flex flex-col items-center">
+              <span className="material-symbols-outlined">
+                person
+              </span>
+
+              <h1>
+              {window.innerWidth > 768 && <span>Log in</span>}
+            </h1>
 
 
+              {showLogin && (
+                <LoginModel
+                  onClose={() => setShowLogin(false)}
+                  onLoginSuccess={(loggedInUser) => {
+                    setUser(loggedInUser);
+                    setShowLogin(false);
+                  }}
+                />
+              )}
+            </div>
+          ) : (
+            <div className="profile-box">
+              <button onClick={() => {navigate("/myprofile")}}>Profile</button>
+            </div>
+          )}
         </div>
 
 

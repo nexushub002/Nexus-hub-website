@@ -35,26 +35,30 @@ export default function LoginModel({ onClose, onLoginSuccess }) {
   const verifyOtp = async () => {
     try {
       console.log("🔔 Verifying OTP for phone:", phone, "otp:", otp);
-      const res = await fetch('http://localhost:3000/api/auth/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("http://localhost:3000/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, otp }),
-        credentials: 'include' // ensures session cookie is sent back
+        credentials: "include", // ensures session cookie is sent back
       });
+
       console.log("🔔 OTP verification response status:", res.status);
-      
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.message || 'OTP verification failed');
+        throw new Error(data.message || "OTP verification failed");
       }
 
-      setError('');
-      onLoginSuccess(); // hide modal & refresh user state
+      // ✅ Get user details from backend response
+      const data = await res.json();
+
+      setError("");
+      onLoginSuccess(data.user); // pass user to context
     } catch (e) {
       setError(e.message);
     }
   };
+
 
   return (
     <div className="modal-backdrop">
