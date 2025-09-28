@@ -13,10 +13,10 @@ import "swiper/css/pagination";
 const SlideBar = () => {
 
     const slides = [
-    { id: 1, color: "bg-blue-500", text: "Slide 1" },
-    { id: 2, color: "bg-green-500", text: "Slide 2" },
-    { id: 3, color: "bg-red-500", text: "Slide 3" },
-    { id: 4, color: "bg-purple-500", text: "Slide 4" },
+    { id: 1, url: "/Sliderbar_images/122911c45334a187.webp" , alt: "Slide 1" },
+    { id: 2, url: "/Sliderbar_images/707b1aae8941c3cc.webp" , alt: "Slide 2" },
+    { id: 3, url: "/Sliderbar_images/f12b23456036aa64.webp" , alt: "Slide 3"   },
+    { id: 4, url: "/Sliderbar_images/f12b23456036aa64.webp" , alt: "Slide 4" },
   ];
 
   return (
@@ -30,14 +30,14 @@ const SlideBar = () => {
         navigation
           pagination={{ clickable: true }}
         autoplay={{ delay: 3000, disableOnInteraction: false }}
-        className="w-full h-[45vh]"
+        className="w-full h-[40vh]"
       >
         {slides.map((slide) => (
           <SwiperSlide key={slide.id}>
             <div
               className={`w-full h-full flex items-center justify-center text-white text-4xl ${slide.color}`}
             >
-              {slide.text}
+              <img className='h-full w-full' src={slide.url} alt={slide.alt} />
             </div>
           </SwiperSlide>
         ))}
