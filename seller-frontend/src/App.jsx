@@ -4,6 +4,7 @@ import Homepage from './pages/Homepage'
 import Sellersignup from './pages/Sellersignup';
 import SellerSignin from './pages/SellerSignin';
 import Sellerdashboard from './pages/Sellerdashboard';
+import AddProduct from './pages/AddProduct';
 import './App.css'
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/seller-signup" element={<Sellersignup />} />
         <Route path="/seller-signin" element={<SellerSignin />} />
         <Route path="/seller/dashboard" element={<Sellerdashboard />} />
+        <Route path="/seller/add-product" element={<AddProduct />} />
       </Routes>
     </div>
   );

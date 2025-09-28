@@ -23,7 +23,14 @@ const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole }) => {
           return (
             <div
               key={item.label}
-              onClick={() => setActive(item.label)}
+              onClick={() => {
+                setActive(item.label)
+                if (item.label === 'Add Product') {
+                  window.location.href = '/seller/add-product'
+                } else if (item.label === 'Dashboard (Overview)') {
+                  window.location.href = '/seller/dashboard'
+                }
+              }}
               className={`px-3 py-2 rounded-lg cursor-pointer transition ${
                 isActive
                   ? 'bg-[#1f4e95] text-white'
