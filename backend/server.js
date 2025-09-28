@@ -600,6 +600,52 @@
 });
 
 
+  // Create product (JSON only, images as URLs). Associates manufacturerId as seller.
+  app.post('/api/products', async (req, res) => {
+    try {
+      const {
+        name,
+        category,
+        description,
+        price,
+        priceRangeMin,
+        priceRangeMax,
+        moq,
+        sampleAvailable,
+        samplePrice,
+        manufacturerId,
+        hsCode,
+        warranty,
+        returnPolicy,
+        customization,
+        images = [],
+        videos = []
+      } = req.body
+
+      const product = await Product.create({
+        name,
+        category,
+        description,
+        price,
+        priceRange: { min: priceRangeMin, max: priceRangeMax },
+        moq,
+        sampleAvailable,
+        samplePrice,
+        manufacturerId,
+        hsCode,
+        warranty,
+        returnPolicy,
+        customization,
+        images,
+        videos
+      })
+
+      res.status(201).json({ success: true, product })
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message })
+    }
+  })
+
   // In homepage, show All products
   app.get("/api/showAllProducts", async (req, res) => {
     try {
