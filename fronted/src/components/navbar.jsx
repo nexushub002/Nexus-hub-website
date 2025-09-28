@@ -14,22 +14,22 @@ const Navbar = () => {
   const location = useLocation();
 
   useEffect(() => {
-  const delayDebounce = setTimeout(() => {
-    const query = inputValue.trim();
+    const delayDebounce = setTimeout(() => {
+      const query = inputValue.trim();
 
-    if (query) {
-      // Always push new query to /search even if already there
-      navigate(`/search?q=${encodeURIComponent(query)}`);
-    } else {
-      // If cleared input, go back to homepage
-      if (location.pathname.startsWith("/search")) {
-        navigate("/");
+      if (query) {
+        // Always push new query to /search even if already there
+        navigate(`/search?q=${encodeURIComponent(query)}`);
+      } else {
+        // If cleared input, go back to homepage
+        if (location.pathname.startsWith("/search")) {
+          navigate("/");
+        }
       }
-    }
-  }, 300); // Short debounce: 300ms
+    }, 300); // Short debounce: 300ms
 
-  return () => clearTimeout(delayDebounce); // Cancel previous timer on every keystroke
-}, [inputValue, navigate, location]);
+    return () => clearTimeout(delayDebounce); // Cancel previous timer on every keystroke
+  }, [inputValue, navigate, location]);
 
 
   const handleLogout = async () => {
@@ -52,9 +52,9 @@ const Navbar = () => {
             search
           </span>
 
-          <input 
+          <input
             type="text"
-            placeholder='Search Nexus Hub' 
+            placeholder='Search Nexus Hub'
             className='outline-none w-full'
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
@@ -91,31 +91,26 @@ const Navbar = () => {
             </h1>
           </div> */}
           {!user ? (
-            <div onClick={() => setShowLogin(true)} className="icon flex flex-col items-center">
-              <span className="material-symbols-outlined">
-                person
-              </span>
-
-              <h1>
-              {window.innerWidth > 768 && <span>Log in</span>}
-            </h1>
-
-
-              {showLogin && (
-                <LoginModel
-                  onClose={() => setShowLogin(false)}
-                  onLoginSuccess={(loggedInUser) => {
-                    setUser(loggedInUser);
-                    setShowLogin(false);
-                  }}
-                />
-              )}
+            <div className="icon flex flex-col items-center" onClick={() => setShowLogin(true)}>
+              <span className="material-symbols-outlined">person</span>
+              <h1>{window.innerWidth > 768 && <span>Log in</span>}</h1>
             </div>
           ) : (
             <div className="profile-box">
-              <button onClick={() => {navigate("/myprofile")}}>Profile</button>
+              <button onClick={() => { navigate("/myprofile") }}>Profile</button>
             </div>
           )}
+
+          {showLogin && (
+            <LoginModel
+              onClose={() => setShowLogin(false)}
+              onLoginSuccess={(loggedInUser) => {
+                setUser(loggedInUser);
+                setShowLogin(false);
+              }}
+            />
+          )}
+
         </div>
 
 

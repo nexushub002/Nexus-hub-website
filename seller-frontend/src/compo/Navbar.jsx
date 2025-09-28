@@ -77,7 +77,7 @@ const Navbar = () => {
             Sell your product on India's B2B Hub-
             <section className="mx-2 text-[#134490]">NexusHub</section>{" "}
           </h1>
-          <button className="bg-[#3b82f6] rounded-lg my-12 text-lg font-bold hover:scale-105 transition-all duration-300  hover:bg-[#134490] text-white px-5 py-3">
+          <button onClick={() => navigate("/seller-signup")} className="bg-[#3b82f6] rounded-lg my-12 text-lg font-bold hover:scale-105 transition-all duration-300  hover:bg-[#134490] text-white px-5 py-3">
             Start Selling
           </button>
         </div>

@@ -104,7 +104,7 @@ router.post("/seller-login", async (req, res) => {
 
     // 2. Check password (assuming bcrypt)
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
+    if (!isMatch) return res.status(400).json({ success: false, message: "Invalid Password" });
 
     // 3. Sign JWT
     const token = jwt.sign(
