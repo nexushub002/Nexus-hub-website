@@ -1,77 +1,201 @@
-// ProductCart.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useWishlist } from '../context/WishlistContext';
+import { useCart } from '../context/CartContext';
+import './ProductCard.css';
 
 const ProductCard = ({ product }) => {
     const [isHovered, setIsHovered] = useState(false);
+    const [showMessage, setShowMessage] = useState('');
     const navigate = useNavigate();
+    
+    const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+    const { addToCart } = useCart();
 
     if (!product) {
-        return <div>Loading...</div>; // or return null
+        return (
+            <div className="product-card-skeleton">
+                <div className="skeleton-image"></div>
+                <div className="skeleton-content">
+                    <div className="skeleton-line"></div>
+                    <div className="skeleton-line short"></div>
+                    <div className="skeleton-line"></div>
+                </div>
+            </div>
+        );
     }
 
     const {
         _id,
         name,
+        price,
         priceRange,
         moq,
         images = [],
+        videos = [],
+        category,
+        subcategory,
+        description,
+        sampleAvailable,
+        samplePrice,
+        customization,
+        warranty,
+        returnPolicy,
+        hsCode,
+        manufacturerId,
+        createdAt
     } = product;
 
-    const handleProductCardClick = () => {
-        console.log(_id);
-        const slug = name.toLowerCase().split(" ").join("-");
-        console.log("Navigating with product id:", product._id);
-
+    const handleProductClick = (e) => {
+        // Don't navigate if clicking on action buttons
+        if (e.target.closest('.action-button')) {
+            return;
+        }
         navigate(`/product-detail/${_id}`);
     };
 
-    const mainImage = images[0] || "";
+    const handleWishlistClick = async (e) => {
+        e.stopPropagation();
+        try {
+            let result;
+            if (isInWishlist(_id)) {
+                result = await removeFromWishlist(_id);
+            } else {
+                result = await addToWishlist(product);
+            }
+            
+            setShowMessage(result.message);
+            setTimeout(() => setShowMessage(''), 2000);
+        } catch (error) {
+            console.error('Error toggling wishlist:', error);
+        }
+    };
+
+    const handleAddToCart = async (e) => {
+        e.stopPropagation();
+        try {
+            const result = await addToCart(product, 1);
+            setShowMessage(result.message);
+            setTimeout(() => setShowMessage(''), 2000);
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+        }
+    };
+
+    const formatPrice = (price) => {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR'
+        }).format(price);
+    };
+
+    const mainImage = images[0] || '/placeholder-image.jpg';
+    const isWishlisted = isInWishlist(_id);
 
     return (
-        <div>
-            <div className="bg-white rounded-xl shadow-md  hover:shadow-lg transition-all p-3 w-64"
-                onClick={handleProductCardClick}
-                style={{ cursor: "pointer" }}>
+        <div className="product-card-container">
+            <div 
+                className={`product-card ${isHovered ? 'hovered' : ''}`}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                onClick={handleProductClick}
+            >
+                {/* Message Toast */}
+                {showMessage && (
+                    <div className="message-toast">
+                        {showMessage}
+                    </div>
+                )}
+
                 {/* Product Image */}
-                <div className="relative w-full h-40 flex items-center justify-center overflow-hidden rounded-lg">
+                <div className="product-image-container">
                     <img
                         src={mainImage}
-                        alt={product.name}
-                        className="object-top w-full h-full"
+                        alt={name}
+                        className="product-image"
+                        onError={(e) => {
+                            e.target.src = '/placeholder-image.jpg';
+                        }}
                     />
+                    
+                    {/* Wishlist Button */}
+                    <button 
+                        className={`wishlist-btn action-button ${isWishlisted ? 'active' : ''}`}
+                        onClick={handleWishlistClick}
+                        title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                    >
+                        <span className="material-symbols-outlined">
+                            {isWishlisted ? 'favorite' : 'favorite_border'}
+                        </span>
+                    </button>
+
+
+                    {/* Hover Overlay with Add to Cart */}
+                    <div className="hover-overlay">
+                        <button 
+                            className="add-to-cart-btn action-button"
+                            onClick={handleAddToCart}
+                        >
+                            <span className="material-symbols-outlined">shopping_cart</span>
+                            Add to Cart
+                        </button>
+                    </div>
                 </div>
 
                 {/* Product Details */}
-                <div className="mt-3">
-                    {/* Title */}
-                    <h3 className="text-sm font-semibold text-gray-800 line-clamp-2">
-                        {product.name}
+                <div className="product-details">
+                    {/* Category */}
+                    <div className="product-category">
+                        {category} {subcategory && `• ${subcategory}`}
+                    </div>
+
+                    {/* Product Name */}
+                    <h3 className="product-name" title={name}>
+                        {name}
                     </h3>
 
                     {/* Price */}
-                    <div className="text-lg font-bold text-gray-900 mt-1">
-                        ${product.priceRange?.min} - ${product.priceRange?.max}
+                    <div className="product-price">
+                        {price ? (
+                            <span className="price-fixed">{formatPrice(price)}</span>
+                        ) : priceRange ? (
+                            <span className="price-range">
+                                {formatPrice(priceRange.min)} - {formatPrice(priceRange.max)}
+                            </span>
+                        ) : (
+                            <span className="price-request">Price on request</span>
+                        )}
                     </div>
 
                     {/* MOQ */}
-                    <p className="text-xs text-gray-500 mt-1">
-                        MOQ: {product.moq}
-                    </p>
+                    {moq && (
+                        <div className="product-moq">
+                            Min Order: {moq} pieces
+                        </div>
+                    )}
 
-                    {/* Verified + Years */}
-                    {/* <div className="flex items-center gap-2 mt-2">
-            {product.verified && (
-                <span className="text-xs bg-blue-100 text-blue-600 font-medium px-2 py-1 rounded">
-                Verified
-                </span>
-            )}
-            <span className="text-xs text-gray-500">{product.years} yrs • CN</span>
-            </div> */}
+                    {/* Action Buttons Row */}
+                    <div className="action-buttons-row">
+                        <button 
+                            className="quick-add-btn action-button"
+                            onClick={handleAddToCart}
+                        >
+                            <span className="material-symbols-outlined">add_shopping_cart</span>
+                        </button>
+                        <button 
+                            className="view-details-btn"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/product-detail/${_id}`);
+                            }}
+                        >
+                            View Details
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default ProductCard
