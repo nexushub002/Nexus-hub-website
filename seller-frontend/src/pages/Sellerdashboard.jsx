@@ -1,14 +1,34 @@
 import React, { useState } from 'react'
 import Sidebar from '../compo/Sidebar'
+import { useSeller } from '../context/SellerContext'
 
 const Sellerdashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const { seller, isAuthenticated, loading } = useSeller()
 
   const handleToggleTheme = () => setIsDarkMode((v) => !v)
 
   const handleSwitchRole = () => {
     // Navigate to buyer app dev server
     window.location.href = 'http://localhost:5173/'
+  }
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-lg">Loading dashboard...</div>
+      </div>
+    )
+  }
+
+  // Redirect if not authenticated (this should be handled by ProtectedRoute, but just in case)
+  if (!isAuthenticated) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-lg">Please log in to access the dashboard.</div>
+      </div>
+    )
   }
 
   return (
@@ -23,7 +43,9 @@ const Sellerdashboard = () => {
         <main className='flex-1 p-6'>
           {/* Top bar */}
           <div className='flex items-center justify-between mb-6'>
-            <div className='text-2xl font-semibold'>Dashboard</div>
+            <div className='text-2xl font-semibold'>
+              Welcome back, {seller?.name || seller?.email || 'Seller'}!
+            </div>
             <div className='flex items-center gap-3'>
               <div className={`hidden md:block ${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl px-3 py-2`}>🔔</div>
               <div className={`hidden md:flex items-center gap-2 ${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl px-3 py-2`}>
@@ -116,10 +138,17 @@ const Sellerdashboard = () => {
             <div className='space-y-6'>
               <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm`}>
                 <div className='flex items-center gap-3 mb-3'>
-                  <img src={`https://i.pravatar.cc/80`} alt='avatar' className='w-16 h-16 rounded-full object-cover' />
+                  <img 
+                    src={`https://i.pravatar.cc/80?seed=${seller?.email || 'seller'}`} 
+                    alt='seller avatar' 
+                    className='w-16 h-16 rounded-full object-cover' 
+                  />
                   <div>
-                    <div className='font-semibold'>Dhira Danuarta</div>
-                    <div className='text-xs opacity-60'>Indonesia 🇮🇩</div>
+                    <div className='font-semibold'>{seller?.name || 'Seller'}</div>
+                    <div className='text-xs opacity-60'>{seller?.email || 'No email'}</div>
+                    {seller?.phone && (
+                      <div className='text-xs opacity-60'>{seller.phone}</div>
+                    )}
                   </div>
                 </div>
                 <button className='text-xs bg-blue-600 text-white px-3 py-1 rounded-md mb-4'>Edit Profile</button>

@@ -5,12 +5,20 @@ dotenv.config();
 
 export const verifySeller = (req, res, next) => {
   try {
-    const token = req.headers["authorization"]?.split(" ")[1]; // Bearer <token>
+    // Check for token in Authorization header first
+    let token = req.headers["authorization"]?.split(" ")[1]; // Bearer <token>
+    
+    // If no token in header, check cookies
+    if (!token) {
+      token = req.cookies?.token;
+    }
+    
     if (!token) return res.status(401).json({ message: "No token provided" });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (!decoded.roles.includes("seller")) {
+    // Check if user has seller role
+    if (!decoded.roles || !decoded.roles.includes("seller")) {
       return res.status(403).json({ message: "Not authorized as seller" });
     }
 

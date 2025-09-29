@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSeller } from "../context/SellerContext";
 
 const Sellersignup = () => {
   const [show, setShow] = useState(false);
@@ -8,8 +9,10 @@ const Sellersignup = () => {
   const [mobile, setMobile] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
+  const { register } = useSeller();
 
   // handleSubmit must be async to use await
   const handleSubmit = async (e) => {
@@ -17,45 +20,32 @@ const Sellersignup = () => {
 
     // basic client-side validation
     if (!mobile && !email) {
-      alert("Please provide either mobile or email.");
+      setError("Please provide either mobile or email.");
       return;
     }
     if (!password) {
-      alert("Please provide a password.");
+      setError("Please provide a password.");
       return;
     }
 
     setLoading(true);
-    try {
-      const res = await fetch("http://localhost:3000/api/seller/auth/seller-register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        // include credentials if your backend uses cookies:
-        // credentials: "include",
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          phone: mobile.trim(),
-          password,
-        }),
-      });
+    setError("");
 
-      const data = await res.json();
+    const result = await register({
+      name: name.trim(),
+      email: email.trim(),
+      phone: mobile.trim(),
+      password,
+    });
 
-      if (res.ok) {
-        // optional: store token if returned
-        // localStorage.setItem('token', data.token);
-        alert("✅ " + (data.message || "Seller account created"));
-        navigate("/seller-signin");
-      } else {
-        alert("❌ " + (data.message || "Signup failed"));
-      }
-    } catch (err) {
-      console.error("Signup error:", err);
-      alert("Server error, try again later.");
-    } finally {
-      setLoading(false);
+    if (result.success) {
+      // Redirect to seller dashboard after successful registration
+      navigate("/seller/dashboard");
+    } else {
+      setError(result.message || "Registration failed");
     }
+    
+    setLoading(false);
   };
 
   return (
@@ -117,11 +107,13 @@ const Sellersignup = () => {
             onChange={(e) => setName(e.target.value)}
           />
 
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+
           <div className="foot flex flex-col space-y-2 justify-center items-center">
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-10 rounded-full bg-[#134490] text-white"
+              className="w-full h-10 rounded-full bg-[#134490] text-white disabled:opacity-50"
             >
               {loading ? "Creating..." : "Create an account"}
             </button>

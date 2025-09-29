@@ -1,8 +1,9 @@
-import React, { useContext, useState, useEffect } from "react";
-import { UserContext } from "../context/UserContext";
+import React, { useContext, useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useWishlist } from '../context/WishlistContext';
+import { useCart } from '../context/CartContext';
+import { UserContext } from '../context/UserContext';
 import LoginModel from "./LoginModel";
-import { useNavigate } from 'react-router-dom'
-import { useLocation } from "react-router-dom";
 
 const Navbar = () => {
 
@@ -10,11 +11,59 @@ const Navbar = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
-  const [cartCount, setCartCount] = useState(15); // Mock cart count
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchRef = useRef(null);
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { getWishlistCount } = useWishlist();
+  const { getCartCount, toggleCart } = useCart();
 
+  // Sync input with URL query on page load
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const queryFromUrl = urlParams.get('q');
+    if (queryFromUrl && queryFromUrl !== inputValue) {
+      setInputValue(queryFromUrl);
+    }
+  }, [location.search]);
+
+  // Fetch search suggestions
+  useEffect(() => {
+    const fetchSuggestions = setTimeout(async () => {
+      const query = inputValue.trim();
+      
+      if (query && query.length > 1) {
+        setIsSearching(true);
+        try {
+          const response = await fetch(`http://localhost:3000/api/search?q=${encodeURIComponent(query)}&limit=5`);
+          const products = await response.json();
+          
+          // Extract unique suggestions from product names and categories
+          const suggestions = [...new Set([
+            ...products.map(p => p.name),
+            ...products.map(p => p.category)
+          ])].slice(0, 5);
+          
+          setSearchSuggestions(suggestions);
+          setShowSuggestions(true);
+        } catch (error) {
+          console.error('Error fetching suggestions:', error);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 200);
+
+    return () => clearTimeout(fetchSuggestions);
+  }, [inputValue]);
+
+  // Navigate to search results
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       const query = inputValue.trim();
@@ -28,10 +77,37 @@ const Navbar = () => {
           navigate("/");
         }
       }
-    }, 300); // Short debounce: 300ms
+    }, 10000); // Longer debounce for navigation: 800ms
 
-    return () => clearTimeout(delayDebounce); // Cancel previous timer on every keystroke
+    return () => clearTimeout(delayDebounce);
   }, [inputValue, navigate, location]);
+
+  // Handle clicking outside search to close suggestions
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSuggestionClick = (suggestion) => {
+    setInputValue(suggestion);
+    setShowSuggestions(false);
+    navigate(`/search?q=${encodeURIComponent(suggestion)}`);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const query = inputValue.trim();
+    if (query) {
+      setShowSuggestions(false);
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+    }
+  };
 
 
   const handleLogout = async () => {
@@ -48,28 +124,52 @@ const Navbar = () => {
       <div className="bg-blue-600 h-1 w-full"></div>
       
       {/* Main navigation bar */}
-      <div className="nav bg-white px-4 py-3 md:px-10 md:py-4 flex justify-between items-center border-b border-gray-200">
+      <div className="nav bg-white px-4 py-2 md:px-8 md:py-3 flex justify-between items-center border-b border-gray-200">
         {/* NexusHub Logo on the left */}
-        <div className="logo flex items-center cursor-pointer">
-          <div className="text-2xl md:text-3xl font-bold text-blue-600">NexusHub</div>
-          <div className="ml-2 flex items-center">
-            <span className="text-xs md:text-sm text-gray-600">Explore Plus</span>
-            <span className="material-symbols-outlined text-yellow-500 text-sm ml-1">star</span>
+        <div className="logo flex items-center cursor-pointer" onClick={() => navigate('/')}>
+          <div className="flex flex-col leading-tight">
+            <div className="flex items-center">
+              <span className="text-[10px] md:text-xs text-gray-600">Explore Plus</span>
+              <span className="material-symbols-outlined text-yellow-500 text-xs ml-1">star</span>
+            </div>
+            <div className="text-xl md:text-2xl font-bold text-blue-600">NexusHub</div>
           </div>
         </div>
 
         {/* Search Bar */}
-        <div className="flex-1 max-w-2xl mx-4">
-          <div className="bg-gray-100 rounded-md flex items-center px-4 py-2">
-            <span className="material-symbols-outlined text-gray-500 mr-2">search</span>
-            <input
-              type="text"
-              placeholder='Search for Products, Brands and More'
-              className='outline-none bg-transparent w-full text-gray-700'
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-            />
-          </div>
+        <div className="flex-1 max-w-2xl mx-3 md:mx-4 relative" ref={searchRef}>
+          <form onSubmit={handleSearchSubmit}>
+            <div className="bg-gray-100 rounded-md flex items-center px-3 md:px-4 py-2 h-[36px] md:h-[40px]">
+              <span className="material-symbols-outlined text-gray-500 mr-2">search</span>
+              <input
+                type="text"
+                placeholder='Search for Products, Brands and More'
+                className='outline-none bg-transparent w-full text-gray-700'
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onFocus={() => inputValue.length > 1 && setShowSuggestions(true)}
+              />
+              {isSearching && (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              )}
+            </div>
+          </form>
+
+          {/* Search Suggestions Dropdown */}
+          {showSuggestions && searchSuggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1">
+              {searchSuggestions.map((suggestion, index) => (
+                <div
+                  key={index}
+                  className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center border-b border-gray-100 last:border-b-0"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  <span className="material-symbols-outlined text-gray-400 mr-3 text-sm">search</span>
+                  <span className="text-gray-700 text-sm">{suggestion}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Right side navigation */}
@@ -121,9 +221,19 @@ const Navbar = () => {
                       <span className="material-symbols-outlined text-gray-500">shopping_bag</span>
                       <span className="text-sm">Orders</span>
                     </div>
-                    <div className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3">
-                      <span className="material-symbols-outlined text-gray-500">favorite</span>
-                      <span className="text-sm">Wishlist</span>
+                    <div 
+                      className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between"
+                      onClick={() => navigate('/wishlist')}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <span className="material-symbols-outlined text-gray-500">favorite</span>
+                        <span className="text-sm">Wishlist</span>
+                      </div>
+                      {getWishlistCount() > 0 && (
+                        <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+                          {getWishlistCount()}
+                        </span>
+                      )}
                     </div>
                     <div className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3">
                       <span className="material-symbols-outlined text-gray-500">help</span>
@@ -147,13 +257,12 @@ const Navbar = () => {
             </div>
           )}
 
-          {/* Cart with badge */}
-          <div className="flex items-center cursor-pointer relative">
-            <span className="material-symbols-outlined mr-1">shopping_cart</span>
-            <span className="text-sm">Cart</span>
-            {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {cartCount}
+          {/* Cart icon with count */}
+          <div className="flex items-center cursor-pointer relative" onClick={toggleCart}>
+            <span className="material-symbols-outlined">shopping_cart</span>
+            {getCartCount() > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {getCartCount()}
               </span>
             )}
           </div>
@@ -213,10 +322,15 @@ const Navbar = () => {
           </h1>
         </div>
 
-        <div className="icon flex flex-col items-center">
+        <div className="icon flex flex-col items-center relative" onClick={toggleCart}>
           <span className="material-symbols-outlined">
             shopping_cart
           </span>
+          {getCartCount() > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+              {getCartCount()}
+            </span>
+          )}
           <h1>
             Cart
           </h1>

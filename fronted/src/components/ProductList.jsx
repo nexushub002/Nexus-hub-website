@@ -14,11 +14,14 @@ const ProductList = () => {
   }, []);
 
   return (
-    <div className="flex flex-wrap gap-4 p-4">
+  <div className="flex justify-center items-center w-full my-8">
+
+<div className=" grid grid-cols-5 gap-4 p-4 m-auto ">
       {products.map((product) => (
         <ProductCard key={product._id} product={product} />
       ))}
     </div>
+  </div>
   );
 };
 

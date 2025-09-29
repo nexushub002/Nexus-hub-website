@@ -30,7 +30,7 @@ const ProductCard = ({ product }) => {
 
     return (
         <div>
-            <div className="bg-white rounded-xl shadow-md border hover:shadow-lg transition-all p-3 w-64"
+            <div className="bg-white rounded-xl shadow-md  hover:shadow-lg transition-all p-3 w-64"
                 onClick={handleProductCardClick}
                 style={{ cursor: "pointer" }}>
                 {/* Product Image */}
@@ -38,7 +38,7 @@ const ProductCard = ({ product }) => {
                     <img
                         src={mainImage}
                         alt={product.name}
-                        className="object-cover w-full h-full"
+                        className="object-top w-full h-full"
                     />
                 </div>
 

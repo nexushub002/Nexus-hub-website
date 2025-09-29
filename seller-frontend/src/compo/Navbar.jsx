@@ -1,12 +1,14 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom'
 import { useState } from "react";
+import { useSeller } from '../context/SellerContext';
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [clicked, setClicked] = useState(false);
 
   const navigate = useNavigate();
+  const { isAuthenticated, seller, logout } = useSeller();
 
   const handleClick = () => {
     if (clicked) {
@@ -24,6 +26,23 @@ const Navbar = () => {
 
   const handleMouseLeave = () => {
     if (!clicked) setOpen(false);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
+
+  const handleLoginClick = () => {
+    navigate("/seller-signin");
+  };
+
+  const handleSignupClick = () => {
+    navigate("/seller-signup");
+  };
+
+  const handleDashboardClick = () => {
+    navigate("/seller/dashboard");
   };
 
   return (
@@ -61,9 +80,40 @@ const Navbar = () => {
           )}
         </h1>
 
-        <button onClick={() => navigate("/seller-signup")} className="mr-20 bg-[#134490] text-white px-6 py-3 rounded-full mb-2 font-bold hover:scale-105 transition-all duration-300 ">
-          Login
-        </button>
+        {isAuthenticated ? (
+          <div className="mr-20 flex items-center space-x-4">
+            <span className="text-sm text-gray-600">
+              Welcome, {seller?.name || seller?.email || 'Seller'}
+            </span>
+            <button 
+              onClick={handleDashboardClick} 
+              className="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:scale-105 transition-all duration-300"
+            >
+              Dashboard
+            </button>
+            <button 
+              onClick={handleLogout} 
+              className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:scale-105 transition-all duration-300"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <div className="mr-20 flex items-center space-x-3">
+            <button 
+              onClick={handleLoginClick} 
+              className="bg-[#134490] text-white px-4 py-2 rounded-full text-sm font-bold hover:scale-105 transition-all duration-300"
+            >
+              Login
+            </button>
+            <button 
+              onClick={handleSignupClick} 
+              className="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:scale-105 transition-all duration-300"
+            >
+              Sign Up
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="main flex justify-between  my-10 h-[45vh] items-center">
@@ -77,8 +127,11 @@ const Navbar = () => {
             Sell your product on India's B2B Hub-
             <section className="mx-2 text-[#134490]">NexusHub</section>{" "}
           </h1>
-          <button onClick={() => navigate("/seller-signup")} className="bg-[#3b82f6] rounded-lg my-12 text-lg font-bold hover:scale-105 transition-all duration-300  hover:bg-[#134490] text-white px-5 py-3">
-            Start Selling
+          <button 
+            onClick={isAuthenticated ? handleDashboardClick : handleSignupClick} 
+            className="bg-[#3b82f6] rounded-lg my-12 text-lg font-bold hover:scale-105 transition-all duration-300  hover:bg-[#134490] text-white px-5 py-3"
+          >
+            {isAuthenticated ? "Go to Dashboard" : "Start Selling"}
           </button>
         </div>
 

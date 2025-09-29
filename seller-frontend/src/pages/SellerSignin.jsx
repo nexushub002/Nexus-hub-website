@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSeller } from "../context/SellerContext";
 
 const SellerSignin = () => {
   const [email, setEmail] = useState("");
@@ -7,35 +8,23 @@ const SellerSignin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useSeller();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    try {
-      const res = await fetch("http://localhost:3000/api/seller/auth/seller-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ important for cookies/session
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-      console.log("Login response:", data);
-
-      if (res.ok) {
-        // ✅ On successful login, redirect to seller dashboard
-        navigate("/seller/dashboard");
-      } else {
-        setError(data.message || "Invalid email or password");
-      }
-    } catch (err) {
-      console.error("Signin error:", err);
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
+    const result = await login(email, password);
+    
+    if (result.success) {
+      // Redirect to seller dashboard
+      navigate("/seller/dashboard");
+    } else {
+      setError(result.message || "Invalid email or password");
     }
+    
+    setLoading(false);
   };
 
   return (

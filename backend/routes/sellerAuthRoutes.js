@@ -55,6 +55,14 @@ router.post("/seller-register", async (req, res) => {
         { expiresIn: "7d" }
       );
 
+      // Set JWT in secure cookie
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
       return res.status(200).json({
         message: "Seller role added successfully",
         user: existingUser,
@@ -80,6 +88,14 @@ router.post("/seller-register", async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
+
+    // Set JWT in secure cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
     res.status(201).json({
       message: "Account created as seller",
@@ -108,7 +124,7 @@ router.post("/seller-login", async (req, res) => {
 
     // 3. Sign JWT
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { id: user._id, roles: user.roles },
        process.env.JWT_SECRET,
        { expiresIn: "7d" }
     );
@@ -124,7 +140,7 @@ router.post("/seller-login", async (req, res) => {
     });
 
 
-    res.json({ success: true, token, role: user.role });
+    res.json({ success: true, token, user, roles: user.roles });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

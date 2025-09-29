@@ -1,13 +1,30 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole }) => {
-  const [active, setActive] = useState('My Products')
+  const [active, setActive] = useState('Dashboard (Overview)')
+  const navigate = useNavigate()
+  const location = useLocation()
+  
   const menuItems = [
-    { label: 'Dashboard (Overview)' },
-    { label: 'Add Product' },
-    { label: 'My Products' },
-    { label: 'Orders' }
+    { label: 'Dashboard (Overview)', path: '/seller/dashboard' },
+    { label: 'Add Product', path: '/seller/add-product' },
+    { label: 'My Products', path: '/seller/my-products' },
+    { label: 'Orders', path: '/seller/orders' }
   ]
+
+  // Update active state based on current route
+  useEffect(() => {
+    const currentItem = menuItems.find(item => item.path === location.pathname)
+    if (currentItem) {
+      setActive(currentItem.label)
+    }
+  }, [location.pathname])
+
+  const handleMenuClick = (item) => {
+    setActive(item.label)
+    navigate(item.path)
+  }
 
   return (
     <div className={`h-screen sticky top-0 w-64 px-4 py-6 ${isDarkMode ? 'bg-[#0f172a] text-white' : 'bg-white text-[#0f172a]'} border-r`}> 
@@ -23,14 +40,7 @@ const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole }) => {
           return (
             <div
               key={item.label}
-              onClick={() => {
-                setActive(item.label)
-                if (item.label === 'Add Product') {
-                  window.location.href = '/seller/add-product'
-                } else if (item.label === 'Dashboard (Overview)') {
-                  window.location.href = '/seller/dashboard'
-                }
-              }}
+              onClick={() => handleMenuClick(item)}
               className={`px-3 py-2 rounded-lg cursor-pointer transition ${
                 isActive
                   ? 'bg-[#1f4e95] text-white'
@@ -45,7 +55,7 @@ const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole }) => {
         })}
       </nav>
 
-      <div className="mt-6 px-2">
+      {/* <div className="mt-6 px-2">
         <div className="text-sm font-semibold mb-2">Appearance</div>
         <div className={`flex items-center justify-between px-3 py-2 rounded-lg ${isDarkMode ? 'bg-white/10' : 'bg-gray-100'}`}>
           <span className="text-sm">{isDarkMode ? 'Dark' : 'Light'}</span>
@@ -53,7 +63,7 @@ const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole }) => {
             <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition ${isDarkMode ? 'translate-x-6' : ''}`}></span>
           </button>
         </div>
-      </div>
+      </div> */}
 
       <div className="mt-6 px-2">
         <div className="text-sm font-semibold mb-2">Switch Role</div>

@@ -7,9 +7,14 @@
   dotenv.config();
 
   import productRoutes from "./routes/productRoutes.js";
+  import uploadRoutes from "./routes/uploadRoutes.js";
+  import wishlistRoutes from "./routes/wishlistRoutesSimple.js";
+  import cartRoutes from "./routes/cartRoutes.js";
   import Product from "./models/Product.js"; // ✅ You forgot to import Product
   import Otp from "./models/Otp.js";
   import User from "./models/User.js";
+  import Wishlist from "./models/Wishlist.js";
+  import Cart from "./models/Cart.js";
 
  
 
@@ -580,17 +585,25 @@
   app.get("/api/search", async (req, res) => {
   try {
     const q = req.query.q?.toLowerCase() || "";
+    const limit = parseInt(req.query.limit) || 0; // 0 means no limit
 
     if (!q) {
       return res.status(400).json({ message: "Query is required" });
     }
 
-    const products = await Product.find({
+    let query = Product.find({
       $or: [
-        { title: { $regex: q, $options: "i" } },         // case-insensitive title match
-        { description: { $regex: q, $options: "i" } }    // case-insensitive description match
+        { name: { $regex: q, $options: "i" } },          // case-insensitive name match
+        { description: { $regex: q, $options: "i" } },   // case-insensitive description match
+        { category: { $regex: q, $options: "i" } }       // case-insensitive category match
       ]
     });
+
+    if (limit > 0) {
+      query = query.limit(limit);
+    }
+
+    const products = await query;
 
     res.json(products);
   } catch (error) {
@@ -680,7 +693,10 @@
     }
   });
 
-  // app.use("/api/products", productRoutes);
+  app.use("/api/products", productRoutes);
+  app.use("/api/upload", uploadRoutes);
+  app.use("/api/wishlist", wishlistRoutes);
+  app.use("/api/cart", cartRoutes);
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {

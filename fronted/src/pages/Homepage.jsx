@@ -8,10 +8,10 @@ import CategoryList from '../components/CategoryList'
 
 const Homepage = () => {
   return (
-    <div>
+    <div >
       <Navbar/>
-      <SlideBar/>
       <CategoryList/>
+      <SlideBar/>
       <ProductList/>
     </div>
   )
