@@ -1,11 +1,18 @@
-import React, { useState, useContext  } from 'react';
-import { UserContext } from "../context/UserContext"; // adjust path if different
-import LoginModel from '../components/LoginModel';
+import React, { useState, useContext, useEffect } from 'react';
+import { UserContext } from "../context/UserContext";
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 const Myprofile = () => {
-    const [showLogin, setShowLogin] = useState(false);
+  const { user, setUser } = useContext(UserContext);
+  const navigate = useNavigate();
+  const [showLogin, setShowLogin] = useState(false);
 
-    const { user, setUser } = useContext(UserContext);
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const handleLoginSuccess = () => {
     setShowLogin(false);

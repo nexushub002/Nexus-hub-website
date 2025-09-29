@@ -1,16 +1,80 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Sidebar from '../compo/Sidebar'
 import { useSeller } from '../context/SellerContext'
+import ProductList from '../components/ProductList'
+import { useSellerTracking } from '../hooks/useSellerTracking'
 
 const Sellerdashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const [activeTab, setActiveTab] = useState('dashboard')
+  const [showProductForm, setShowProductForm] = useState(false)
+  const [products, setProducts] = useState([])
+  const [dashboardStats, setDashboardStats] = useState({
+    totalProducts: 0,
+    activeProducts: 0,
+    totalOrders: 0,
+    totalRevenue: 0
+  })
+  
   const { seller, isAuthenticated, loading } = useSeller()
+  const { trackPageView, trackProductActivity, trackDashboardActivity } = useSellerTracking()
+
+  // Track page view and load data on mount
+  useEffect(() => {
+    if (seller) {
+      trackPageView('seller_dashboard', { tab: activeTab })
+      fetchDashboardData()
+    }
+  }, [seller, activeTab])
 
   const handleToggleTheme = () => setIsDarkMode((v) => !v)
 
   const handleSwitchRole = () => {
-    // Navigate to buyer app dev server
+    trackDashboardActivity('switch_role', { target: 'buyer' })
     window.location.href = 'http://localhost:5173/'
+  }
+
+  const fetchDashboardData = async () => {
+    if (!seller) return
+    
+    try {
+      const response = await fetch(`http://localhost:3000/api/seller/dashboard-stats?sellerId=${seller._id || seller.id}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setDashboardStats(data.stats || dashboardStats)
+        setProducts(data.products || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error)
+    }
+  }
+
+  const handleProductCreated = (newProduct) => {
+    setProducts(prev => [newProduct, ...prev])
+    setDashboardStats(prev => ({
+      ...prev,
+      totalProducts: prev.totalProducts + 1,
+      activeProducts: newProduct.status === 'active' ? prev.activeProducts + 1 : prev.activeProducts
+    }))
+    setShowProductForm(false)
+    trackProductActivity('created', {
+      productId: newProduct._id,
+      productName: newProduct.name,
+      category: newProduct.category,
+      price: newProduct.price
+    })
+  }
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
+    trackDashboardActivity('tab_change', { tab })
   }
 
   // Show loading state while checking authentication
@@ -61,125 +125,378 @@ const Sellerdashboard = () => {
             </div>
           </div>
 
-          {/* Content grid: main + right panel */}
-          <div className='grid grid-cols-1 xl:grid-cols-3 gap-6'>
-            {/* Main center column spans 2 */}
-            <div className='xl:col-span-2'>
-              {/* KPI cards */}
-              <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
-                {[
-                  { label: 'Avg. Selling Price', value: '$ 121.10', change: '+9.82%' },
-                  { label: 'Avg. Clicks', value: '1912', change: '-51.71%' },
-                  { label: 'Avg. Impressions', value: '120,192', change: '-43.71%' }
-                ].map((k) => (
-                  <div key={k.label} className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-4 shadow-sm`}>
-                    <div className='text-sm opacity-70 mb-2'>{k.label}</div>
-                    <div className='text-2xl font-semibold'>{k.value}</div>
-                    <div className={`text-xs mt-1 ${k.change.startsWith('-') ? 'text-red-500' : 'text-green-600'}`}>{k.change}</div>
-                    <div className='mt-3 h-10 w-full rounded-md bg-gradient-to-r from-blue-100 to-transparent opacity-70'></div>
-                  </div>
-                ))}
-              </div>
+          {/* Navigation Tabs */}
+          <div className='flex items-center space-x-1 mb-6'>
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+              { id: 'products', label: 'Products', icon: '📦' },
+              { id: 'orders', label: 'Orders', icon: '🛒' },
+              { id: 'analytics', label: 'Analytics', icon: '📈' }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                  activeTab === tab.id
+                    ? isDarkMode ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700'
+                    : isDarkMode ? 'text-white/70 hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <span>{tab.icon}</span>
+                <span className="font-medium">{tab.label}</span>
+              </button>
+            ))}
+          </div>
 
-              {/* Overview Order */}
-              <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm mb-6`}>
-                <div className='flex items-center justify-between mb-4'>
-                  <div className='font-semibold'>Overview Order</div>
-                  <div className='text-sm opacity-70'>Monthly ▾</div>
-                </div>
-                {/* simple bar chart mock */}
-                <div className='grid grid-cols-12 gap-2 h-56 items-end'>
-                  {Array.from({ length: 12 }).map((_, i) => (
-                    <div key={i} className='flex flex-col items-center gap-1'>
-                      <div className='w-3 rounded bg-blue-500' style={{ height: `${30 + ((i * 13) % 70)}%` }}></div>
-                      <div className='w-3 rounded bg-gray-300/70' style={{ height: `${10 + ((i * 7) % 40)}%` }}></div>
-                      <div className='text-[10px] opacity-60 mt-1'>
-                        {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][i]}
+          {/* Content Area */}
+          {activeTab === 'dashboard' && (
+            <div className='grid grid-cols-1 xl:grid-cols-3 gap-6'>
+              {/* Main center column spans 2 */}
+              <div className='xl:col-span-2'>
+                {/* KPI cards */}
+                <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-6'>
+                  {[
+                    { label: 'Total Products', value: dashboardStats.totalProducts, change: '+12%', icon: '📦' },
+                    { label: 'Active Products', value: dashboardStats.activeProducts, change: '+8%', icon: '✅' },
+                    { label: 'Total Orders', value: dashboardStats.totalOrders, change: '+15%', icon: '🛒' },
+                    { label: 'Revenue', value: `₹${dashboardStats.totalRevenue.toLocaleString()}`, change: '+23%', icon: '💰' }
+                  ].map((k) => (
+                    <div key={k.label} className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-4 shadow-sm`}>
+                      <div className='flex items-center justify-between mb-2'>
+                        <div className='text-sm opacity-70'>{k.label}</div>
+                        <span className='text-xl'>{k.icon}</span>
                       </div>
+                      <div className='text-2xl font-semibold'>{k.value}</div>
+                      <div className={`text-xs mt-1 ${k.change.startsWith('-') ? 'text-red-500' : 'text-green-600'}`}>{k.change}</div>
+                      <div className='mt-3 h-2 w-full rounded-md bg-gradient-to-r from-blue-100 to-transparent opacity-70'></div>
                     </div>
                   ))}
                 </div>
-              </div>
 
-              {/* Orders table */}
-              <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm`}>
-                <div className='flex items-center justify-between mb-3'>
-                  <div className='font-semibold'>Orders</div>
-                  <div className='text-sm opacity-70'>Sort ▾</div>
-                </div>
-                <div className='overflow-auto'>
-                  <table className='w-full text-sm'>
-                    <thead className={`${isDarkMode ? 'text-white/70' : 'text-gray-500'}`}>
-                      <tr>
-                        <th className='text-left py-2'>No</th>
-                        <th className='text-left py-2'>Services name</th>
-                        <th className='text-left py-2'>Status</th>
-                        <th className='text-left py-2'>Date</th>
-                        <th className='text-left py-2'>Buyer</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[1,2,3].map((n) => (
-                        <tr key={n} className={`${isDarkMode ? 'border-white/10' : 'border-gray-200'} border-t`}> 
-                          <td className='py-3'>{n}</td>
-                          <td className='py-3'>I will design website UI UX in figma and landing page UI...</td>
-                          <td className='py-3'><span className='bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs'>Ongoing</span></td>
-                          <td className='py-3'>March 9, 2023</td>
-                          <td className='py-3'>Leslie...</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            {/* Right sidebar panel */}
-            <div className='space-y-6'>
-              <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm`}>
-                <div className='flex items-center gap-3 mb-3'>
-                  <img 
-                    src={`https://i.pravatar.cc/80?seed=${seller?.email || 'seller'}`} 
-                    alt='seller avatar' 
-                    className='w-16 h-16 rounded-full object-cover' 
-                  />
-                  <div>
-                    <div className='font-semibold'>{seller?.name || 'Seller'}</div>
-                    <div className='text-xs opacity-60'>{seller?.email || 'No email'}</div>
-                    {seller?.phone && (
-                      <div className='text-xs opacity-60'>{seller.phone}</div>
+                {/* Recent Products Preview */}
+                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm mb-6`}>
+                  <div className='flex items-center justify-between mb-4'>
+                    <div className='font-semibold'>Recent Products</div>
+                    <button 
+                      onClick={() => handleTabChange('products')}
+                      className='text-sm text-blue-600 hover:text-blue-700'
+                    >
+                      View All →
+                    </button>
+                  </div>
+                  <div className='space-y-3'>
+                    {products.slice(0, 3).map((product) => (
+                      <div key={product._id} className='flex items-center space-x-3 p-3 rounded-lg bg-gray-50/50'>
+                        <div className='w-12 h-12 rounded-lg bg-gray-200 flex-shrink-0'>
+                          {product.images && product.images[0] ? (
+                            <img src={product.images[0]} alt={product.name} className='w-full h-full object-cover rounded-lg' />
+                          ) : (
+                            <div className='w-full h-full flex items-center justify-center text-gray-400'>📦</div>
+                          )}
+                        </div>
+                        <div className='flex-1 min-w-0'>
+                          <p className='font-medium truncate'>{product.name}</p>
+                          <p className='text-sm text-gray-500'>{product.category}</p>
+                        </div>
+                        <div className='text-right'>
+                          <p className='font-semibold'>₹{product.price}</p>
+                          <p className='text-xs text-gray-500'>Stock: {product.stock}</p>
+                        </div>
+                      </div>
+                    ))}
+                    {products.length === 0 && (
+                      <div className='text-center py-8 text-gray-500'>
+                        <div className='text-4xl mb-2'>📦</div>
+                        <p>No products yet</p>
+                        <button 
+                          onClick={() => handleTabChange('products')}
+                          className='mt-2 text-blue-600 hover:text-blue-700 text-sm'
+                        >
+                          Create your first product
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
-                <button className='text-xs bg-blue-600 text-white px-3 py-1 rounded-md mb-4'>Edit Profile</button>
-                <div className='space-y-2 text-sm'>
-                  <div className='flex items-center justify-between'><span className='opacity-70'>Response rate:</span><span>100%</span></div>
-                  <div className='flex items-center justify-between'><span className='opacity-70'>Delivery on time:</span><span>39%</span></div>
-                  <div className='flex items-center justify-between'><span className='opacity-70'>Order completed:</span><span>89%</span></div>
+
+                {/* Quick Actions */}
+                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm`}>
+                  <div className='font-semibold mb-4'>Quick Actions</div>
+                  <div className='grid grid-cols-2 gap-3'>
+                    <button 
+                      onClick={() => {
+                        handleTabChange('products')
+                        setShowProductForm(true)
+                      }}
+                      className='flex items-center space-x-2 p-3 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors'
+                    >
+                      <span>➕</span>
+                      <span className='text-sm font-medium'>Add Product</span>
+                    </button>
+                    <button 
+                      onClick={() => handleTabChange('orders')}
+                      className='flex items-center space-x-2 p-3 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors'
+                    >
+                      <span>📋</span>
+                      <span className='text-sm font-medium'>View Orders</span>
+                    </button>
+                    <button 
+                      onClick={() => handleTabChange('analytics')}
+                      className='flex items-center space-x-2 p-3 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors'
+                    >
+                      <span>📊</span>
+                      <span className='text-sm font-medium'>Analytics</span>
+                    </button>
+                    <button 
+                      onClick={() => window.open('http://localhost:5173/', '_blank')}
+                      className='flex items-center space-x-2 p-3 rounded-lg bg-orange-50 text-orange-700 hover:bg-orange-100 transition-colors'
+                    >
+                      <span>👥</span>
+                      <span className='text-sm font-medium'>Buyer View</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm`}>
-                <div className='font-semibold mb-2'>Improve your service!</div>
-                <div className='text-sm opacity-70'>Improve your service by reading article by top seller</div>
-                <div className='mt-3 h-24 rounded-lg bg-gradient-to-r from-blue-100 to-transparent opacity-70'></div>
-              </div>
-
-              <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm`}>
-                <div className='font-semibold mb-3'>Top articles today</div>
-                <div className='space-y-3 text-sm'>
-                  <div className='flex items-center gap-3'>
-                    <div className='w-12 h-12 rounded-lg bg-gray-200'></div>
-                    <div>How to close more orders in less time</div>
+              {/* Right sidebar panel */}
+              <div className='space-y-6'>
+                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm`}>
+                  <div className='flex items-center gap-3 mb-3'>
+                    <img 
+                      src={`https://i.pravatar.cc/80?seed=${seller?.email || 'seller'}`} 
+                      alt='seller avatar' 
+                      className='w-16 h-16 rounded-full object-cover' 
+                    />
+                    <div>
+                      <div className='font-semibold'>{seller?.name || 'Seller'}</div>
+                      <div className='text-xs opacity-60'>{seller?.email || 'No email'}</div>
+                      {seller?.businessName && (
+                        <div className='text-xs opacity-60'>{seller.businessName}</div>
+                      )}
+                    </div>
                   </div>
-                  <div className='flex items-center gap-3'>
-                    <div className='w-12 h-12 rounded-lg bg-gray-200'></div>
-                    <div>5 tips to improve delivery on time</div>
+                  <button className='text-xs bg-blue-600 text-white px-3 py-1 rounded-md mb-4'>Edit Profile</button>
+                  <div className='space-y-2 text-sm'>
+                    <div className='flex items-center justify-between'><span className='opacity-70'>Products:</span><span>{dashboardStats.totalProducts}</span></div>
+                    <div className='flex items-center justify-between'><span className='opacity-70'>Active Products:</span><span>{dashboardStats.activeProducts}</span></div>
+                    <div className='flex items-center justify-between'><span className='opacity-70'>Total Orders:</span><span>{dashboardStats.totalOrders}</span></div>
+                  </div>
+                </div>
+
+                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm`}>
+                  <div className='font-semibold mb-2'>Seller Tips</div>
+                  <div className='text-sm opacity-70 mb-3'>Boost your sales with these tips</div>
+                  <div className='space-y-2 text-xs'>
+                    <div className='flex items-center space-x-2'>
+                      <span className='text-green-500'>✓</span>
+                      <span>Add high-quality product images</span>
+                    </div>
+                    <div className='flex items-center space-x-2'>
+                      <span className='text-green-500'>✓</span>
+                      <span>Write detailed descriptions</span>
+                    </div>
+                    <div className='flex items-center space-x-2'>
+                      <span className='text-green-500'>✓</span>
+                      <span>Respond to customers quickly</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm`}>
+                  <div className='font-semibold mb-3'>Recent Activity</div>
+                  <div className='space-y-3 text-sm'>
+                    <div className='flex items-center gap-3'>
+                      <div className='w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600'>📦</div>
+                      <div className='flex-1'>
+                        <div>Product created</div>
+                        <div className='text-xs opacity-60'>2 hours ago</div>
+                      </div>
+                    </div>
+                    <div className='flex items-center gap-3'>
+                      <div className='w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600'>✅</div>
+                      <div className='flex-1'>
+                        <div>Order completed</div>
+                        <div className='text-xs opacity-60'>5 hours ago</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Products Tab */}
+          {activeTab === 'products' && (
+            <div className='space-y-6'>
+              {showProductForm ? (
+                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-6 shadow-sm`}>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold">Add New Product</h2>
+                    <button
+                      onClick={() => setShowProductForm(false)}
+                      className="text-gray-500 hover:text-gray-700 text-xl"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  
+                  <form className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Product Name</label>
+                        <input
+                          type="text"
+                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            isDarkMode ? 'bg-white/10 border-white/20' : 'bg-white border-gray-300'
+                          }`}
+                          placeholder="Enter product name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Category</label>
+                        <select
+                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            isDarkMode ? 'bg-white/10 border-white/20' : 'bg-white border-gray-300'
+                          }`}
+                        >
+                          <option value="">Select category</option>
+                          <option value="Electronics">Electronics</option>
+                          <option value="Clothing">Clothing</option>
+                          <option value="Home & Garden">Home & Garden</option>
+                          <option value="Sports">Sports</option>
+                          <option value="Books">Books</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Description</label>
+                      <textarea
+                        rows={3}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          isDarkMode ? 'bg-white/10 border-white/20' : 'bg-white border-gray-300'
+                        }`}
+                        placeholder="Describe your product"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Price (₹)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            isDarkMode ? 'bg-white/10 border-white/20' : 'bg-white border-gray-300'
+                          }`}
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Stock Quantity</label>
+                        <input
+                          type="number"
+                          min="0"
+                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            isDarkMode ? 'bg-white/10 border-white/20' : 'bg-white border-gray-300'
+                          }`}
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="flex space-x-4 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // Simulate product creation
+                          const newProduct = {
+                            _id: Date.now().toString(),
+                            name: 'Sample Product',
+                            category: 'Electronics',
+                            price: 999,
+                            stock: 10,
+                            status: 'active',
+                            createdAt: new Date().toISOString(),
+                            images: []
+                          };
+                          handleProductCreated(newProduct);
+                        }}
+                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+                      >
+                        Create Product
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowProductForm(false)}
+                        className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                <div className='flex items-center justify-between mb-4'>
+                  <h2 className='text-xl font-bold'>Product Management</h2>
+                  <button
+                    onClick={() => setShowProductForm(true)}
+                    className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2'
+                  >
+                    <span>➕</span>
+                    <span>Add Product</span>
+                  </button>
+                </div>
+              )}
+              
+              {!showProductForm && (
+                <ProductList 
+                  isDarkMode={isDarkMode}
+                  onEditProduct={(product) => {
+                    // Handle edit product
+                    console.log('Edit product:', product)
+                  }}
+                />
+              )}
+            </div>
+          )}
+
+          {/* Orders Tab */}
+          {activeTab === 'orders' && (
+            <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-6 shadow-sm`}>
+              <h2 className='text-xl font-bold mb-6'>Order Management</h2>
+              <div className='text-center py-12'>
+                <div className='text-6xl mb-4'>🛒</div>
+                <h3 className='text-lg font-medium mb-2'>No orders yet</h3>
+                <p className='text-gray-500'>Orders will appear here when customers purchase your products</p>
+              </div>
+            </div>
+          )}
+
+          {/* Analytics Tab */}
+          {activeTab === 'analytics' && (
+            <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-6 shadow-sm`}>
+              <h2 className='text-xl font-bold mb-6'>Analytics & Reports</h2>
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                <div className='bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-4'>
+                  <div className='text-2xl mb-2'>📈</div>
+                  <h3 className='font-semibold mb-1'>Sales Trend</h3>
+                  <p className='text-sm text-gray-600'>Track your sales performance over time</p>
+                </div>
+                <div className='bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-4'>
+                  <div className='text-2xl mb-2'>👥</div>
+                  <h3 className='font-semibold mb-1'>Customer Insights</h3>
+                  <p className='text-sm text-gray-600'>Understand your customer behavior</p>
+                </div>
+                <div className='bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-4'>
+                  <div className='text-2xl mb-2'>📊</div>
+                  <h3 className='font-semibold mb-1'>Product Performance</h3>
+                  <p className='text-sm text-gray-600'>See which products perform best</p>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>

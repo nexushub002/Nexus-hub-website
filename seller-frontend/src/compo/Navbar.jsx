@@ -4,29 +4,11 @@ import { useState } from "react";
 import { useSeller } from '../context/SellerContext';
 
 const Navbar = () => {
-  const [open, setOpen] = useState(false);
-  const [clicked, setClicked] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const navigate = useNavigate();
   const { isAuthenticated, seller, logout } = useSeller();
-
-  const handleClick = () => {
-    if (clicked) {
-      setOpen(false);
-      setClicked(false);
-    } else {
-      setOpen(true);
-      setClicked(true);
-    }
-  };
-
-  const handleMouseEnter = () => {
-    if (!clicked) setOpen(true);
-  };
-
-  const handleMouseLeave = () => {
-    if (!clicked) setOpen(false);
-  };
 
   const handleLogout = async () => {
     await logout();
@@ -46,218 +28,176 @@ const Navbar = () => {
   };
 
   return (
-    <div className="mx-30 my-5">
-       <div className="  h-[60px] flex justify-between border-b-2 shadow-blue-300/4 items-center">
-        <h1
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          onClick={handleClick}
-          className=" 
-           relative text-3xl  flex hover:scale-105 transition-all duration-300"
-        >
-          {" "}
-          Nexus <h1 className="mx-2 text-[#134490]">Hub</h1>
-          {open && (
-            <ul
-              className={`
-           ${open ? "opacity-100" : "opacity-0 "}
-         absolute top-8 mt-2 w-48 bg-[#134490] text-white shadow-lg rounded-lg py-2 z-10 flex flex-col`}
-            >
-              <li href="#" className=" px-4 py-2 text-sm hover:bg-sky-950">
-                Pricing
-              </li>
-              <li href="#" className=" px-4 py-2 text-sm   hover:bg-sky-950">
-                Shipping
-              </li>
-              <li href="#" className=" px-4 py-2 text-sm  hover:bg-sky-950">
-                Advertize
-              </li>
+    <nav className="bg-white shadow-lg sticky top-0 z-50 border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <div className="flex items-center">
+            <div className="flex-shrink-0 flex items-center">
+              <div className="text-2xl font-bold">
+                <span className="text-gray-900">Nexus</span>
+                <span className="text-blue-600 ml-1">Hub</span>
+              </div>
+              <div className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+                Seller
+              </div>
+            </div>
+          </div>
 
-              <li href="#" className=" px-4 py-2 text-sm  hover:bg-sky-950 ">
-                Buy on NexusHub
-              </li>
-            </ul>
-          )}
-        </h1>
+          {/* Desktop Navigation */}
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-baseline space-x-8">
+              <div className="relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium flex items-center transition-colors duration-200"
+                >
+                  Solutions
+                  <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
+                    <a href="#pricing" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                      Pricing
+                    </a>
+                    <a href="#shipping" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                      Shipping
+                    </a>
+                    <a href="#advertising" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                      Advertising
+                    </a>
+                    <a href="#marketplace" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                      Buy on NexusHub
+                    </a>
+                  </div>
+                )}
+              </div>
+              
+              <a href="#features" className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+                Features
+              </a>
+              <a href="#support" className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
+                Support
+              </a>
+            </div>
+          </div>
 
-        {isAuthenticated ? (
-          <div className="mr-20 flex items-center space-x-4">
-            <span className="text-sm text-gray-600">
-              Welcome, {seller?.name || seller?.email || 'Seller'}
-            </span>
-            <button 
-              onClick={handleDashboardClick} 
-              className="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:scale-105 transition-all duration-300"
+          {/* Authentication Buttons */}
+          <div className="hidden md:block">
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold text-sm">
+                      {seller?.name?.charAt(0) || seller?.email?.charAt(0) || 'S'}
+                    </span>
+                  </div>
+                  <span className="text-sm text-gray-700 font-medium">
+                    {seller?.name || seller?.email || 'Seller'}
+                  </span>
+                </div>
+                <button 
+                  onClick={handleDashboardClick} 
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors duration-200"
+                >
+                  Dashboard
+                </button>
+                <button 
+                  onClick={handleLogout} 
+                  className="text-gray-600 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <button 
+                  onClick={handleLoginClick} 
+                  className="text-gray-700 hover:text-blue-600 px-4 py-2 text-sm font-medium transition-colors duration-200"
+                >
+                  Login
+                </button>
+                <button 
+                  onClick={handleSignupClick} 
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors duration-200"
+                >
+                  Start Selling
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-gray-700 hover:text-blue-600 p-2"
             >
-              Dashboard
-            </button>
-            <button 
-              onClick={handleLogout} 
-              className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:scale-105 transition-all duration-300"
-            >
-              Logout
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
             </button>
           </div>
-        ) : (
-          <div className="mr-20 flex items-center space-x-3">
-            <button 
-              onClick={handleLoginClick} 
-              className="bg-[#134490] text-white px-4 py-2 rounded-full text-sm font-bold hover:scale-105 transition-all duration-300"
-            >
-              Login
-            </button>
-            <button 
-              onClick={handleSignupClick} 
-              className="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold hover:scale-105 transition-all duration-300"
-            >
-              Sign Up
-            </button>
+        </div>
+
+        {/* Mobile menu */}
+        {isMenuOpen && (
+          <div className="md:hidden border-t border-gray-200">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              <a href="#features" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600">
+                Features
+              </a>
+              <a href="#pricing" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600">
+                Pricing
+              </a>
+              <a href="#support" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600">
+                Support
+              </a>
+              
+              {isAuthenticated ? (
+                <div className="border-t border-gray-200 pt-4">
+                  <div className="px-3 py-2">
+                    <span className="text-sm text-gray-600">
+                      Welcome, {seller?.name || seller?.email || 'Seller'}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={handleDashboardClick} 
+                    className="block w-full text-left px-3 py-2 text-base font-medium text-blue-600"
+                  >
+                    Dashboard
+                  </button>
+                  <button 
+                    onClick={handleLogout} 
+                    className="block w-full text-left px-3 py-2 text-base font-medium text-red-600"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="border-t border-gray-200 pt-4 space-y-2">
+                  <button 
+                    onClick={handleLoginClick} 
+                    className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700"
+                  >
+                    Login
+                  </button>
+                  <button 
+                    onClick={handleSignupClick} 
+                    className="block w-full text-left px-3 py-2 text-base font-medium text-blue-600"
+                  >
+                    Start Selling
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
-
-      <div className="main flex justify-between  my-10 h-[45vh] items-center">
-        <div className="l">
-          <h1 className=" text-4xl mb-5 font-bold flex">
-            Open your shop on{" "}
-            <section className=" text-[#134490] mx-2">NexusHub</section> now !
-          </h1>
-          <h1 className=" text-2xl font-semibold flex">
-            {" "}
-            Sell your product on India's B2B Hub-
-            <section className="mx-2 text-[#134490]">NexusHub</section>{" "}
-          </h1>
-          <button 
-            onClick={isAuthenticated ? handleDashboardClick : handleSignupClick} 
-            className="bg-[#3b82f6] rounded-lg my-12 text-lg font-bold hover:scale-105 transition-all duration-300  hover:bg-[#134490] text-white px-5 py-3"
-          >
-            {isAuthenticated ? "Go to Dashboard" : "Start Selling"}
-          </button>
-        </div>
-
-        <div className="img">
-          <img
-            className="h-75  mr-10 hover:scale-105  transition-all duration-300"
-            src="../src/assets/agent.png"
-            alt=""
-          />
-        </div>
-      </div>
-
-      <div className="sec my-20 ">
-        <div className="head text-3xl font-semibold">How does this work?</div>
-
-        <div className="bottom mt-10 flex mx-25 justify-center space-x-10">
-
-          <div className="box pb-5 px-4 size-65 h-[220px] rounded-xl border-1 border-[#b3b3b3]">
-
-            <h1 className="font-bold text-xl text-[#134490] my-6">Create Seller Account</h1>
-            <h1 className=" text-lg">
-              Register on NexusHub Seller with your Phone Number, Email ID &
-              GST details.
-            </h1>
-          </div>
-
-          <div className="box pb-5 px-4 size-65 h-[220px] rounded-xl border-1 border-[#b3b3b3]">
-
-            <h1 className="font-bold text-xl text-[#134490] my-6">List Your Products</h1>
-            <h1 className=" text-lg">
-              List your products with all required details in the “Add Product” section of the Seller Dashboard.
-            </h1>
-          </div>
-
-           <div className="box pb-5 px-4 size-65 h-[220px] rounded-xl border-1 border-[#b3b3b3]">
-
-            <h1 className="font-bold text-xl text-[#134490] my-6">Get Orders</h1>
-            <h1 className=" text-lg">
-             Start receiving orders directly from businesses, retailers & individual customers.
-            </h1>
-          </div>
-
-
-        </div>
-
-      </div>
-
-      <div className="max-w-7xl  px-6 py-12">
-      <h2 className="text-2xl md:text-3xl font-bold mb-10">
-        Why NexusHub?
-      </h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        
-        {/* Free Listing */}
-        <div className="bg-blue-50 rounded-xl p-6 text-center shadow-sm hover:shadow-md transition duration-300">
-               
-               <img
-            className=" m-auto h-20 my-5  "
-            src="../src/assets/check-list.png"
-            alt=""
-          />
-
-          <h3 className="text-xl font-semibold text-[#134490] mb-2">
-            Free Listing
-          </h3>
-          <p className="text-gray-600 text-base">
-            List unlimited products on NexusHub free of charge.
-          </p>
-        </div>
-
-        {/* 5% Commission */}
-        <div className="bg-blue-50 rounded-xl p-6 text-center shadow-sm hover:shadow-md transition duration-300">
-           
-            <img
-            className=" m-auto h-20 my-5  "
-            src="../src/assets/saving.png"
-            alt=""
-          />
-          <h3 className="text-xl font-semibold text-[#134490] mb-2">
-            5% Commission
-          </h3>
-          <p className="text-gray-600 text-base">
-            Sellers on NexusHub pay only 5% Commission on Sales.
-          </p>
-        </div>
-
-        {/* Start Export */}
-        <div className="bg-blue-50 rounded-xl p-6 text-center shadow-sm hover:shadow-md transition duration-300">
-         
-            <img
-            className=" m-auto h-20 my-5  "
-            src="../src/assets/planet-earth.png"
-            alt=""
-          />
-
-          <h3 className="text-xl font-semibold text-[#134490] mb-2">
-            Start Export
-          </h3>
-          <p className="text-gray-600 text-base">
-            Expand your business globally with NexusHub and get bulk orders
-            from international buyers.
-          </p>
-        </div>
-
-        {/* Logistics */}
-        <div className="bg-blue-50 rounded-xl p-6 text-center shadow-sm hover:shadow-md transition duration-300">
-            
-            <img
-            className=" m-auto h-20 my-5  "
-            src="../src/assets/shipped.png"
-            alt=""
-          />
-          <h3 className="text-xl font-semibold text-[#134490]  mb-2">Logistics</h3>
-          <p className="text-gray-600 text-base">
-            NexusHub manages logistics for your orders to make your business
-            easier.
-          </p>
-        </div>
-
-      </div>
-
-    </div>
-
-
-   </div>
+    </nav>
   );
 };
 

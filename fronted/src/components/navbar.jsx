@@ -4,11 +4,13 @@ import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { UserContext } from '../context/UserContext';
 import LoginModel from "./LoginModel";
+import LoginPopup from "./LoginPopup";
 
 const Navbar = () => {
 
   const { user, setUser } = useContext(UserContext);
   const [showLogin, setShowLogin] = useState(false);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
@@ -213,7 +215,10 @@ const Navbar = () => {
                   </div>
                   
                   <div className="py-2">
-                    <div className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3">
+                    <div 
+                      className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3"
+                      onClick={() => navigate('/myprofile')}
+                    >
                       <span className="material-symbols-outlined text-gray-500">person</span>
                       <span className="text-sm">My Profile</span>
                     </div>
@@ -336,12 +341,21 @@ const Navbar = () => {
           </h1>
         </div>
 
-        <div className="icon flex flex-col items-center">
+        <div 
+          className="icon flex flex-col items-center cursor-pointer"
+          onClick={() => {
+            if (!user) {
+              setShowLoginPopup(true);
+            } else {
+              navigate('/myprofile');
+            }
+          }}
+        >
           <span className="material-symbols-outlined">
             account_circle
           </span>
           <h1>
-            Profile
+            {user ? 'Profile' : 'Login'}
           </h1>
         </div>
 
@@ -349,6 +363,16 @@ const Navbar = () => {
 
 
       </div>}
+
+      {/* New Login Popup */}
+      <LoginPopup
+        isOpen={showLoginPopup}
+        onClose={() => setShowLoginPopup(false)}
+        onLoginSuccess={(loggedInUser) => {
+          setUser(loggedInUser);
+          setShowLoginPopup(false);
+        }}
+      />
     </div>
 
   )
