@@ -8,6 +8,8 @@ import ProductDetailsPage from './pages/ProductDetailsPage'
 import Myprofile from "./pages/Myprofile";
 import SearchResultPage from "./pages/SearchResultPage";
 import WishlistPage from "./pages/WishlistPage";
+import HelpSupport from "./pages/HelpSupport";
+import OrdersPage from "./pages/OrdersPage";
 import './App.css'
 
 
@@ -24,6 +26,8 @@ function App() {
               <Route path="/myprofile" element={<Myprofile />} />
               <Route path="/search" element={<SearchResultPage />} />
               <Route path="/wishlist" element={<WishlistPage />} />
+              <Route path="/help" element={<HelpSupport />} />
+              <Route path="/orders" element={<OrdersPage />} />
             </Routes>
             <CartPanel />
           </div>

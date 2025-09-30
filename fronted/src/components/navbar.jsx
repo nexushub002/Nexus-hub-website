@@ -220,7 +220,10 @@ const Navbar = () => {
                       <span className="material-symbols-outlined text-gray-500">person</span>
                       <span className="text-sm">My Profile</span>
                     </div>
-                    <div className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3">
+                    <div 
+                      className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3"
+                      onClick={() => navigate('/orders')}
+                    >
                       <span className="material-symbols-outlined text-gray-500">shopping_bag</span>
                       <span className="text-sm">Orders</span>
                     </div>
@@ -238,13 +241,12 @@ const Navbar = () => {
                         </span>
                       )}
                     </div>
-                    <div className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3">
+                    <div 
+                      className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3"
+                      onClick={() => navigate('/help')}
+                    >
                       <span className="material-symbols-outlined text-gray-500">help</span>
                       <span className="text-sm">Help & Support</span>
-                    </div>
-                    <div className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3">
-                      <span className="material-symbols-outlined text-gray-500">settings</span>
-                      <span className="text-sm">Settings</span>
                     </div>
                     <div className="border-t my-2"></div>
                     <div 
