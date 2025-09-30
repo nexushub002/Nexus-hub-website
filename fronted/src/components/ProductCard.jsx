@@ -137,7 +137,7 @@ const ProductCard = ({ product }) => {
                             onClick={handleAddToCart}
                         >
                             <span className="material-symbols-outlined">shopping_cart</span>
-                            Add to Cart
+                            <span className="add-to-cart-text">Add to Cart</span>
                         </button>
                     </div>
                 </div>
@@ -179,8 +179,9 @@ const ProductCard = ({ product }) => {
                         <button 
                             className="quick-add-btn action-button"
                             onClick={handleAddToCart}
+                            title="Add to Cart"
                         >
-                            <span className="material-symbols-outlined">add_shopping_cart</span>
+                            <span className="material-symbols-outlined">shopping_cart</span>
                         </button>
                         <button 
                             className="view-details-btn"
@@ -189,7 +190,7 @@ const ProductCard = ({ product }) => {
                                 navigate(`/product-detail/${_id}`);
                             }}
                         >
-                            View Details
+                            <span className="view-details-text">View Details</span>
                         </button>
                     </div>
                 </div>

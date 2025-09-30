@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CategoryList.css';
 
@@ -107,6 +107,31 @@ const CategoryList = () => {
     setSelectedCategory(null);
   };
 
+  // Close modal on escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && isModalOpen) {
+        closeModal();
+      }
+    };
+    
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isModalOpen]);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isModalOpen]);
+
   const handleSubcategoryClick = (subcategory) => {
     // Map labels to normalized keys
     const CATEGORY_KEY_MAP = {
@@ -161,6 +186,7 @@ const CategoryList = () => {
       return;
     }
     navigate(`/browse/${ck}/${sk}`);
+    closeModal(); // Close modal after navigation
   };
 
   return (

@@ -101,18 +101,28 @@
 }
 
 .wishlist-btn.active {
-  background: #fef2f2;
-  color: #dc2626;
+  background: #dc2626;
+  color: white;
+  border: 2px solid #dc2626;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.wishlist-btn.active:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+  transform: scale(1.15);
 }
 
 .wishlist-btn .material-symbols-outlined {
   font-size: 20px;
   color: #64748b;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .wishlist-btn.active .material-symbols-outlined {
-  color: #dc2626;
+  color: white;
+  transform: scale(1.1);
 }
 
 /* Product Badges */
@@ -264,32 +274,38 @@
 .quick-add-btn {
   width: 40px;
   height: 40px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .quick-add-btn:hover {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: white;
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.quick-add-btn:active {
+  transform: translateY(0px) scale(0.95);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 .quick-add-btn .material-symbols-outlined {
   font-size: 20px;
-  color: #64748b;
-  transition: color 0.2s ease;
+  color: white;
+  transition: all 0.2s ease;
 }
 
 .quick-add-btn:hover .material-symbols-outlined {
   color: white;
+  transform: scale(1.1);
 }
 
 .view-details-btn {
@@ -400,12 +416,19 @@
   }
   
   .product-card {
-    height: 380px;
-    border-radius: 12px;
+    height: 320px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 8px;
+  }
+  
+  .product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   }
   
   .product-image-container {
-    height: 160px;
+    height: 140px;
   }
   
   .product-details {
@@ -414,16 +437,18 @@
   }
   
   .product-name {
-    font-size: 14px;
-    min-height: 36px;
+    font-size: 13px;
+    min-height: 32px;
+    font-weight: 600;
   }
   
   .price-fixed {
-    font-size: 15px;
+    font-size: 14px;
+    font-weight: 700;
   }
   
   .price-range {
-    font-size: 14px;
+    font-size: 13px;
   }
   
   .wishlist-btn {
@@ -434,7 +459,7 @@
   }
   
   .wishlist-btn .material-symbols-outlined {
-    font-size: 18px;
+    font-size: 16px;
   }
   
   .product-badges {
@@ -447,25 +472,30 @@
     font-size: 9px;
   }
   
+  /* Hide hover overlay text on mobile */
   .hover-overlay {
-    opacity: 1;
-    visibility: visible;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
-    padding: 16px 12px 12px;
+    display: none;
   }
   
-  .add-to-cart-btn {
-    padding: 8px 12px;
-    font-size: 13px;
+  .add-to-cart-text {
+    display: none;
   }
   
   .action-buttons-row {
-    gap: 6px;
+    gap: 8px;
+    margin-top: 8px;
   }
   
   .quick-add-btn {
     width: 36px;
     height: 36px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.3);
+  }
+  
+  .quick-add-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
   }
   
   .quick-add-btn .material-symbols-outlined {
@@ -474,7 +504,18 @@
   
   .view-details-btn {
     padding: 8px 12px;
-    font-size: 13px;
+    font-size: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+  }
+  
+  .view-details-text {
+    display: block;
+  }
+  
+  .product-moq {
+    font-size: 11px;
+    padding: 3px 6px;
   }
 }
 
@@ -525,16 +566,18 @@
 
 @media (max-width: 768px) {
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 8px;
-    padding: 8px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 80px; /* Space for mobile bottom nav */
   }
 }
 
 @media (max-width: 480px) {
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 6px;
-    padding: 6px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 8px;
+    margin-bottom: 80px;
   }
 }

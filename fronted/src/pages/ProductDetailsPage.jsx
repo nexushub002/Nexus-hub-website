@@ -162,6 +162,19 @@ const ProductDetailsPage = () => {
       <div className="product-details-container">
         {/* Image Gallery Section */}
         <div className="image-section">
+          {/* Main Image */}
+          <div className="main-image-wrapper">
+            <img
+              src={images[mainIndex] || '/placeholder-image.jpg'}
+              alt={name}
+              className="main-image"
+            />
+            <div className="image-counter">
+              {mainIndex + 1} / {images.length}
+            </div>
+          </div>
+          
+          {/* Thumbnails Row */}
           <div className="thumbnails">
             {images.map((src, idx) => (
               <img
@@ -172,16 +185,6 @@ const ProductDetailsPage = () => {
                 onClick={() => handleThumbClick(idx)}
               />
             ))}
-          </div>
-          <div className="main-image-wrapper">
-            <img
-              src={images[mainIndex] || '/placeholder-image.jpg'}
-              alt={name}
-              className="main-image"
-            />
-            <div className="image-counter">
-              {mainIndex + 1} / {images.length}
-            </div>
           </div>
         </div>
 

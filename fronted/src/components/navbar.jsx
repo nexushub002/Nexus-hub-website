@@ -123,23 +123,23 @@ const Navbar = () => {
       {/* Top blue strip */}
       <div className="bg-blue-600 h-1 w-full"></div>
       
-      {/* Main navigation bar */}
-      <div className="nav bg-white px-4 py-2 md:px-8 md:py-3 flex justify-between items-center border-b border-gray-200">
+      {/* Desktop Navigation Bar */}
+      <div className="nav bg-white px-4 py-2 md:px-8 md:py-3 flex justify-between items-center border-b border-gray-200 hidden md:flex">
         {/* NexusHub Logo on the left */}
         <div className="logo flex items-center cursor-pointer" onClick={() => navigate('/')}>
           <div className="flex flex-col leading-tight">
             <div className="flex items-center">
-              <span className="text-[10px] md:text-xs text-gray-600">Explore Plus</span>
+              <span className="text-xs text-gray-600">Explore Plus</span>
               <span className="material-symbols-outlined text-yellow-500 text-xs ml-1">star</span>
             </div>
-            <div className="text-xl md:text-2xl font-bold text-blue-600">NexusHub</div>
+            <div className="text-2xl font-bold text-blue-600">NexusHub</div>
           </div>
         </div>
 
         {/* Search Bar */}
-        <div className="flex-1 max-w-2xl mx-3 md:mx-4 relative" ref={searchRef}>
+        <div className="flex-1 max-w-2xl mx-4 relative" ref={searchRef}>
           <form onSubmit={handleSearchSubmit}>
-            <div className="bg-gray-100 rounded-md flex items-center px-3 md:px-4 py-2 h-[36px] md:h-[40px]">
+            <div className="bg-gray-100 rounded-md flex items-center px-4 py-2 h-[40px]">
               <span className="material-symbols-outlined text-gray-500 mr-2">search</span>
               <input
                 type="text"
@@ -286,54 +286,101 @@ const Navbar = () => {
             <span className="material-symbols-outlined">more_vert</span>
           </div>
         </div>
-
       </div>
 
-      {/* Mobile bottom navigation - unchanged */}
-      {window.innerWidth < 768 && <div className="reso py-3 flex justify-around items-center text-sm fixed bottom-0 left-0 w-full  shadow-[0_-2px_5px_rgba(0,0,0,0.2)] z-50">
-        <div className="icon flex flex-col items-center">
-          <span className="material-symbols-outlined">
-            Home
-          </span>
-          <h1>
-            Home
-          </h1>
-        </div>
-        <div className="icon flex flex-col items-center">
-          <span className="material-symbols-outlined">
-            view_cozy
-          </span>
-          <h1>
-            Category
-          </h1>
-        </div>
+      {/* Mobile Navigation Header */}
+      <div className="md:hidden bg-white px-4 py-3 border-b border-gray-200">
+        <div className="flex items-center space-x-4">
+          {/* NexusHub Logo */}
+          <div className="logo flex items-center cursor-pointer flex-shrink-0" onClick={() => navigate('/')}>
+            <div className="flex flex-col leading-tight">
+              <div className="flex items-center">
+                <span className="text-[10px] text-gray-600">Explore Plus</span>
+                <span className="material-symbols-outlined text-yellow-500 text-xs ml-1">star</span>
+              </div>
+              <div className="text-lg font-bold text-blue-600">NexusHub</div>
+            </div>
+          </div>
 
+          {/* Mobile Search Bar - Full Width */}
+          <div className="flex-1 relative" ref={searchRef}>
+            <form onSubmit={handleSearchSubmit}>
+              <div className="bg-gray-100 rounded-lg flex items-center px-4 py-2 h-[40px]">
+                <span className="material-symbols-outlined text-gray-500 mr-3">search</span>
+                <input
+                  type="text"
+                  placeholder='Search for Products, Brands and More'
+                  className='outline-none bg-transparent w-full text-gray-700 text-sm'
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onFocus={() => inputValue.length > 1 && setShowSuggestions(true)}
+                />
+                {isSearching && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                )}
+              </div>
+            </form>
 
-        <div className="icon flex flex-col items-center">
-          <span className="material-symbols-outlined">
-            search
-          </span>
-          <h1>
-            Search
-          </h1>
+            {/* Mobile Search Suggestions */}
+            {showSuggestions && searchSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1">
+                {searchSuggestions.map((suggestion, index) => (
+                  <div
+                    key={index}
+                    className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center border-b border-gray-100 last:border-b-0"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
+                    <span className="material-symbols-outlined text-gray-400 mr-3 text-sm">search</span>
+                    <span className="text-gray-700 text-sm">{suggestion}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
+      </div>
 
-        <div className="icon flex flex-col items-center relative" onClick={toggleCart}>
-          <span className="material-symbols-outlined">
-            shopping_cart
-          </span>
-          {getCartCount() > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-              {getCartCount()}
-            </span>
-          )}
-          <h1>
-            Cart
-          </h1>
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden bg-white py-2 flex justify-around items-center text-xs fixed bottom-0 left-0 w-full border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-50">
+        <div 
+          className="flex flex-col items-center cursor-pointer p-2"
+          onClick={() => navigate('/')}
+        >
+          <span className="material-symbols-outlined text-gray-600 text-xl mb-1">home</span>
+          <span className="text-gray-600">Home</span>
         </div>
 
         <div 
-          className="icon flex flex-col items-center cursor-pointer"
+          className="flex flex-col items-center cursor-pointer p-2"
+          onClick={() => navigate('/categories')}
+        >
+          <span className="material-symbols-outlined text-gray-600 text-xl mb-1">category</span>
+          <span className="text-gray-600">Category</span>
+        </div>
+
+        <div 
+          className="flex flex-col items-center cursor-pointer p-2"
+          onClick={() => window.open("http://localhost:5174", "_blank")}
+        >
+          <span className="material-symbols-outlined text-gray-600 text-xl mb-1">storefront</span>
+          <span className="text-gray-600">Sell</span>
+        </div>
+
+        <div 
+          className="flex flex-col items-center cursor-pointer p-2 relative"
+          onClick={toggleCart}
+        >
+          <span className="material-symbols-outlined text-gray-600 text-xl mb-1">shopping_cart</span>
+          {getCartCount() > 0 && (
+            <span className="absolute top-0 right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+              {getCartCount()}
+            </span>
+          )}
+          <span className="text-gray-600">Cart</span>
+        </div>
+
+        <div 
+          className="flex flex-col items-center cursor-pointer p-2"
           onClick={() => {
             if (!user) {
               setShowLoginPopup(true);
@@ -342,18 +389,10 @@ const Navbar = () => {
             }
           }}
         >
-          <span className="material-symbols-outlined">
-            account_circle
-          </span>
-          <h1>
-            {user ? 'Profile' : 'Login'}
-          </h1>
+          <span className="material-symbols-outlined text-gray-600 text-xl mb-1">account_circle</span>
+          <span className="text-gray-600">{user ? 'Account' : 'Login'}</span>
         </div>
-
-
-
-
-      </div>}
+      </div>
 
       {/* New Login Popup */}
       <LoginPopup

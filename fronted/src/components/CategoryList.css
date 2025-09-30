@@ -374,8 +374,8 @@
 /* Tablet */
 @media (max-width: 1024px) {
   .category-list {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
   }
   
   .category-list-container {
@@ -383,11 +383,38 @@
   }
   
   .category-card {
-    padding: 20px;
+    padding: 16px;
   }
   
   .category-title {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+  
+  .category-icon {
+    font-size: 32px;
+  }
+  
+  .subcategories-preview {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .subcategory-item {
+    padding: 8px 10px;
+  }
+  
+  .subcategory-icon {
     font-size: 16px;
+  }
+  
+  .subcategory-name {
+    font-size: 12px;
+  }
+  
+  .more-button {
+    padding: 10px 12px;
+    font-size: 12px;
   }
   
   .subcategories-grid {
@@ -407,16 +434,25 @@
 /* Mobile */
 @media (max-width: 768px) {
   .category-list {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
   }
   
   .category-list-container {
     padding: 12px;
+    margin-bottom: 80px; /* Space for mobile bottom nav */
   }
   
   .category-card {
-    padding: 16px;
+    padding: 12px;
+    border-radius: 16px;
+    box-shadow: 
+      0 4px 20px rgba(59, 130, 246, 0.08),
+      0 1px 0 rgba(255, 255, 255, 0.9) inset;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
   
   .category-header {
@@ -424,34 +460,63 @@
   }
   
   .category-icon {
-    font-size: 28px;
+    font-size: 24px;
   }
   
   .category-title {
-    font-size: 15px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.2;
+  }
+  
+  .category-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  
+  .subcategories-preview {
+    gap: 4px;
+    margin-bottom: 8px;
   }
   
   .subcategory-item {
-    padding: 6px 10px;
+    padding: 4px 6px;
+    border-radius: 8px;
   }
   
   .subcategory-icon {
-    font-size: 18px;
+    font-size: 14px;
   }
   
   .subcategory-name {
-    font-size: 13px;
+    font-size: 10px;
+    font-weight: 600;
   }
   
   .more-button {
-    padding: 10px 14px;
-    font-size: 13px;
+    padding: 8px 12px;
+    font-size: 11px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+    font-weight: 600;
+    margin-top: auto;
+  }
+  
+  .more-button:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
   }
   
   .modal-content {
     margin: 10px;
-    max-height: 90vh;
-    border-radius: 16px;
+    max-height: 85vh;
+    border-radius: 20px;
+    box-shadow: 
+      0 20px 60px rgba(59, 130, 246, 0.15),
+      0 8px 32px rgba(0, 0, 0, 0.1);
   }
   
   .modal-header {
@@ -467,12 +532,23 @@
   }
   
   .subcategories-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
   }
   
   .subcategory-card {
-    padding: 16px 12px;
+    padding: 18px 14px;
+    border-radius: 16px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+  }
+  
+  .subcategory-card:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
   }
   
   .subcategory-icon-large {
@@ -487,20 +563,25 @@
 
 /* Small Mobile */
 @media (max-width: 480px) {
+  .category-list {
+    gap: 6px;
+  }
+  
   .category-list-container {
     padding: 8px;
   }
   
   .category-card {
-    padding: 12px;
+    padding: 8px;
+    min-height: 160px;
   }
   
   .category-icon {
-    font-size: 24px;
+    font-size: 20px;
   }
   
   .category-title {
-    font-size: 14px;
+    font-size: 11px;
   }
   
   .subcategory-item {
@@ -509,16 +590,16 @@
   }
   
   .subcategory-icon {
-    font-size: 16px;
+    font-size: 12px;
   }
   
   .subcategory-name {
-    font-size: 12px;
+    font-size: 9px;
   }
   
   .more-button {
-    padding: 8px 12px;
-    font-size: 12px;
+    padding: 6px 10px;
+    font-size: 10px;
   }
   
   .modal-overlay {
