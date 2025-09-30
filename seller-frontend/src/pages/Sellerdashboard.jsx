@@ -1,13 +1,29 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Sidebar from '../compo/Sidebar'
 import { useSeller } from '../context/SellerContext'
-import ProductList from '../components/ProductList'
 import { useSellerTracking } from '../hooks/useSellerTracking'
+
+// Helpers: generate deterministic color and initial for avatar
+const getInitial = (nameOrEmail) => {
+  if (!nameOrEmail) return 'S'
+  const trimmed = nameOrEmail.trim()
+  return trimmed.charAt(0).toUpperCase()
+}
+
+const stringToColor = (str = 'seller') => {
+  // Simple hash -> HSL color for consistent backgrounds per seller
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  const h = Math.abs(hash) % 360
+  return `hsl(${h}, 70%, 40%)`
+}
 
 const Sellerdashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [activeTab, setActiveTab] = useState('dashboard')
-  const [showProductForm, setShowProductForm] = useState(false)
   const [products, setProducts] = useState([])
   const [dashboardStats, setDashboardStats] = useState({
     totalProducts: 0,
@@ -18,6 +34,7 @@ const Sellerdashboard = () => {
   
   const { seller, isAuthenticated, loading } = useSeller()
   const { trackPageView, trackProductActivity, trackDashboardActivity } = useSellerTracking()
+  const navigate = useNavigate()
 
   // Track page view and load data on mount
   useEffect(() => {
@@ -38,7 +55,7 @@ const Sellerdashboard = () => {
     if (!seller) return
     
     try {
-      const response = await fetch(`http://localhost:3000/api/seller/dashboard-stats?sellerId=${seller._id || seller.id}`, {
+      const response = await fetch('http://localhost:3000/api/seller/products/dashboard-stats', {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -56,21 +73,7 @@ const Sellerdashboard = () => {
     }
   }
 
-  const handleProductCreated = (newProduct) => {
-    setProducts(prev => [newProduct, ...prev])
-    setDashboardStats(prev => ({
-      ...prev,
-      totalProducts: prev.totalProducts + 1,
-      activeProducts: newProduct.status === 'active' ? prev.activeProducts + 1 : prev.activeProducts
-    }))
-    setShowProductForm(false)
-    trackProductActivity('created', {
-      productId: newProduct._id,
-      productName: newProduct.name,
-      category: newProduct.category,
-      price: newProduct.price
-    })
-  }
+  // Product creation is handled on dedicated Add Product page
 
   const handleTabChange = (tab) => {
     setActiveTab(tab)
@@ -107,8 +110,18 @@ const Sellerdashboard = () => {
         <main className='flex-1 p-6'>
           {/* Top bar */}
           <div className='flex items-center justify-between mb-6'>
-            <div className='text-2xl font-semibold'>
-              Welcome back, {seller?.name || seller?.email || 'Seller'}!
+            <div className='space-y-1'>
+              <div className='text-2xl font-semibold'>
+                Welcome back, {seller?.name || 'Seller'}! 👋
+              </div>
+              <div className='text-sm text-gray-500'>
+                {seller?.businessName && (
+                  <span className='bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium mr-2'>
+                    {seller.businessName}
+                  </span>
+                )}
+                <span>Manage your business from here</span>
+              </div>
             </div>
             <div className='flex items-center gap-3'>
               <div className={`hidden md:block ${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl px-3 py-2`}>🔔</div>
@@ -129,7 +142,6 @@ const Sellerdashboard = () => {
           <div className='flex items-center space-x-1 mb-6'>
             {[
               { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-              { id: 'products', label: 'Products', icon: '📦' },
               { id: 'orders', label: 'Orders', icon: '🛒' },
               { id: 'analytics', label: 'Analytics', icon: '📈' }
             ].map((tab) => (
@@ -178,7 +190,7 @@ const Sellerdashboard = () => {
                   <div className='flex items-center justify-between mb-4'>
                     <div className='font-semibold'>Recent Products</div>
                     <button 
-                      onClick={() => handleTabChange('products')}
+                      onClick={() => navigate('/seller/my-products')}
                       className='text-sm text-blue-600 hover:text-blue-700'
                     >
                       View All →
@@ -209,7 +221,7 @@ const Sellerdashboard = () => {
                         <div className='text-4xl mb-2'>📦</div>
                         <p>No products yet</p>
                         <button 
-                          onClick={() => handleTabChange('products')}
+                          onClick={() => { window.location.href = 'http://localhost:5174/seller/add-product' }}
                           className='mt-2 text-blue-600 hover:text-blue-700 text-sm'
                         >
                           Create your first product
@@ -224,17 +236,14 @@ const Sellerdashboard = () => {
                   <div className='font-semibold mb-4'>Quick Actions</div>
                   <div className='grid grid-cols-2 gap-3'>
                     <button 
-                      onClick={() => {
-                        handleTabChange('products')
-                        setShowProductForm(true)
-                      }}
+                      onClick={() => { window.location.href = 'http://localhost:5174/seller/add-product' }}
                       className='flex items-center space-x-2 p-3 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors'
                     >
                       <span>➕</span>
                       <span className='text-sm font-medium'>Add Product</span>
                     </button>
                     <button 
-                      onClick={() => handleTabChange('orders')}
+                      onClick={() => navigate('/seller/my-orders')}
                       className='flex items-center space-x-2 p-3 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors'
                     >
                       <span>📋</span>
@@ -261,25 +270,61 @@ const Sellerdashboard = () => {
               {/* Right sidebar panel */}
               <div className='space-y-6'>
                 <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm`}>
-                  <div className='flex items-center gap-3 mb-3'>
-                    <img 
-                      src={`https://i.pravatar.cc/80?seed=${seller?.email || 'seller'}`} 
-                      alt='seller avatar' 
-                      className='w-16 h-16 rounded-full object-cover' 
-                    />
-                    <div>
-                      <div className='font-semibold'>{seller?.name || 'Seller'}</div>
-                      <div className='text-xs opacity-60'>{seller?.email || 'No email'}</div>
+                  <div className='flex items-center gap-3 mb-4'>
+                    <div className='relative cursor-pointer' onClick={() => navigate('/seller/profile')}>
+                      <div
+                        className='w-16 h-16 rounded-full flex items-center justify-center text-white font-semibold border-2 border-blue-200'
+                        style={{ backgroundColor: stringToColor(seller?.name || seller?.email || 'seller') }}
+                        aria-label='seller avatar'
+                      >
+                        {getInitial(seller?.name || seller?.email)}
+                      </div>
+                      <div className='absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white'></div>
+                    </div>
+                    <div className='flex-1'>
+                      <div className='font-semibold text-lg'>{seller?.name || 'Seller'}</div>
+                      <div className='text-xs text-gray-500'>{seller?.email || 'No email'}</div>
                       {seller?.businessName && (
-                        <div className='text-xs opacity-60'>{seller.businessName}</div>
+                        <div className='text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-2 py-1 rounded-full mt-1 inline-block'>
+                          {seller.businessName}
+                        </div>
+                      )}
+                      {seller?.gstNumber && (
+                        <div className='text-xs text-gray-500 mt-1'>GST: {seller.gstNumber}</div>
                       )}
                     </div>
                   </div>
-                  <button className='text-xs bg-blue-600 text-white px-3 py-1 rounded-md mb-4'>Edit Profile</button>
-                  <div className='space-y-2 text-sm'>
-                    <div className='flex items-center justify-between'><span className='opacity-70'>Products:</span><span>{dashboardStats.totalProducts}</span></div>
-                    <div className='flex items-center justify-between'><span className='opacity-70'>Active Products:</span><span>{dashboardStats.activeProducts}</span></div>
-                    <div className='flex items-center justify-between'><span className='opacity-70'>Total Orders:</span><span>{dashboardStats.totalOrders}</span></div>
+                  
+                  <div className='grid grid-cols-2 gap-2 mb-4'>
+                    <button onClick={() => navigate('/seller/profile')} className='text-xs bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors'>
+                      Edit Profile
+                    </button>
+                    <button className='text-xs bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors'>
+                      Settings
+                    </button>
+                  </div>
+                  
+                  <div className='space-y-3 text-sm'>
+                    <div className='bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-3'>
+                      <div className='flex items-center justify-between mb-2'>
+                        <span className='font-medium text-gray-700'>Business Stats</span>
+                        <span className='text-lg'>📊</span>
+                      </div>
+                      <div className='space-y-2'>
+                        <div className='flex items-center justify-between'>
+                          <span className='text-gray-600'>Products:</span>
+                          <span className='font-semibold text-blue-600'>{dashboardStats.totalProducts}</span>
+                        </div>
+                        <div className='flex items-center justify-between'>
+                          <span className='text-gray-600'>Active:</span>
+                          <span className='font-semibold text-green-600'>{dashboardStats.activeProducts}</span>
+                        </div>
+                        <div className='flex items-center justify-between'>
+                          <span className='text-gray-600'>Orders:</span>
+                          <span className='font-semibold text-purple-600'>{dashboardStats.totalOrders}</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

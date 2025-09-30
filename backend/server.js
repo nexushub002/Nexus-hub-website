@@ -4,12 +4,15 @@
   import mongoose from "mongoose";
   import MongoStore from "connect-mongo";
   import dotenv from "dotenv";
+  import axios from "axios";
   dotenv.config();
 
   import productRoutes from "./routes/productRoutes.js";
   import uploadRoutes from "./routes/uploadRoutes.js";
   import wishlistRoutes from "./routes/wishlistRoutesSimple.js";
   import cartRoutes from "./routes/cartRoutes.js";
+  import sellerProductRoutes from "./routes/sellerProductRoutes.js";
+  import sellerOrderRoutes from "./routes/sellerOrderRoutes.js";
   import Product from "./models/Product.js"; // ✅ You forgot to import Product
   import Otp from "./models/Otp.js";
   import User from "./models/User.js";
@@ -36,7 +39,7 @@
 
   // Enable CORS
   app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"], // frontend + seller frontend
+    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176"], // frontend + seller frontend
     credentials: true
   }));
 
@@ -57,12 +60,63 @@
     }
   }));
 
+  // Function to send SMS using Fast2SMS (Free service)
+  const sendSMS = async (phone, otp) => {
+    try {
+      // Fast2SMS API configuration
+      const apiKey = process.env.FAST2SMS_API_KEY || "YOUR_FAST2SMS_API_KEY"; // Add this to your .env file
+      const message = `Your NexusHub verification code is: ${otp}. Valid for 5 minutes. Do not share this code with anyone.`;
+      
+      // If no API key is provided, just log the OTP (for development)
+      if (!process.env.FAST2SMS_API_KEY || apiKey === "YOUR_FAST2SMS_API_KEY") {
+        console.log(`🔐 OTP for ${phone}: ${otp} (Valid for 5 minutes)`);
+        console.log(`📱 SMS Message: ${message}`);
+        return { success: true, message: "OTP logged to console (development mode)" };
+      }
+
+      // Send actual SMS using Fast2SMS
+      const response = await axios.post('https://www.fast2sms.com/dev/bulkV2', {
+        route: 'v3',
+        sender_id: 'TXTIND',
+        message: message,
+        language: 'english',
+        flash: 0,
+        numbers: phone
+      }, {
+        headers: {
+          'authorization': apiKey,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.data.return) {
+        return { success: true, message: "OTP sent successfully" };
+      } else {
+        throw new Error(response.data.message || "Failed to send SMS");
+      }
+    } catch (error) {
+      console.error("❌ SMS sending error:", error.message);
+      // Fallback to console logging if SMS fails
+      console.log(`🔐 Fallback - OTP for ${phone}: ${otp} (Valid for 5 minutes)`);
+      return { success: true, message: "OTP logged to console (SMS service unavailable)" };
+    }
+  };
+
   // 1. Send OTP
   app.post("/api/auth/send-otp", async (req, res) => {
     try {
       const { phone } = req.body;
 
       if (!phone) return res.status(400).json({ message: "Phone Number is required" });
+
+      // Validate phone number format (10 digits starting with 6-9)
+      const phoneRegex = /^[6-9]\d{9}$/;
+      if (!phoneRegex.test(phone)) {
+        return res.status(400).json({ message: "Please enter a valid 10-digit mobile number" });
+      }
+
+      // Delete any existing OTPs for this phone number
+      await Otp.deleteMany({ phone });
 
       // Generate 6-digit OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -74,11 +128,15 @@
         expiresAt: new Date(Date.now() + 5 * 60 * 1000)
       });
 
-      // 👉 Here you’d integrate SMS provider like Twilio
-      console.log(`OTP for ${phone}: ${otp}`);
-
-      res.json({ message: "OTP sent" });
+      // Send SMS using Fast2SMS or fallback to console
+      const smsResult = await sendSMS(phone, otp);
+      
+      res.json({ 
+        message: smsResult.message,
+        success: true 
+      });
     } catch (err) {
+      console.error("❌ Send OTP error:", err);
       res.status(500).json({ message: "Error sending OTP", error: err.message });
     }
   });
@@ -88,16 +146,36 @@
     try {
       console.log("🔔 Verify OTP request body:", req.body);
       const { phone, otp } = req.body;
+
+      if (!phone || !otp) {
+        return res.status(400).json({ message: "Phone number and OTP are required" });
+      }
+
+      // Validate phone number format
+      const phoneRegex = /^[6-9]\d{9}$/;
+      if (!phoneRegex.test(phone)) {
+        return res.status(400).json({ message: "Invalid phone number format" });
+      }
+
+      // Validate OTP format (6 digits)
+      const otpRegex = /^\d{6}$/;
+      if (!otpRegex.test(otp)) {
+        return res.status(400).json({ message: "OTP must be 6 digits" });
+      }
+
       console.log("Received phone:", phone, "otp:", otp);
 
       const validOtp = await Otp.findOne({ phone, otp });
       console.log("OTP lookup result:", validOtp);
 
       if (!validOtp) {
-        return res.status(400).json({ message: "Invalid OTP" });
+        return res.status(400).json({ message: "Invalid OTP. Please check and try again." });
       }
+      
       if (validOtp.expiresAt < new Date()) {
-        return res.status(400).json({ message: "Expired OTP" });
+        // Clean up expired OTP
+        await Otp.deleteMany({ phone });
+        return res.status(400).json({ message: "OTP has expired. Please request a new one." });
       }
 
       let user = await User.findOne({ phone });
@@ -108,15 +186,15 @@
       req.session.userId = user._id;
       req.session.role = user.role;
 
+      // Clean up used OTP
       await Otp.deleteMany({ phone });
 
       res.json({ message: "Login successful", user });
     } catch (err) {
-      console.error("❌ Verify OTP error:", err);   // print full error
+      console.error("❌ Verify OTP error:", err);
       res.status(500).json({
         message: "Error verifying OTP",
-        error: err.message,
-        stack: err.stack,  // only in dev, remove in prod
+        error: err.message
       });
     }
   });
@@ -723,6 +801,8 @@
   app.use("/api/upload", uploadRoutes);
   app.use("/api/wishlist", wishlistRoutes);
   app.use("/api/cart", cartRoutes);
+  app.use("/api/seller/products", sellerProductRoutes);
+  app.use("/api/seller/orders", sellerOrderRoutes);
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {

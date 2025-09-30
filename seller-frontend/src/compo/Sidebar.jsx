@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useSeller } from '../context/SellerContext'
 
 const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole }) => {
   const [active, setActive] = useState('Dashboard (Overview)')
+  const { seller } = useSeller()
   const navigate = useNavigate()
   const location = useLocation()
   
@@ -10,7 +12,7 @@ const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole }) => {
     { label: 'Dashboard (Overview)', path: '/seller/dashboard' },
     { label: 'Add Product', path: '/seller/add-product' },
     { label: 'My Products', path: '/seller/my-products' },
-    { label: 'Orders', path: '/seller/orders' }
+    { label: 'Orders', path: '/seller/my-orders' }
   ]
 
   // Update active state based on current route
@@ -26,11 +28,33 @@ const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole }) => {
     navigate(item.path)
   }
 
+  // helpers for letter avatar
+  const getInitial = (str) => {
+    const s = (str || '').trim()
+    return s ? s.charAt(0).toUpperCase() : 'S'
+  }
+  const stringToColor = (str = 'seller') => {
+    let hash = 0
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash)
+    const h = Math.abs(hash) % 360
+    return `hsl(${h}, 70%, 40%)`
+  }
+
+  const displayName = seller?.name || seller?.email || 'Seller'
+  const initial = getInitial(displayName)
+  const bgColor = stringToColor(displayName)
+
   return (
     <div className={`h-screen sticky top-0 w-64 px-4 py-6 ${isDarkMode ? 'bg-[#0f172a] text-white' : 'bg-white text-[#0f172a]'} border-r`}> 
       <div className="flex items-center gap-2 px-2 mb-6">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${isDarkMode ? 'bg-white text-[#0f172a]' : 'bg-[#0f172a] text-white'}`}>NH</div>
-        <div className="font-semibold">TakasiMura</div>
+        <div
+          className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white"
+          style={{ backgroundColor: bgColor }}
+          aria-label="seller avatar"
+        >
+          {initial}
+        </div>
+        <div className="font-semibold truncate" title={displayName}>{displayName}</div>
       </div>
 
       <div className="text-sm font-semibold mb-2 px-2">Menu</div>

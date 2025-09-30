@@ -3,13 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { UserContext } from '../context/UserContext';
-import LoginModel from "./LoginModel";
 import LoginPopup from "./LoginPopup";
 
 const Navbar = () => {
 
   const { user, setUser } = useContext(UserContext);
-  const [showLogin, setShowLogin] = useState(false);
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
@@ -178,7 +176,7 @@ const Navbar = () => {
         <div className="flex items-center space-x-6 text-gray-700">
           {/* Account */}
           {!user ? (
-            <div className="flex items-center cursor-pointer" onClick={() => setShowLogin(true)}>
+            <div className="flex items-center cursor-pointer" onClick={() => setShowLoginPopup(true)}>
               <span className="material-symbols-outlined mr-1">person</span>
               <span className="text-sm">Account</span>
               <span className="material-symbols-outlined text-xs ml-1">keyboard_arrow_down</span>
@@ -287,15 +285,6 @@ const Navbar = () => {
           </div>
         </div>
 
-        {showLogin && (
-          <LoginModel
-            onClose={() => setShowLogin(false)}
-            onLoginSuccess={(loggedInUser) => {
-              setUser(loggedInUser);
-              setShowLogin(false);
-            }}
-          />
-        )}
       </div>
 
       {/* Mobile bottom navigation - unchanged */}

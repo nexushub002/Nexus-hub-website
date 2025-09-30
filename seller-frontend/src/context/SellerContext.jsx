@@ -91,7 +91,39 @@ export const SellerProvider = ({ children }) => {
     initializeSession();
     checkAuthStatus();
     loadSellerHistory();
-  }, []);
+    
+    // Add security listener for direct URL access attempts
+    const handleLocationChange = () => {
+      const currentPath = window.location.pathname;
+      if (currentPath.startsWith('/seller/') && currentPath !== '/seller-signin' && currentPath !== '/seller-signup') {
+        if (!seller || !seller.roles?.includes('seller')) {
+          console.log('🚫 Security Alert: Unauthorized seller route access attempt');
+          window.location.replace('/seller-signin');
+        }
+      }
+    };
+    
+    // Listen for navigation events
+    window.addEventListener('popstate', handleLocationChange);
+    
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+    };
+  }, [seller]);
+
+  // Periodic session validation (every 5 minutes)
+  useEffect(() => {
+    if (seller) {
+      const sessionValidator = setInterval(() => {
+        console.log('🔄 Validating session...');
+        checkAuthStatus();
+      }, 5 * 60 * 1000); // 5 minutes
+      
+      return () => {
+        clearInterval(sessionValidator);
+      };
+    }
+  }, [seller]);
 
   // Track page visits and user interactions
   useEffect(() => {
@@ -139,6 +171,17 @@ export const SellerProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
+        
+        // Strict validation of seller data
+        if (!data.user || !data.user.roles?.includes('seller')) {
+          console.error('🚫 Invalid seller data or missing seller role');
+          setSeller(null);
+          cookieUtils.remove('seller_info');
+          // Force redirect to signin
+          window.location.replace('/seller-signin');
+          return;
+        }
+        
         setSeller(data.user);
         
         // Store seller info in cookies for offline access
@@ -147,19 +190,31 @@ export const SellerProvider = ({ children }) => {
           name: data.user.name,
           email: data.user.email,
           businessName: data.user.businessName,
-          lastLogin: new Date().toISOString()
+          gstNumber: data.user.gstNumber,
+          lastLogin: new Date().toISOString(),
+          roles: data.user.roles
         }, 30);
 
         // Track successful auth check
         trackActivity('auth_check', { status: 'success', userId: data.user._id });
       } else {
+        console.error('🚫 Auth check failed with status:', response.status);
         setSeller(null);
         cookieUtils.remove('seller_info');
+        
+        // Force redirect for unauthorized access
+        if (response.status === 401 || response.status === 403) {
+          window.location.replace('/seller-signin');
+        }
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error('🚫 Auth check network error:', error);
       setSeller(null);
+      cookieUtils.remove('seller_info');
       trackActivity('auth_check', { status: 'failed', error: error.message });
+      
+      // Force redirect on network errors that might indicate session issues
+      window.location.replace('/seller-signin');
     } finally {
       setLoading(false);
     }
