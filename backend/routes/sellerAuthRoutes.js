@@ -1,55 +1,44 @@
+import express from "express";
+import User from "../models/User.js";
+import { verifySeller } from "../middleware/sellerAuth.js";
+
+const router = express.Router();
 
 // ----------------------
 // GET PROFILE
 // ----------------------
 router.get("/me", verifySeller, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
-    res.json({ user });
+    // verifySeller populates req.user
+    return res.json({ user: req.user });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching user info" });
+    return res.status(500).json({ message: "Error fetching user info" });
   }
 });
 
-// Update seller profile (name, phone, business info, GST, address)
+// ----------------------
+// UPDATE PROFILE
+// ----------------------
 router.put("/profile", verifySeller, async (req, res) => {
   try {
-    const { name, phone, businessName, gstNumber, companyAddress } = req.body;
+    const { name, phone, businessName, gstNumber, companyAddress } = req.body || {};
 
-    // Current logged-in user
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    // Already a seller?
-    if (user.role === "seller") {
-      return res.status(400).json({ success: false, message: "You are already a seller" });
+    if (typeof name === "string") user.name = name;
+    if (typeof phone === "string") user.phone = phone;
+    if (typeof businessName === "string") user.businessName = businessName;
+    if (typeof gstNumber === "string") user.gstNumber = gstNumber;
+    if (companyAddress && typeof companyAddress === "object") {
+      user.companyAddress = { ...(user.companyAddress || {}), ...companyAddress };
     }
 
-    // Update user role
-    user.role = "seller";
-
-    // Create manufacturer profile
-    const manufacturer = await Manufacturer.create({
-      companyName,
-      contactPerson,
-      phone,
-      factoryAddress,
-      user: user._id,
-    });
-
-    // Link manufacturer to user
-    user.manufacturerProfile = manufacturer._id;
     await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Upgraded to seller successfully",
-      user,
-      manufacturer
-    });
+    return res.json({ success: true, message: "Profile updated", user });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error("Profile update error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 });
 

@@ -13,6 +13,7 @@
   import cartRoutes from "./routes/cartRoutes.js";
   import sellerProductRoutes from "./routes/sellerProductRoutes.js";
   import sellerOrderRoutes from "./routes/sellerOrderRoutes.js";
+  import orderRoutes from "./routes/orderRoutes.js";
   import Product from "./models/Product.js"; // ✅ You forgot to import Product
   import Otp from "./models/Otp.js";
   import User from "./models/User.js";
@@ -256,11 +257,62 @@
   //   }
   // });
   app.get("/api/addData", async (req, res) => {
+    // Mapping from display labels to normalized keys
+    const CATEGORY_KEY_MAP = {
+      'Apparel & Accessories': 'Apparel_Accessories',
+      'Consumer Electronics': 'Consumer_Electronics',
+      'Jewelry': 'Jewelry'
+    };
+    const SUBCATEGORY_KEY_MAP = {
+      'Apparel & Accessories': {
+        "Men's Clothing": 'Men_Clothing',
+        "Women's Clothing": 'Women_Clothing',
+        "Children's Clothing": 'Children_Clothing',
+        'Shoes & Footwear': 'Shoes_Footwear',
+        'Bags & Handbags': 'Bags_Handbags',
+        'Watches': 'Watches',
+        'Belts & Accessories': 'Belts_Accessories',
+        'Jewelry & Accessories': 'Jewelry_Accessories',
+        'Sports & Activewear': 'Sports_Activewear',
+        'Underwear & Lingerie': 'Underwear_Lingerie'
+      },
+      'Consumer Electronics': {
+        'Mobile Phones & Accessories': 'Mobile_Phones_Accessories',
+        'Computers & Laptops': 'Computers_Laptops',
+        'Audio & Video Equipment': 'Audio_Video_Equipment',
+        'Gaming Consoles & Accessories': 'Gaming_Consoles_Accessories',
+        'Cameras & Photography': 'Cameras_Photography',
+        'Home Appliances': 'Home_Appliances',
+        'Smart Home Devices': 'Smart_Home_Devices',
+        'Wearable Technology': 'Wearable_Technology',
+        'Electronic Components': 'Electronic_Components',
+        'Office Electronics': 'Office_Electronics'
+      },
+      'Jewelry': {
+        'Rings': 'Rings',
+        'Necklaces & Pendants': 'Necklaces_Pendants',
+        'Earrings': 'Earrings',
+        'Bracelets & Bangles': 'Bracelets_Bangles',
+        'Watches': 'Watches',
+        'Brooches & Pins': 'Brooches_Pins',
+        'Anklets': 'Anklets',
+        'Cufflinks': 'Cufflinks',
+        'Tie Clips': 'Tie_Clips',
+        'Jewelry Sets': 'Jewelry_Sets'
+      }
+    };
+    const toKey = (label = '') => label
+      .replace(/&/g, ' ')
+      .replace(/[^A-Za-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .replace(/_{2,}/g, '_');
     let productData = [
     {
       "name": "Cotton Saree",
       "category": "Apparel & Accessories",
       "subcategory": "Women's Clothing",
+      "categoryKey": "Apparel_Accessories",
+      "subcategoryKey": "Women_Clothing",
       "description": "Lightweight cotton saree with traditional hand block prints.",
       "price": 1200,
       "priceRange": { "min": 1000, "max": 1500 },
@@ -283,6 +335,8 @@
       "name": "Banarasi Silk Saree",
       "category": "Apparel & Accessories",
       "subcategory": "Women's Clothing",
+      "categoryKey": "Apparel_Accessories",
+      "subcategoryKey": "Women_Clothing",
       "description": "Rich Banarasi silk saree with zari work.",
       "price": 5500,
       "priceRange": { "min": 5000, "max": 6000 },
@@ -306,6 +360,8 @@
       "name": "Kundan Necklace Set",
       "category": "Jewelry",
       "subcategory": "Necklaces & Pendants",
+      "categoryKey": "Jewelry",
+      "subcategoryKey": "Necklaces_Pendants",
       "description": "Traditional Kundan necklace with matching earrings.",
       "price": 8000,
       "priceRange": { "min": 7000, "max": 9000 },
@@ -329,6 +385,8 @@
       "name": "Silver Oxidized Earrings",
       "category": "Jewelry",
       "subcategory": "Earrings",
+      "categoryKey": "Jewelry",
+      "subcategoryKey": "Earrings",
       "description": "Handcrafted oxidized silver earrings for ethnic wear.",
       "price": 600,
       "priceRange": { "min": 500, "max": 800 },
@@ -352,6 +410,8 @@
       "name": "Wooden Carved Wall Clock",
       "category": "Consumer Electronics",
       "subcategory": "Mobile Phones & Accessories",
+      "categoryKey": "Consumer_Electronics",
+      "subcategoryKey": "Mobile_Phones_Accessories",
       "description": "Handcrafted teak wood wall clock with intricate carvings.",
       "price": 2200,
       "priceRange": { "min": 2000, "max": 2500 },
@@ -375,6 +435,8 @@
       "name": "Rajasthani Blue Pottery Vase",
       "category": "Consumer Electronics",
       "subcategory": "Mobile Phones & Accessories",
+      "categoryKey": "Consumer_Electronics",
+      "subcategoryKey": "Mobile_Phones_Accessories",
       "description": "Traditional blue pottery flower vase made in Jaipur.",
       "price": 1500,
       "priceRange": { "min": 1200, "max": 1800 },
@@ -395,6 +457,8 @@
       "name": "Chanderi Dupatta",
       "category": "Apparel & Accessories",
       "subcategory": "Women's Clothing",
+      "categoryKey": "Apparel_Accessories",
+      "subcategoryKey": "Women_Clothing",
       "description": "Lightweight Chanderi silk dupatta with golden zari border.",
       "price": 900,
       "priceRange": { "min": 800, "max": 1200 },
@@ -418,6 +482,8 @@
       "name": "Meenakari Bangles",
       "category": "Jewelry",
       "subcategory": "Necklaces & Pendants",
+      "categoryKey": "Jewelry",
+      "subcategoryKey": "Necklaces_Pendants",
       "description": "Hand-painted Meenakari bangles in vibrant colors.",
       "price": 1200,
       "priceRange": { "min": 1000, "max": 1500 },
@@ -435,6 +501,8 @@
       "name": "Handmade Woolen Carpet",
       "category": "Consumer Electronics",
       "subcategory": "Mobile Phones & Accessories",
+      "categoryKey": "Consumer_Electronics",
+      "subcategoryKey": "Mobile_Phones_Accessories",
       "description": "Luxurious hand-knotted woolen carpet from Kashmir.",
       "price": 15000,
       "priceRange": { "min": 12000, "max": 18000 },
@@ -458,6 +526,8 @@
       "name": "Brass Decorative Lamp",
       "category": "Consumer Electronics",
       "subcategory": "Mobile Phones & Accessories",
+      "categoryKey": "Consumer_Electronics",
+      "subcategoryKey": "Mobile_Phones_Accessories",
       "description": "Polished brass lamp with antique finish for home decor.",
       "price": 3500,
       "priceRange": { "min": 3000, "max": 4000 },
@@ -481,6 +551,8 @@
       "name": "Handloom Cotton Kurta Fabric",
       "category": "Apparel & Accessories",
       "subcategory": "Men's Clothing",
+      "categoryKey": "Apparel_Accessories",
+      "subcategoryKey": "Men_Clothing",
       "description": "Handwoven cotton fabric suitable for kurta stitching.",
       "price": 400,
       "priceRange": { "min": 350, "max": 500 },
@@ -504,6 +576,8 @@
       "name": "Temple Jewellery Set",
       "category": "Jewelry",
       "subcategory": "Necklaces & Pendants",
+      "categoryKey": "Jewelry",
+      "subcategoryKey": "Necklaces_Pendants",
       "description": "Traditional temple jewellery set with intricate motifs.",
       "price": 9500,
       "priceRange": { "min": 9000, "max": 10000 },
@@ -527,6 +601,8 @@
       "name": "Silver Payal (Anklet)",
       "category": "Jewelry",
       "subcategory": "Necklaces & Pendants",
+      "categoryKey": "Jewelry",
+      "subcategoryKey": "Necklaces_Pendants",
       "description": "Handcrafted silver anklet with ghungroo bells.",
       "price": 2000,
       "priceRange": { "min": 1800, "max": 2200 },
@@ -545,6 +621,8 @@
       "name": "Hand-painted Wooden Jewelry Box",
       "category": "Consumer Electronics",
       "subcategory": "Mobile Phones & Accessories",
+      "categoryKey": "Consumer_Electronics",
+      "subcategoryKey": "Mobile_Phones_Accessories",
       "description": "Wooden jewelry storage box with Rajasthani hand-painting.",
       "price": 1800,
       "priceRange": { "min": 1500, "max": 2000 },
@@ -554,7 +632,7 @@
       "manufacturerId": "64f0a1b2c3d4e5f678901234",
       "images": ["https://s.alicdn.com/@sc04/kf/U67bc610911064345bd32523f897bce29b.jpg?avif=close&webp=close",
         "https://s.alicdn.com/@sc04/kf/U58b9b76c4d0841e99451159ea776a579M.jpg?avif=close&webp=close",
-        "https://s.alicdn.com/@sc04/kf/U83694bd2b2ac47c9b5a4b1025e13893ay.jpg?avif=close&webp=close",
+        "https://s.alicdn.com/@sc04/kf/U83694bd2b2ac47c9b5a4b1025e13893ay.jpg?avif=close&webp=close"
       ],
       "videos": [],
       "hsCode": "442090",
@@ -566,6 +644,8 @@
       "name": "Wool Pashmina Shawl",
       "category": "Apparel & Accessories",
       "subcategory": "Women's Clothing",
+      "categoryKey": "Apparel_Accessories",
+      "subcategoryKey": "Women_Clothing",
       "description": "Soft and warm Kashmiri pashmina wool shawl.",
       "price": 4000,
       "priceRange": { "min": 3500, "max": 4500 },
@@ -588,6 +668,8 @@
       "name": "Jadau Earrings",
       "category": "Jewelry",
       "subcategory": "Necklaces & Pendants",
+      "categoryKey": "Jewelry",
+      "subcategoryKey": "Necklaces_Pendants",
       "description": "Premium Jadau earrings with ruby and pearl detailing.",
       "price": 12000,
       "priceRange": { "min": 11000, "max": 13000 },
@@ -608,6 +690,8 @@
       "name": "Handwoven Jute Basket",
       "category": "Consumer Electronics",
       "subcategory": "Mobile Phones & Accessories",
+      "categoryKey": "Consumer_Electronics",
+      "subcategoryKey": "Mobile_Phones_Accessories",
       "description": "Eco-friendly jute basket handwoven by artisans.",
       "price": 700,
       "priceRange": { "min": 600, "max": 900 },
@@ -630,6 +714,8 @@
       "name": "Banarasi Dupatta",
       "category": "Apparel & Accessories",
       "subcategory": "Women's Clothing",
+      "categoryKey": "Apparel_Accessories",
+      "subcategoryKey": "Women_Clothing",
       "description": "Banarasi silk dupatta with intricate zari border.",
       "price": 2200,
       "priceRange": { "min": 2000, "max": 2500 },
@@ -648,6 +734,8 @@
       "name": "Brass Wall Hanging Ganesha",
       "category": "Consumer Electronics",
       "subcategory": "Mobile Phones & Accessories",
+      "categoryKey": "Consumer_Electronics",
+      "subcategoryKey": "Mobile_Phones_Accessories",
       "description": "Handcrafted brass Ganesha wall hanging for pooja rooms.",
       "price": 2800,
       "priceRange": { "min": 2500, "max": 3200 },
@@ -671,10 +759,37 @@
       // Optional: Clear the existing products first
       await Product.deleteMany({});
 
-      // Bulk insert all products
-      await Product.insertMany(productData);
+      // Compute normalized keys and bulk insert
+      const augmented = productData.map((p) => {
+        const categoryKey = CATEGORY_KEY_MAP[p.category] || toKey(p.category);
+        const subcategoryKey = (SUBCATEGORY_KEY_MAP[p.category] && SUBCATEGORY_KEY_MAP[p.category][p.subcategory])
+          ? SUBCATEGORY_KEY_MAP[p.category][p.subcategory]
+          : toKey(p.subcategory);
+        
+        return {
+          ...p,
+          categoryKey,
+          subcategoryKey
+        };
+      });
+      
+      console.log("=== DEBUG: Sample augmented product ===");
+      console.log("Category:", augmented[0].category);
+      console.log("Subcategory:", augmented[0].subcategory);
+      console.log("CategoryKey:", augmented[0].categoryKey);
+      console.log("SubcategoryKey:", augmented[0].subcategoryKey);
+      console.log("==========================================");
+      
+      await Product.insertMany(augmented);
 
-      res.json({ message: "Products added successfully!!!!!!!!!!!11" });
+      res.json({ 
+        message: "Products added successfully - " + new Date().toISOString(),
+        count: augmented.length,
+        sampleKeys: {
+          categoryKey: augmented[0].categoryKey,
+          subcategoryKey: augmented[0].subcategoryKey
+        }
+      });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -723,6 +838,9 @@
       const {
         name,
         category,
+        subcategory,
+        categoryKey,
+        subcategoryKey,
         description,
         price,
         priceRangeMin,
@@ -742,6 +860,9 @@
       const product = await Product.create({
         name,
         category,
+        subcategory,
+        categoryKey,
+        subcategoryKey,
         description,
         price,
         priceRange: { min: priceRangeMin, max: priceRangeMax },
@@ -803,6 +924,7 @@
   app.use("/api/cart", cartRoutes);
   app.use("/api/seller/products", sellerProductRoutes);
   app.use("/api/seller/orders", sellerOrderRoutes);
+  app.use("/api/orders", orderRoutes);
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {

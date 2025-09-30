@@ -10,6 +10,7 @@ import SearchResultPage from "./pages/SearchResultPage";
 import WishlistPage from "./pages/WishlistPage";
 import HelpSupport from "./pages/HelpSupport";
 import OrdersPage from "./pages/OrdersPage";
+import SubcategoryProducts from "./pages/SubcategoryProducts";
 import './App.css'
 
 
@@ -28,6 +29,7 @@ function App() {
               <Route path="/wishlist" element={<WishlistPage />} />
               <Route path="/help" element={<HelpSupport />} />
               <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/browse/:categoryKey/:subcategoryKey" element={<SubcategoryProducts />} />
             </Routes>
             <CartPanel />
           </div>

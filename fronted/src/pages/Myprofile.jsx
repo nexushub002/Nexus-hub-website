@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { UserContext } from "../context/UserContext";
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/navbar';
+import Navbar from '../components/Navbar';
 
 const getInitial = (s) => (s && s.trim() ? s.trim().charAt(0).toUpperCase() : 'U');
 const stringToColor = (str = 'user') => {

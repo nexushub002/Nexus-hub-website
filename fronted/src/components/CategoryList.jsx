@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './CategoryList.css';
 
 const CategoryList = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Categories data from Product.js model
   const categories = {
@@ -106,8 +108,59 @@ const CategoryList = () => {
   };
 
   const handleSubcategoryClick = (subcategory) => {
-    // Navigate to search results for this subcategory
-    window.location.href = `/search?category=${encodeURIComponent(selectedCategory)}&subcategory=${encodeURIComponent(subcategory)}`;
+    // Map labels to normalized keys
+    const CATEGORY_KEY_MAP = {
+      'Apparel & Accessories': 'Apparel_Accessories',
+      'Consumer Electronics': 'Consumer_Electronics',
+      'Jewelry': 'Jewelry'
+    };
+    const SUBCATEGORY_KEY_MAP = {
+      'Apparel & Accessories': {
+        "Men's Clothing": 'Men_Clothing',
+        "Women's Clothing": 'Women_Clothing',
+        "Children's Clothing": 'Children_Clothing',
+        'Shoes & Footwear': 'Shoes_Footwear',
+        'Bags & Handbags': 'Bags_Handbags',
+        'Watches': 'Watches',
+        'Belts & Accessories': 'Belts_Accessories',
+        'Jewelry & Accessories': 'Jewelry_Accessories',
+        'Sports & Activewear': 'Sports_Activewear',
+        'Underwear & Lingerie': 'Underwear_Lingerie'
+      },
+      'Consumer Electronics': {
+        'Mobile Phones & Accessories': 'Mobile_Phones_Accessories',
+        'Computers & Laptops': 'Computers_Laptops',
+        'Audio & Video Equipment': 'Audio_Video_Equipment',
+        'Gaming Consoles & Accessories': 'Gaming_Consoles_Accessories',
+        'Cameras & Photography': 'Cameras_Photography',
+        'Home Appliances': 'Home_Appliances',
+        'Smart Home Devices': 'Smart_Home_Devices',
+        'Wearable Technology': 'Wearable_Technology',
+        'Electronic Components': 'Electronic_Components',
+        'Office Electronics': 'Office_Electronics'
+      },
+      'Jewelry': {
+        'Rings': 'Rings',
+        'Necklaces & Pendants': 'Necklaces_Pendants',
+        'Earrings': 'Earrings',
+        'Bracelets & Bangles': 'Bracelets_Bangles',
+        'Watches': 'Watches',
+        'Brooches & Pins': 'Brooches_Pins',
+        'Anklets': 'Anklets',
+        'Cufflinks': 'Cufflinks',
+        'Tie Clips': 'Tie_Clips',
+        'Jewelry Sets': 'Jewelry_Sets'
+      }
+    };
+
+    const ck = CATEGORY_KEY_MAP[selectedCategory];
+    const sk = SUBCATEGORY_KEY_MAP[selectedCategory]?.[subcategory];
+    if (!ck || !sk) {
+      // fallback to search with labels if mapping missing
+      navigate(`/search?category=${encodeURIComponent(selectedCategory)}&subcategory=${encodeURIComponent(subcategory)}`);
+      return;
+    }
+    navigate(`/browse/${ck}/${sk}`);
   };
 
   return (

@@ -70,6 +70,9 @@ const productSchema = new mongoose.Schema({
       }
     }
   },
+  // Normalized keys for search and filtering (e.g., Apparel_Accessories, Men_Clothing)
+  categoryKey: { type: String, index: true },
+  subcategoryKey: { type: String, index: true },
   description: {
     type: String,
     trim: true,
@@ -116,14 +119,16 @@ const productSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// Static method to get available categories and subcategories
+// Statics for category info
 productSchema.statics.getCategories = function() {
   return CATEGORIES;
 };
 
-// Static method to get subcategories for a specific category
 productSchema.statics.getSubcategories = function(category) {
   return CATEGORIES[category] || [];
 };
+
+// Index for normalized key queries
+productSchema.index({ categoryKey: 1, subcategoryKey: 1 });
 
 export default mongoose.model("Product", productSchema);
