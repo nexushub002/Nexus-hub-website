@@ -11,6 +11,7 @@ import WishlistPage from "./pages/WishlistPage";
 import HelpSupport from "./pages/HelpSupport";
 import OrdersPage from "./pages/OrdersPage";
 import SubcategoryProducts from "./pages/SubcategoryProducts";
+import TopRankingPage from './pages/TopRankingPage';
 import './App.css'
 
 
@@ -23,6 +24,7 @@ function App() {
           <div> 
             <Routes>
               <Route path="/" element={<Homepage />} />
+              <Route path="/top-ranking" element={<TopRankingPage />} />
               <Route path="/product-detail/:id" element={<ProductDetailsPage />} />
               <Route path="/myprofile" element={<Myprofile />} />
               <Route path="/search" element={<SearchResultPage />} />

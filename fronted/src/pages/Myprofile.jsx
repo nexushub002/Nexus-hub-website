@@ -35,9 +35,9 @@ const Myprofile = () => {
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,rgba(59,130,246,0.08),transparent_40%),radial-gradient(ellipse_at_bottom_right,rgba(168,85,247,0.08),transparent_40%)]">
       <Navbar />
 
-      <div className="max-w-6xl mx-auto px-4 py-6 md:py-8 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 pt-5 pb-28 md:pt-8 md:pb-10 space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center justify-between">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between items-start gap-4">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-semibold" style={{ backgroundColor: stringToColor(displayName) }}>{getInitial(displayName)}</div>
             <div>
@@ -45,9 +45,15 @@ const Myprofile = () => {
               <div className="text-sm text-gray-500">{user?.email || user?.phone}</div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate('/help')} className="px-3 py-2 rounded-lg border hover:bg-gray-50">Help</button>
-            <button onClick={handleLogout} className="px-3 py-2 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100">Logout</button>
+          <div className="w-full sm:w-auto grid grid-cols-2 sm:flex gap-2 sm:gap-3 justify-end">
+            <button onClick={() => navigate('/help')} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 whitespace-nowrap">
+              <span className="material-symbols-outlined text-gray-500 text-base">help</span>
+              <span>Help</span>
+            </button>
+            <button onClick={handleLogout} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 whitespace-nowrap">
+              <span className="material-symbols-outlined text-red-500 text-base">logout</span>
+              <span>Logout</span>
+            </button>
           </div>
         </div>
 

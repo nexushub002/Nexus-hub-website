@@ -5,7 +5,21 @@
   text-align: center;
 } */
 
+html, body, #root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden; /* prevent horizontal scroll on mobile */
+}
+
 body {
   background-color: #E3E6E6;
+}
+
+/* Prevent fixed mobile bottom nav from covering content */
+@media (max-width: 768px) {
+  body {
+    /* 72px approx. bottom nav height; include iOS safe area */
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px);
+  }
 }
 
