@@ -217,7 +217,7 @@ const FeaturedSectionsTailwind = () => {
                   <img
                     src={product.images && product.images.length > 0 ? product.images[0] : '/placeholder-image.jpg'}
                     alt={product.name}
-                    className="w-full h-24 sm:h-28 lg:h-32 object-cover"
+                    className="w-full h-24 sm:h-28 lg:h-32 object-cover rounded-lg"
                     onError={(e) => {
                       e.target.src = '/placeholder-image.jpg';
                     }}
@@ -272,7 +272,7 @@ const FeaturedSectionsTailwind = () => {
                   <img
                     src={product.images && product.images.length > 0 ? product.images[0] : '/placeholder-image.jpg'}
                     alt={product.name}
-                    className="w-full h-24 sm:h-28 lg:h-32 object-cover"
+                    className="w-full h-24 sm:h-28 lg:h-32 object-cover rounded-lg"
                     onError={(e) => {
                       e.target.src = '/placeholder-image.jpg';
                     }}

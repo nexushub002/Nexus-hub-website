@@ -5,6 +5,7 @@ import SlideBar from '../components/SlideBar'
 import CategoryList from '../components/CategoryList'
 import CategoryList1 from '../components/CategoryList1'
 import FeaturedSectionsTailwind from '../components/FeaturedSectionsTailwind'
+import TopDeals from '../components/TopDeals'
 
 const Homepage = () => {
   return (
@@ -14,6 +15,7 @@ const Homepage = () => {
       <SlideBar/>
       <CategoryList/>
       <FeaturedSectionsTailwind/>
+      <TopDeals/>
       <ProductList/>
     </div>
   )

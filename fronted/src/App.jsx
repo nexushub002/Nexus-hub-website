@@ -12,6 +12,8 @@ import HelpSupport from "./pages/HelpSupport";
 import OrdersPage from "./pages/OrdersPage";
 import SubcategoryProducts from "./pages/SubcategoryProducts";
 import TopRankingPage from './pages/TopRankingPage';
+import TopDealsPage from './pages/TopDealsPage';
+import NewArrivalsPage from './pages/NewArrivalsPage';
 import './App.css'
 
 
@@ -25,6 +27,8 @@ function App() {
             <Routes>
               <Route path="/" element={<Homepage />} />
               <Route path="/top-ranking" element={<TopRankingPage />} />
+              <Route path="/top-deals" element={<TopDealsPage />} />
+              <Route path="/new-arrivals" element={<NewArrivalsPage />} />
               <Route path="/product-detail/:id" element={<ProductDetailsPage />} />
               <Route path="/myprofile" element={<Myprofile />} />
               <Route path="/search" element={<SearchResultPage />} />
