@@ -53,7 +53,6 @@
   flex: 1;
   max-width: 600px;
   display: flex;
-  flex-direction: row; /* Ensure row layout for desktop */
   gap: 20px;
   padding: 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -68,9 +67,6 @@
   max-height: 500px;
   overflow-y: auto;
   padding-right: 8px;
-  order: 1; /* Thumbnails first (left side) */
-  width: 100px; /* Fixed width for thumbnails column */
-  flex-shrink: 0;
 }
 
 .thumbnails::-webkit-scrollbar {
@@ -125,7 +121,6 @@
     0 25px 50px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  order: 2; /* Main image second (right side) */
 }
 
 .main-image-wrapper::before {
@@ -574,25 +569,24 @@
 
   .image-section {
     max-width: none;
-    flex-direction: column; /* Column layout for tablet/mobile */
+    flex-direction: column;
     gap: 20px;
     padding: 20px;
   }
 
   .main-image-wrapper {
-    order: 1; /* Main image first on mobile */
+    order: 1;
   }
 
   .thumbnails {
-    order: 2; /* Thumbnails below main image on mobile */
-    flex-direction: row; /* Horizontal row on mobile */
+    order: 2;
+    flex-direction: row;
     max-height: none;
     overflow-x: auto;
     overflow-y: hidden;
     padding-right: 0;
     padding-bottom: 8px;
     gap: 12px;
-    width: auto; /* Reset fixed width for mobile */
   }
 
   .thumbnails::-webkit-scrollbar {
