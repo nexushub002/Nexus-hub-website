@@ -275,7 +275,7 @@ const Navbar = () => {
           {/* Become a Seller */}
           <div 
             className="flex items-center cursor-pointer" 
-            onClick={() => window.open("http://localhost:5174", "_blank")}
+            onClick={() => window.location.href = "http://localhost:5174"}
           >
             <span className="material-symbols-outlined mr-1">storefront</span>
             <span className="text-sm">Become a Seller</span>
@@ -360,7 +360,7 @@ const Navbar = () => {
 
         <div 
           className="flex flex-col items-center cursor-pointer p-2"
-          onClick={() => window.open("http://localhost:5174", "_blank")}
+          onClick={() => window.location.href = "http://localhost:5174"}
         >
           <span className="material-symbols-outlined text-gray-600 text-xl mb-1">storefront</span>
           <span className="text-gray-600">Sell</span>

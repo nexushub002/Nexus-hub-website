@@ -9,57 +9,40 @@ export const verifySeller = async (req, res, next) => {
   try {
     const token = req.cookies.token;
     
+    // Simple check - if no token, redirect to signin
     if (!token) {
       return res.status(401).json({ 
-        message: "Access denied. No token provided.",
+        message: "No authentication token found",
         code: "NO_TOKEN"
       });
     }
 
+    // Verify token and get user
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
+      decoded = jwt.verify(token, process.env.JWT_SECRET || "nexushub-seller-secret");
     } catch (jwtError) {
       return res.status(401).json({ 
-        message: "Invalid or expired token.",
+        message: "Token expired or invalid",
         code: "INVALID_TOKEN"
       });
     }
 
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.userId);
     
-    if (!user) {
+    if (!user || !user.roles.includes("seller")) {
       return res.status(401).json({ 
-        message: "Invalid token. User not found.",
-        code: "USER_NOT_FOUND"
+        message: "Invalid seller account",
+        code: "INVALID_SELLER"
       });
     }
-
-    if (!user.roles.includes("seller")) {
-      return res.status(403).json({ 
-        message: "Access denied. Seller role required.",
-        code: "INSUFFICIENT_PERMISSIONS"
-      });
-    }
-
-    // Additional security checks
-    if (user.isBlocked || user.status === 'suspended') {
-      return res.status(403).json({ 
-        message: "Account has been suspended. Contact support.",
-        code: "ACCOUNT_SUSPENDED"
-      });
-    }
-
-    // Update last activity
-    user.lastActivity = new Date();
-    await user.save();
 
     req.user = user;
     next();
   } catch (error) {
     console.error("Seller auth error:", error);
     res.status(401).json({ 
-      message: "Authentication failed.",
+      message: "Authentication failed",
       code: "AUTH_ERROR"
     });
   }

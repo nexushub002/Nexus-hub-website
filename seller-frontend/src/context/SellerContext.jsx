@@ -86,44 +86,29 @@ export const SellerProvider = ({ children }) => {
   const [sellerHistory, setSellerHistory] = useState([]);
   const [sessionData, setSessionData] = useState({});
 
-  // Initialize session and load history on app load
+  // Simple initialization - check cookies first
   useEffect(() => {
-    initializeSession();
-    checkAuthStatus();
-    loadSellerHistory();
-    
-    // Add security listener for direct URL access attempts
-    const handleLocationChange = () => {
-      const currentPath = window.location.pathname;
-      if (currentPath.startsWith('/seller/') && currentPath !== '/seller-signin' && currentPath !== '/seller-signup') {
-        if (!seller || !seller.roles?.includes('seller')) {
-          console.log('🚫 Security Alert: Unauthorized seller route access attempt');
-          window.location.replace('/seller-signin');
-        }
+    const initAuth = () => {
+      initializeSession();
+      loadSellerHistory();
+      
+      // Check for existing seller info in cookies first
+      const existingSellerInfo = cookieUtils.get('seller_info');
+      if (existingSellerInfo && existingSellerInfo.id) {
+        console.log('✅ Found seller in cookies - auto login');
+        setSeller(existingSellerInfo);
+        setLoading(false);
+      } else {
+        console.log('❌ No seller cookies found');
+        setSeller(null);
+        setLoading(false);
       }
     };
     
-    // Listen for navigation events
-    window.addEventListener('popstate', handleLocationChange);
-    
-    return () => {
-      window.removeEventListener('popstate', handleLocationChange);
-    };
-  }, [seller]);
+    initAuth();
+  }, []);
 
-  // Periodic session validation (every 5 minutes)
-  useEffect(() => {
-    if (seller) {
-      const sessionValidator = setInterval(() => {
-        console.log('🔄 Validating session...');
-        checkAuthStatus();
-      }, 5 * 60 * 1000); // 5 minutes
-      
-      return () => {
-        clearInterval(sessionValidator);
-      };
-    }
-  }, [seller]);
+  // No periodic validation - keep it simple
 
   // Track page visits and user interactions
   useEffect(() => {
@@ -159,11 +144,20 @@ export const SellerProvider = ({ children }) => {
     setSellerHistory(history);
   };
 
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = async (skipRedirect = false) => {
     try {
+      // Simple cookie check first
+      const existingSellerInfo = cookieUtils.get('seller_info');
+      if (existingSellerInfo && existingSellerInfo.id) {
+        setSeller(existingSellerInfo);
+        setLoading(false);
+        return;
+      }
+
+      // If no cookie, try API call
       const response = await fetch('http://localhost:3000/api/seller/auth/me', {
         method: 'GET',
-        credentials: 'include', // Include cookies
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -172,49 +166,31 @@ export const SellerProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         
-        // Strict validation of seller data
-        if (!data.user || !data.user.roles?.includes('seller')) {
-          console.error('🚫 Invalid seller data or missing seller role');
+        if (data.user && data.user.roles?.includes('seller')) {
+          setSeller(data.user);
+          
+          // Store seller info in cookies
+          cookieUtils.set('seller_info', {
+            id: data.user._id,
+            name: data.user.name,
+            email: data.user.email,
+            businessName: data.user.businessName,
+            gstNumber: data.user.gstNumber,
+            lastLogin: new Date().toISOString(),
+            roles: data.user.roles
+          }, 30);
+        } else {
           setSeller(null);
           cookieUtils.remove('seller_info');
-          // Force redirect to signin
-          window.location.replace('/seller-signin');
-          return;
         }
-        
-        setSeller(data.user);
-        
-        // Store seller info in cookies for offline access
-        cookieUtils.set('seller_info', {
-          id: data.user._id,
-          name: data.user.name,
-          email: data.user.email,
-          businessName: data.user.businessName,
-          gstNumber: data.user.gstNumber,
-          lastLogin: new Date().toISOString(),
-          roles: data.user.roles
-        }, 30);
-
-        // Track successful auth check
-        trackActivity('auth_check', { status: 'success', userId: data.user._id });
       } else {
-        console.error('🚫 Auth check failed with status:', response.status);
         setSeller(null);
         cookieUtils.remove('seller_info');
-        
-        // Force redirect for unauthorized access
-        if (response.status === 401 || response.status === 403) {
-          window.location.replace('/seller-signin');
-        }
       }
     } catch (error) {
-      console.error('🚫 Auth check network error:', error);
+      console.error('Auth check error:', error);
       setSeller(null);
       cookieUtils.remove('seller_info');
-      trackActivity('auth_check', { status: 'failed', error: error.message });
-      
-      // Force redirect on network errors that might indicate session issues
-      window.location.replace('/seller-signin');
     } finally {
       setLoading(false);
     }

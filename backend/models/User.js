@@ -6,6 +6,19 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, sparse: true },
   password: { type: String },
   roles: { type: [String], default: ["buyer"] }, // buyer by default
+  
+  // Seller-specific fields
+  businessName: { type: String },
+  gstNumber: { type: String },
+  companyAddress: {
+    street: { type: String },
+    city: { type: String },
+    state: { type: String },
+    pincode: { type: String },
+    country: { type: String, default: "India" }
+  },
+  isVerified: { type: Boolean, default: false },
+  
   manufacturerProfile: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Manufacturer"
