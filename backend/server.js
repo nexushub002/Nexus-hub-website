@@ -17,6 +17,7 @@
   import Product from "./models/Product.js"; // ✅ You forgot to import Product
   import Otp from "./models/Otp.js";
   import User from "./models/User.js";
+  import Manufacturer from "./models/Manufacture.js";
   import Wishlist from "./models/Wishlist.js";
   import Cart from "./models/Cart.js";
 
@@ -857,6 +858,30 @@
         videos = []
       } = req.body
 
+      // Find or create manufacturer profile for the seller
+      let manufacturer = await Manufacturer.findOne({ user: manufacturerId });
+      if (!manufacturer) {
+        // Get seller info to create manufacturer profile
+        const seller = await User.findById(manufacturerId);
+        if (!seller) {
+          return res.status(400).json({ success: false, message: 'Seller not found' });
+        }
+
+        // Create basic manufacturer profile
+        manufacturer = await Manufacturer.create({
+          user: manufacturerId,
+          companyName: seller.businessName || seller.name || 'Company Name',
+          companyAddress: seller.companyAddress?.street || 'Address not provided',
+          contactPerson: {
+            name: seller.name || 'Contact Person',
+            phone: seller.phone || '0000000000',
+            email: seller.email || 'email@example.com'
+          },
+          gstin: seller.gstNumber || '',
+          verified: false
+        });
+      }
+
       const product = await Product.create({
         name,
         category,
@@ -870,6 +895,8 @@
         sampleAvailable,
         samplePrice,
         manufacturerId,
+        seller: manufacturerId, // Add seller field
+        manufacturer: manufacturer._id, // Link to manufacturer profile
         hsCode,
         warranty,
         returnPolicy,
@@ -878,16 +905,29 @@
         videos
       })
 
+      // Add product ID to manufacturer's products array
+      await Manufacturer.findByIdAndUpdate(
+        manufacturer._id,
+        { $push: { products: product._id } },
+        { new: true }
+      );
+
       res.status(201).json({ success: true, product })
     } catch (err) {
       res.status(400).json({ success: false, message: err.message })
     }
   })
 
-  // In homepage, show All products
+  // In homepage, show All products with manufacturer information
   app.get("/api/showAllProducts", async (req, res) => {
     try {
-      const products = await Product.find();
+      const products = await Product.find()
+        .populate('seller', 'name email businessName phone')
+        .populate({
+          path: 'manufacturer',
+          select: 'companyName companyAddress contactPerson verified yearOfEstablishment companyLogo'
+        })
+        .sort({ createdAt: -1 });
       res.json(products);
     } catch (err) {
       res.status(500).json({ error: "Failed to fetch products" });
@@ -897,7 +937,7 @@
 
 
 
-  // Get product by ID
+  // Get product by ID with manufacturer information
   app.get('/api/product/:id', async (req, res) => {
     const { id } = req.params;
     console.log(id);
@@ -907,11 +947,39 @@
     }
 
     try {
-      const product = await Product.findById(id);
+      const product = await Product.findById(id)
+        .populate('seller', 'name email businessName phone createdAt')
+        .populate({
+          path: 'manufacturer',
+          populate: {
+            path: 'user',
+            select: 'name email phone businessName'
+          }
+        });
+      
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
-      res.status(200).json(product);
+
+      // Get manufacturer's total products count
+      let manufacturerProductsCount = 0;
+      if (product.manufacturer) {
+        manufacturerProductsCount = await Product.countDocuments({ 
+          manufacturer: product.manufacturer._id 
+        });
+      }
+
+      // Enhanced response with manufacturer info
+      const response = {
+        ...product.toObject(),
+        manufacturerInfo: product.manufacturer ? {
+          ...product.manufacturer.toObject(),
+          totalProducts: manufacturerProductsCount,
+          sellerSince: product.manufacturer.user?.createdAt
+        } : null
+      };
+
+      res.status(200).json(response);
     } catch (error) {
       console.error("Error fetching product by ID:", error);
       res.status(500).json({ message: "Server error" });

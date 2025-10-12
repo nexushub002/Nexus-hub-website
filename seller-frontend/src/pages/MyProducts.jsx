@@ -22,7 +22,7 @@ const MyProducts = () => {
 
   const fetchMyProducts = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/seller/products/my-products', {
+      const response = await fetch('http://localhost:3000/api/seller/my-products', {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -33,6 +33,7 @@ const MyProducts = () => {
       if (response.ok) {
         const data = await response.json();
         setProducts(data.products || []);
+        console.log('✅ Fetched seller products:', data.products.length);
       } else {
         console.error('Failed to fetch products');
       }
@@ -56,10 +57,24 @@ const MyProducts = () => {
     
     try {
       const url = editingProduct 
-        ? `http://localhost:3000/api/seller/products/update/${editingProduct._id}`
-        : 'http://localhost:3000/api/seller/products/create';
+        ? `http://localhost:3000/api/seller/my-products/${editingProduct._id}`
+        : 'http://localhost:3000/api/products';
       
       const method = editingProduct ? 'PUT' : 'POST';
+      
+      // For new products, we need to use the proper product creation format
+      const productData = editingProduct ? formData : {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        category: formData.category,
+        subcategory: formData.category, // Using category as subcategory for now
+        categoryKey: formData.category.replace(/\s+/g, '_'),
+        subcategoryKey: formData.category.replace(/\s+/g, '_'),
+        moq: 1, // Default MOQ
+        sampleAvailable: false,
+        images: formData.images || []
+      };
       
       const response = await fetch(url, {
         method,
@@ -67,7 +82,7 @@ const MyProducts = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(productData),
       });
 
       if (response.ok) {
@@ -106,13 +121,14 @@ const MyProducts = () => {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/seller/products/delete/${productId}`, {
+      const response = await fetch(`http://localhost:3000/api/seller/my-products/${productId}`, {
         method: 'DELETE',
         credentials: 'include',
       });
 
       if (response.ok) {
         setProducts(prev => prev.filter(p => p._id !== productId));
+        console.log('✅ Product deleted successfully');
       } else {
         const errorData = await response.json();
         alert(errorData.message || 'Failed to delete product');
@@ -205,13 +221,9 @@ const MyProducts = () => {
                   required
                 >
                   <option value="">Select category</option>
-                  <option value="Electronics">Electronics</option>
-                  <option value="Clothing">Clothing</option>
-                  <option value="Home & Garden">Home & Garden</option>
-                  <option value="Sports">Sports</option>
-                  <option value="Books">Books</option>
-                  <option value="Automotive">Automotive</option>
-                  <option value="Health & Beauty">Health & Beauty</option>
+                  <option value="Apparel & Accessories">Apparel & Accessories</option>
+                  <option value="Consumer Electronics">Consumer Electronics</option>
+                  <option value="Jewelry">Jewelry</option>
                 </select>
               </div>
             </div>
@@ -316,21 +328,27 @@ const MyProducts = () => {
                 <h3 className="font-semibold text-lg mb-2 truncate">{product.name}</h3>
                 <p className="text-gray-600 text-sm mb-2 line-clamp-2">{product.description}</p>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl font-bold text-blue-600">₹{product.price}</span>
-                  <span className="text-sm text-gray-500">Stock: {product.stock || 0}</span>
+                  <span className="text-2xl font-bold text-blue-600">₹{product.price?.toLocaleString()}</span>
+                  <span className="text-sm text-gray-500">MOQ: {product.moq || 1}</span>
                 </div>
                 <div className="flex items-center justify-between mb-3">
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
                     {product.category}
                   </span>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    product.status === 'active' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {product.status || 'active'}
+                  <span className="text-xs text-gray-500">
+                    {new Date(product.createdAt).toLocaleDateString()}
                   </span>
                 </div>
+                {product.manufacturer && (
+                  <div className="mb-3">
+                    <span className="text-xs text-gray-500">
+                      By: {product.manufacturer.companyName}
+                      {product.manufacturer.verified && (
+                        <span className="ml-1 text-green-600">✓</span>
+                      )}
+                    </span>
+                  </div>
+                )}
                 
                 <div className="flex space-x-2">
                   <button

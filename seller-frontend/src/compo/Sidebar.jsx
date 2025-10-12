@@ -12,7 +12,8 @@ const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole }) => {
     { label: 'Dashboard (Overview)', path: '/seller/dashboard' },
     { label: 'Add Product', path: '/seller/add-product' },
     { label: 'My Products', path: '/seller/my-products' },
-    { label: 'Orders', path: '/seller/my-orders' }
+    { label: 'Orders', path: '/seller/my-orders' },
+    { label: 'Manufacturer Profile', path: '/seller/manufacturer-profile' }
   ]
 
   // Update active state based on current route

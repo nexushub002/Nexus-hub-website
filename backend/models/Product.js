@@ -102,7 +102,16 @@ const productSchema = new mongoose.Schema({
   manufacturerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+    required: false, // Make optional since we're using seller field now
+  },
+  seller: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
+  },
+  manufacturer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Manufacturer",
   },
 
   images: [{ type: String }],  // store Cloudinary URLs of images

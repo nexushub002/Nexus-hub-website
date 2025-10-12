@@ -22,5 +22,38 @@ const videoStorage = new CloudinaryStorage({
   },
 });
 
+// Setup storage for manufacturer documents
+const documentStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "manufacturer/documents",
+    resource_type: "auto", // auto-detect file type
+    allowed_formats: ["pdf", "doc", "docx", "jpg", "jpeg", "png"],
+  },
+});
+
+// Setup storage for manufacturer certificates
+const certificateStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "manufacturer/certificates",
+    resource_type: "auto",
+    allowed_formats: ["pdf", "jpg", "jpeg", "png"],
+  },
+});
+
+// Setup storage for company logo
+const logoStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "manufacturer/logos",
+    resource_type: "image",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+  },
+});
+
 export const uploadImages = multer({ storage: imageStorage });
 export const uploadVideos = multer({ storage: videoStorage });
+export const uploadDocuments = multer({ storage: documentStorage });
+export const uploadCertificates = multer({ storage: certificateStorage });
+export const uploadLogo = multer({ storage: logoStorage });

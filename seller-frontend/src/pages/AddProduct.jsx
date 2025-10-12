@@ -202,6 +202,14 @@ const AddProduct = () => {
     setSubmitting(true)
     setMessage('')
     try {
+      // Check if seller is properly authenticated
+      if (!seller || (!seller._id && !seller.id)) {
+        setMessage('Error: Seller not authenticated. Please log in again.')
+        return
+      }
+
+      console.log('Seller info:', seller) // Debug log
+
       // Upload images to Cloudinary first
       let imageUrls = []
       if (form.images.length > 0) {
@@ -214,6 +222,8 @@ const AddProduct = () => {
       const subcategoryKey = (SUBCATEGORY_KEY_MAP[form.category] && SUBCATEGORY_KEY_MAP[form.category][form.subcategory])
         ? SUBCATEGORY_KEY_MAP[form.category][form.subcategory]
         : toKey(form.subcategory)
+
+      const sellerId = seller._id || seller.id // Handle both possible field names
 
       const body = {
         name: form.name,
@@ -229,13 +239,15 @@ const AddProduct = () => {
         moq: Number(form.moq),
         sampleAvailable: !!form.sampleAvailable,
         samplePrice: form.samplePrice ? Number(form.samplePrice) : undefined,
-        manufacturerId: seller._id,
+        manufacturerId: sellerId,
         hsCode: form.hsCode,
         warranty: form.warranty,
         returnPolicy: form.returnPolicy,
         customization: !!form.customization,
         images: imageUrls
       }
+
+      console.log('Product data being sent:', body) // Debug log
 
       const res = await fetch('http://localhost:3000/api/products', {
         method: 'POST',

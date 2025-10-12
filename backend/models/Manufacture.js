@@ -41,17 +41,40 @@ const manufacturerSchema = new mongoose.Schema(
     gstin: { type: String }, // GST number
     cin: { type: String }, // Company Identification Number
     pan: { type: String }, // PAN number
-    documents: [String], // Cloudinary URLs for uploaded docs
+    documents: [{
+      url: { type: String, required: true },
+      originalName: { type: String },
+      format: { type: String },
+      resourceType: { type: String },
+      uploadedAt: { type: Date, default: Date.now }
+    }], // Cloudinary URLs with metadata for uploaded docs
 
     // Profile Media
-    companyLogo: { type: String }, // Cloudinary URL
-    certificates: [String], // Cloudinary URLs of certifications
+    companyLogo: {
+      url: { type: String },
+      originalName: { type: String },
+      format: { type: String },
+      uploadedAt: { type: Date, default: Date.now }
+    }, // Cloudinary URL with metadata
+    certificates: [{
+      url: { type: String, required: true },
+      originalName: { type: String },
+      format: { type: String },
+      resourceType: { type: String },
+      uploadedAt: { type: Date, default: Date.now }
+    }], // Cloudinary URLs with metadata for certifications
 
     // Extra Info
     aboutCompany: { type: String },
     website: { type: String },
     yearsInBusiness: { type: Number },
     verified: { type: Boolean, default: false }, // admin verification
+
+    // Products array to store all product IDs created by this manufacturer
+    products: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product"
+    }],
 
     createdAt: { type: Date, default: Date.now },
   },

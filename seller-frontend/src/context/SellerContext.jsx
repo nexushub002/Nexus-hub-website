@@ -96,7 +96,13 @@ export const SellerProvider = ({ children }) => {
       const existingSellerInfo = cookieUtils.get('seller_info');
       if (existingSellerInfo && existingSellerInfo.id) {
         console.log('✅ Found seller in cookies - auto login');
-        setSeller(existingSellerInfo);
+        // Ensure both _id and id fields are available
+        const sellerWithBothIds = {
+          ...existingSellerInfo,
+          _id: existingSellerInfo.id,
+          id: existingSellerInfo.id
+        };
+        setSeller(sellerWithBothIds);
         setLoading(false);
       } else {
         console.log('❌ No seller cookies found');
@@ -167,11 +173,18 @@ export const SellerProvider = ({ children }) => {
         const data = await response.json();
         
         if (data.user && data.user.roles?.includes('seller')) {
-          setSeller(data.user);
+          // Ensure both _id and id fields are available
+          const sellerWithBothIds = {
+            ...data.user,
+            _id: data.user._id,
+            id: data.user._id
+          };
+          setSeller(sellerWithBothIds);
           
           // Store seller info in cookies
           cookieUtils.set('seller_info', {
             id: data.user._id,
+            _id: data.user._id,
             name: data.user.name,
             email: data.user.email,
             businessName: data.user.businessName,
@@ -240,11 +253,18 @@ export const SellerProvider = ({ children }) => {
 
       if (response.ok) {
         const user = data.user || { email, roles: ['seller'] };
-        setSeller(user);
+        // Ensure both _id and id fields are available
+        const sellerWithBothIds = {
+          ...user,
+          _id: user._id || user.id,
+          id: user._id || user.id
+        };
+        setSeller(sellerWithBothIds);
         
         // Store comprehensive seller info
         cookieUtils.set('seller_info', {
           id: user._id || user.id,
+          _id: user._id || user.id,
           name: user.name,
           email: user.email,
           businessName: user.businessName,
@@ -361,7 +381,7 @@ export const SellerProvider = ({ children }) => {
     const registrationAttempt = {
       timestamp: new Date().toISOString(),
       email: userData.email,
-      businessName: userData.businessName,
+      companyName: userData.companyName,
       userAgent: navigator.userAgent,
       sessionId: sessionData.sessionId
     };
@@ -383,11 +403,18 @@ export const SellerProvider = ({ children }) => {
 
       if (response.ok) {
         const user = data.user;
-        setSeller(user);
+        // Ensure both _id and id fields are available
+        const sellerWithBothIds = {
+          ...user,
+          _id: user._id || user.id,
+          id: user._id || user.id
+        };
+        setSeller(sellerWithBothIds);
         
         // Store new seller info
         cookieUtils.set('seller_info', {
           id: user._id || user.id,
+          _id: user._id || user.id,
           name: user.name,
           email: user.email,
           businessName: user.businessName,

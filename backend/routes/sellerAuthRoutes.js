@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Manufacturer from "../models/Manufacture.js";
 import { verifySeller } from "../middleware/sellerAuth.js";
 
 const router = express.Router();
@@ -11,13 +12,40 @@ const router = express.Router();
 // ----------------------
 router.post("/seller-register", async (req, res) => {
   try {
-    const { name, email, phone, password, businessName, gstNumber } = req.body;
+    console.log("📝 Registration data received:", JSON.stringify(req.body, null, 2));
+    
+    const { 
+      name, 
+      email, 
+      phone, 
+      password, 
+      // Manufacturer Information
+      companyName,
+      yearOfEstablishment,
+      numberOfEmployees,
+      companyAddress,
+      factoryAddress,
+      contactPerson,
+      gstin,
+      cin,
+      pan,
+      aboutCompany,
+      website,
+      yearsInBusiness
+    } = req.body;
 
     // Validation
-    if (!name || !email || !phone || !password || !businessName) {
+    if (!name || !email || !phone || !password || !companyName || !companyAddress) {
       return res.status(400).json({
         success: false,
-        message: "Name, email, phone, password, and business name are required"
+        message: "Name, email, phone, password, company name, and company address are required"
+      });
+    }
+
+    if (!contactPerson || !contactPerson.name || !contactPerson.phone || !contactPerson.email) {
+      return res.status(400).json({
+        success: false,
+        message: "Contact person name, phone, and email are required"
       });
     }
 
@@ -43,13 +71,43 @@ router.post("/seller-register", async (req, res) => {
       email: email.trim().toLowerCase(),
       phone: phone.trim(),
       password: hashedPassword,
-      businessName: businessName.trim(),
-      gstNumber: gstNumber ? gstNumber.trim() : "",
+      businessName: companyName.trim(), // Use companyName as businessName for backward compatibility
+      gstNumber: gstin ? gstin.trim() : "",
       roles: ["seller"], // Set seller role
       isVerified: true, // Auto-verify for now
       createdAt: new Date()
     });
 
+    await newUser.save();
+
+    // Create comprehensive manufacturer profile
+    const newManufacturer = new Manufacturer({
+      user: newUser._id,
+      companyName: companyName.trim(),
+      yearOfEstablishment: yearOfEstablishment || undefined,
+      numberOfEmployees: numberOfEmployees || undefined,
+      companyAddress: companyAddress.trim(),
+      factoryAddress: factoryAddress ? factoryAddress.trim() : undefined,
+      contactPerson: {
+        name: contactPerson.name.trim(),
+        designation: contactPerson.designation ? contactPerson.designation.trim() : undefined,
+        phone: contactPerson.phone.trim(),
+        email: contactPerson.email.trim()
+      },
+      gstin: gstin ? gstin.trim() : undefined,
+      cin: cin ? cin.trim() : undefined,
+      pan: pan ? pan.trim() : undefined,
+      aboutCompany: aboutCompany ? aboutCompany.trim() : undefined,
+      website: website ? website.trim() : undefined,
+      yearsInBusiness: yearsInBusiness || undefined,
+      verified: false, // Admin verification required
+      products: [] // Initialize empty products array
+    });
+
+    await newManufacturer.save();
+
+    // Link manufacturer profile to user
+    newUser.manufacturerProfile = newManufacturer._id;
     await newUser.save();
 
     // Generate JWT token
@@ -71,7 +129,7 @@ router.post("/seller-register", async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
-    // Return user data (without password)
+    // Return user data with manufacturer profile (without password)
     const userResponse = {
       _id: newUser._id,
       name: newUser.name,
@@ -80,12 +138,13 @@ router.post("/seller-register", async (req, res) => {
       businessName: newUser.businessName,
       gstNumber: newUser.gstNumber,
       roles: newUser.roles,
+      manufacturerProfile: newManufacturer,
       createdAt: newUser.createdAt
     };
 
     res.status(201).json({
       success: true,
-      message: "Seller account created successfully",
+      message: "Seller account and manufacturer profile created successfully",
       user: userResponse
     });
 

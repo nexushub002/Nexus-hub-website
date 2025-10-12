@@ -11,8 +11,22 @@ const Sellersignup = () => {
     mobile: "",
     password: "",
     confirmPassword: "",
-    businessName: "",
-    gstNumber: ""
+    // Manufacturer/Business Information
+    companyName: "",
+    yearOfEstablishment: "",
+    numberOfEmployees: "",
+    companyAddress: "",
+    factoryAddress: "",
+    contactPersonName: "",
+    contactPersonDesignation: "",
+    contactPersonPhone: "",
+    contactPersonEmail: "",
+    gstin: "",
+    cin: "",
+    pan: "",
+    aboutCompany: "",
+    website: "",
+    yearsInBusiness: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -102,22 +116,46 @@ const Sellersignup = () => {
     }
   };
 
+  const validateStep2 = () => {
+    if (!formData.companyName.trim()) {
+      setError("Company name is required");
+      return false;
+    }
+    if (!formData.companyAddress.trim()) {
+      setError("Company address is required");
+      return false;
+    }
+    if (!formData.contactPersonName.trim()) {
+      setError("Contact person name is required");
+      return false;
+    }
+    if (!formData.contactPersonPhone.trim()) {
+      setError("Contact person phone is required");
+      return false;
+    }
+    if (!formData.contactPersonEmail.trim()) {
+      setError("Contact person email is required");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     trackFeatureUsage('signup_step2_submit', {
       form_data: {
-        has_business_name: !!formData.businessName,
-        has_gst_number: !!formData.gstNumber,
-        business_name_length: formData.businessName.length
+        has_company_name: !!formData.companyName,
+        has_gstin: !!formData.gstin,
+        has_company_address: !!formData.companyAddress,
+        company_name_length: formData.companyName.length
       }
     });
 
-    if (!formData.businessName.trim()) {
-      setError("Business name is required");
-      trackError(new Error('Business name validation failed'), {
+    if (!validateStep2()) {
+      trackError(new Error('Step 2 validation failed'), {
         step: 2,
-        field: 'businessName'
+        validation_errors: error
       });
       return;
     }
@@ -126,20 +164,40 @@ const Sellersignup = () => {
     setError("");
 
     try {
-      const result = await register({
+      const registrationData = {
+        // Personal Information
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.mobile.trim(),
         password: formData.password,
-        businessName: formData.businessName.trim(),
-        gstNumber: formData.gstNumber.trim()
-      });
+        // Manufacturer Information
+        companyName: formData.companyName.trim(),
+        yearOfEstablishment: formData.yearOfEstablishment ? Number(formData.yearOfEstablishment) : undefined,
+        numberOfEmployees: formData.numberOfEmployees ? Number(formData.numberOfEmployees) : undefined,
+        companyAddress: formData.companyAddress.trim(),
+        factoryAddress: formData.factoryAddress.trim(),
+        contactPerson: {
+          name: formData.contactPersonName.trim(),
+          designation: formData.contactPersonDesignation.trim(),
+          phone: formData.contactPersonPhone.trim(),
+          email: formData.contactPersonEmail.trim()
+        },
+        gstin: formData.gstin.trim(),
+        cin: formData.cin.trim(),
+        pan: formData.pan.trim(),
+        aboutCompany: formData.aboutCompany.trim(),
+        website: formData.website.trim(),
+        yearsInBusiness: formData.yearsInBusiness ? Number(formData.yearsInBusiness) : undefined
+      };
+      
+      console.log("🚀 Sending registration data:", registrationData);
+      const result = await register(registrationData);
 
       if (result.success) {
         trackFeatureUsage('signup_completed', {
           registration_method: 'email_password',
-          has_gst: !!formData.gstNumber,
-          business_type: 'seller'
+          has_gstin: !!formData.gstin,
+          business_type: 'manufacturer'
         });
         navigate("/seller/dashboard");
       } else {
@@ -352,42 +410,235 @@ const Sellersignup = () => {
               </>
             ) : (
               <>
-                {/* Step 2: Business Information */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
-                  <input
-                    name="businessName"
-                    type="text"
-                    value={formData.businessName}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                    placeholder="Enter your business name"
-                    required
-                  />
-                </div>
+                {/* Step 2: Manufacturer Information */}
+                <div className="space-y-6">
+                  <div className="text-center mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900">Company Information</h3>
+                    <p className="text-sm text-gray-600">Tell us about your manufacturing business</p>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">GST Number (Optional)</label>
-                  <input
-                    name="gstNumber"
-                    type="text"
-                    value={formData.gstNumber}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                    placeholder="Enter GST number (if available)"
-                  />
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-start space-x-3">
-                    <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                  {/* Company Details */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <h4 className="text-sm font-medium text-blue-900">Almost there!</h4>
-                      <p className="text-sm text-blue-700 mt-1">
-                        Complete your registration to start selling on NexusHub
-                      </p>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Company Name *</label>
+                      <input
+                        name="companyName"
+                        type="text"
+                        value={formData.companyName}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                        placeholder="Enter your company name"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Year of Establishment</label>
+                      <input
+                        name="yearOfEstablishment"
+                        type="number"
+                        value={formData.yearOfEstablishment}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                        placeholder="e.g., 2010"
+                        min="1900"
+                        max="2024"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Number of Employees</label>
+                      <select
+                        name="numberOfEmployees"
+                        value={formData.numberOfEmployees}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                      >
+                        <option value="">Select range</option>
+                        <option value="1">1-10</option>
+                        <option value="11">11-50</option>
+                        <option value="51">51-100</option>
+                        <option value="101">101-500</option>
+                        <option value="501">500+</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Years in Business</label>
+                      <input
+                        name="yearsInBusiness"
+                        type="number"
+                        value={formData.yearsInBusiness}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                        placeholder="e.g., 5"
+                        min="0"
+                        max="100"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Addresses */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Company Address *</label>
+                    <textarea
+                      name="companyAddress"
+                      value={formData.companyAddress}
+                      onChange={handleInputChange}
+                      rows="3"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                      placeholder="Enter complete company address"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Factory Address (if different)</label>
+                    <textarea
+                      name="factoryAddress"
+                      value={formData.factoryAddress}
+                      onChange={handleInputChange}
+                      rows="3"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                      placeholder="Enter factory address if different from company address"
+                    />
+                  </div>
+
+                  {/* Contact Person */}
+                  <div className="border-t pt-6">
+                    <h4 className="text-md font-semibold text-gray-900 mb-4">Contact Person Details</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Person Name *</label>
+                        <input
+                          name="contactPersonName"
+                          type="text"
+                          value={formData.contactPersonName}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                          placeholder="Enter contact person name"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Designation</label>
+                        <input
+                          name="contactPersonDesignation"
+                          type="text"
+                          value={formData.contactPersonDesignation}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                          placeholder="e.g., Manager, Director"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Phone *</label>
+                        <input
+                          name="contactPersonPhone"
+                          type="tel"
+                          value={formData.contactPersonPhone}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                          placeholder="Enter contact phone number"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Email *</label>
+                        <input
+                          name="contactPersonEmail"
+                          type="email"
+                          value={formData.contactPersonEmail}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                          placeholder="Enter contact email"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Legal Information */}
+                  <div className="border-t pt-6">
+                    <h4 className="text-md font-semibold text-gray-900 mb-4">Legal & Business Information</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">GSTIN</label>
+                        <input
+                          name="gstin"
+                          type="text"
+                          value={formData.gstin}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                          placeholder="Enter GST number"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">CIN</label>
+                        <input
+                          name="cin"
+                          type="text"
+                          value={formData.cin}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                          placeholder="Company Identification Number"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">PAN</label>
+                        <input
+                          name="pan"
+                          type="text"
+                          value={formData.pan}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                          placeholder="Enter PAN number"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                        <input
+                          name="website"
+                          type="url"
+                          value={formData.website}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                          placeholder="https://www.yourcompany.com"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* About Company */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">About Company</label>
+                    <textarea
+                      name="aboutCompany"
+                      value={formData.aboutCompany}
+                      onChange={handleInputChange}
+                      rows="4"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                      placeholder="Tell us about your company, products, and manufacturing capabilities..."
+                    />
+                  </div>
+
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-start space-x-3">
+                      <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div>
+                        <h4 className="text-sm font-medium text-blue-900">Complete Your Manufacturer Profile</h4>
+                        <p className="text-sm text-blue-700 mt-1">
+                          This information helps buyers understand your business and builds trust in your products.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

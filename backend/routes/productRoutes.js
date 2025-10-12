@@ -82,6 +82,34 @@ router.post("/", async (req, res) => {
       images, // Array of Cloudinary URLs
     } = req.body;
 
+    // Import Manufacturer model
+    const Manufacturer = (await import("../models/Manufacture.js")).default;
+    const User = (await import("../models/User.js")).default;
+
+    // Find or create manufacturer profile for the seller
+    let manufacturer = await Manufacturer.findOne({ user: manufacturerId });
+    if (!manufacturer) {
+      // Get seller info to create manufacturer profile
+      const seller = await User.findById(manufacturerId);
+      if (!seller) {
+        return res.status(400).json({ success: false, message: 'Seller not found' });
+      }
+
+      // Create basic manufacturer profile
+      manufacturer = await Manufacturer.create({
+        user: manufacturerId,
+        companyName: seller.businessName || seller.name || 'Company Name',
+        companyAddress: seller.companyAddress?.street || 'Address not provided',
+        contactPerson: {
+          name: seller.name || 'Contact Person',
+          phone: seller.phone || '0000000000',
+          email: seller.email || 'email@example.com'
+        },
+        gstin: seller.gstNumber || '',
+        verified: false
+      });
+    }
+
     const product = new Product({
       name,
       category,
@@ -95,6 +123,8 @@ router.post("/", async (req, res) => {
       sampleAvailable,
       samplePrice,
       manufacturerId,
+      seller: manufacturerId, // Add seller field
+      manufacturer: manufacturer._id, // Link to manufacturer profile
       images: images || [], // Cloudinary URLs
       videos: [], // No videos for now
       hsCode,
@@ -103,6 +133,14 @@ router.post("/", async (req, res) => {
       customization,
     });
     await product.save();
+
+    // Add product ID to manufacturer's products array
+    await Manufacturer.findByIdAndUpdate(
+      manufacturer._id,
+      { $push: { products: product._id } },
+      { new: true }
+    );
+
     res.status(201).json({ success: true, product });
   } catch (error) {
     console.error(error);
@@ -206,6 +244,102 @@ router.get("/categories/:category/subcategories", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Error fetching subcategories" });
+  }
+});
+
+// ✅ Get product by ID with comprehensive seller and manufacturer information
+router.get("/details/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Import models
+    const User = (await import("../models/User.js")).default;
+    const Manufacturer = (await import("../models/Manufacture.js")).default;
+    
+    const product = await Product.findById(id)
+      .populate('seller', 'name email businessName phone createdAt')
+      .populate({
+        path: 'manufacturer',
+        populate: {
+          path: 'user',
+          select: 'name email phone businessName'
+        }
+      });
+    
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    // Get additional manufacturer products count
+    let manufacturerProductsCount = 0;
+    if (product.manufacturer) {
+      manufacturerProductsCount = await Product.countDocuments({ 
+        manufacturer: product.manufacturer._id 
+      });
+    }
+
+    // Prepare response with comprehensive information
+    const response = {
+      success: true,
+      product: {
+        ...product.toObject(),
+        manufacturerInfo: product.manufacturer ? {
+          ...product.manufacturer.toObject(),
+          totalProducts: manufacturerProductsCount,
+          sellerSince: product.manufacturer.user?.createdAt
+        } : null
+      }
+    };
+    
+    res.json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error fetching product details" });
+  }
+});
+
+// ✅ Get all products with manufacturer information for buyer dashboard
+router.get("/all-with-manufacturers", async (req, res) => {
+  try {
+    const { page = 1, limit = 20, category, search } = req.query;
+    
+    // Build query
+    let query = {};
+    if (category) {
+      query.category = category;
+    }
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const products = await Product.find(query)
+      .populate('seller', 'name email businessName phone')
+      .populate({
+        path: 'manufacturer',
+        select: 'companyName companyAddress contactPerson verified yearOfEstablishment'
+      })
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .sort({ createdAt: -1 });
+
+    const total = await Product.countDocuments(query);
+
+    res.json({
+      success: true,
+      products,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error fetching products" });
   }
 });
 
