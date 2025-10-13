@@ -9,7 +9,7 @@
 
   import productRoutes from "./routes/productRoutes.js";
   import uploadRoutes from "./routes/uploadRoutes.js";
-  import wishlistRoutes from "./routes/wishlistRoutesSimple.js";
+  import wishlistRoutes from "./routes/wishlistRoutes.js";
   import cartRoutes from "./routes/cartRoutes.js";
   import sellerProductRoutes from "./routes/sellerProductRoutes.js";
   import sellerOrderRoutes from "./routes/sellerOrderRoutes.js";
@@ -17,7 +17,7 @@
   import Product from "./models/Product.js"; // ✅ You forgot to import Product
   import Otp from "./models/Otp.js";
   import User from "./models/User.js";
-  import Manufacturer from "./models/Manufacture.js";
+  import Seller from "./models/SellerProfile.js";
   import Wishlist from "./models/Wishlist.js";
   import Cart from "./models/Cart.js";
 
@@ -227,36 +227,19 @@
 
 
    // Import routes
-  import sellerRoutes from "./routes/sellerRoutes.js";
   import sellerAuthRoutes from "./routes/sellerAuthRoutes.js";
+  import sellerProfileRoutes from "./routes/sellerProfileRoutes.js";
+  import newProductRoutes from "./routes/newProductRoutes.js";
 
   //use seller routes
-  app.use("/api/seller", sellerRoutes);
   app.use("/api/seller/auth", sellerAuthRoutes);
+  
+  // New seller profile routes (using SellerProfile schema)
+  app.use("/api/seller-profile", sellerProfileRoutes);
+  app.use("/api/products-new", newProductRoutes);
 
 
-  // app.use(cors({
-  //   origin: function (origin, callback) {
-  //     // Allow requests with no origin (like Postman blocked)
-  //     if (!origin) return callback(new Error("Blocked: No origin"), false);
-
-  //     if (allowedOrigins.includes(origin)) {
-  //       callback(null, true);  // Allow frontend
-  //     } else {
-  //       callback(new Error("Blocked by CORS"), false); // Block others
-  //     }
-  //   },
-  //   credentials: true
-  // }));
-
-  // app.use((req, res, next) => {
-  //   const key = req.headers["x-api-key"];
-  //   if (key === process.env.FRONTEND_SECRET_KEY) {
-  //     next();
-  //   } else {
-  //     res.status(403).json({ error: "Forbidden" });
-  //   }
-  // });
+  
   app.get("/api/addData", async (req, res) => {
     // Mapping from display labels to normalized keys
     const CATEGORY_KEY_MAP = {
@@ -858,18 +841,22 @@
         videos = []
       } = req.body
 
-      // Find or create manufacturer profile for the seller
-      let manufacturer = await Manufacturer.findOne({ user: manufacturerId });
-      if (!manufacturer) {
-        // Get seller info to create manufacturer profile
+      // Find or create seller profile for the seller
+      let sellerProfile = await Seller.findOne({ email: manufacturerId });
+      if (!sellerProfile) {
+        // Get seller info to create seller profile
         const seller = await User.findById(manufacturerId);
         if (!seller) {
           return res.status(400).json({ success: false, message: 'Seller not found' });
         }
 
-        // Create basic manufacturer profile
-        manufacturer = await Manufacturer.create({
-          user: manufacturerId,
+        // Create basic seller profile
+        sellerProfile = await Seller.create({
+          sellerId: `NXS${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+          name: seller.name || 'Seller Name',
+          email: seller.email,
+          phone: seller.phone || '0000000000',
+          password: 'temp-password', // This should be properly handled
           companyName: seller.businessName || seller.name || 'Company Name',
           companyAddress: seller.companyAddress?.street || 'Address not provided',
           contactPerson: {
@@ -877,8 +864,9 @@
             phone: seller.phone || '0000000000',
             email: seller.email || 'email@example.com'
           },
-          gstin: seller.gstNumber || '',
-          verified: false
+          gstNumber: seller.gstNumber || 'TEMP-GST',
+          verified: false,
+          products: []
         });
       }
 
@@ -894,9 +882,8 @@
         moq,
         sampleAvailable,
         samplePrice,
-        manufacturerId,
-        seller: manufacturerId, // Add seller field
-        manufacturer: manufacturer._id, // Link to manufacturer profile
+        sellerId: sellerProfile.sellerId, // Use seller's unique ID
+        sellerProfile: sellerProfile._id, // Link to seller profile
         hsCode,
         warranty,
         returnPolicy,
@@ -905,9 +892,9 @@
         videos
       })
 
-      // Add product ID to manufacturer's products array
-      await Manufacturer.findByIdAndUpdate(
-        manufacturer._id,
+      // Add product ID to seller's products array
+      await Seller.findByIdAndUpdate(
+        sellerProfile._id,
         { $push: { products: product._id } },
         { new: true }
       );
@@ -918,14 +905,13 @@
     }
   })
 
-  // In homepage, show All products with manufacturer information
+  // In homepage, show All products with seller information
   app.get("/api/showAllProducts", async (req, res) => {
     try {
       const products = await Product.find()
-        .populate('seller', 'name email businessName phone')
         .populate({
-          path: 'manufacturer',
-          select: 'companyName companyAddress contactPerson verified yearOfEstablishment companyLogo'
+          path: 'sellerProfile',
+          select: 'sellerId companyName companyAddress contactPerson verified yearOfEstablishment companyLogo'
         })
         .sort({ createdAt: -1 });
       res.json(products);
@@ -948,34 +934,30 @@
 
     try {
       const product = await Product.findById(id)
-        .populate('seller', 'name email businessName phone createdAt')
         .populate({
-          path: 'manufacturer',
-          populate: {
-            path: 'user',
-            select: 'name email phone businessName'
-          }
+          path: 'sellerProfile',
+          select: 'sellerId companyName companyAddress contactPerson verified yearOfEstablishment companyLogo aboutCompany website'
         });
       
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
 
-      // Get manufacturer's total products count
-      let manufacturerProductsCount = 0;
-      if (product.manufacturer) {
-        manufacturerProductsCount = await Product.countDocuments({ 
-          manufacturer: product.manufacturer._id 
+      // Get seller's total products count
+      let sellerProductsCount = 0;
+      if (product.sellerProfile) {
+        sellerProductsCount = await Product.countDocuments({ 
+          sellerProfile: product.sellerProfile._id 
         });
       }
 
-      // Enhanced response with manufacturer info
+      // Enhanced response with seller info
       const response = {
         ...product.toObject(),
-        manufacturerInfo: product.manufacturer ? {
-          ...product.manufacturer.toObject(),
-          totalProducts: manufacturerProductsCount,
-          sellerSince: product.manufacturer.user?.createdAt
+        sellerInfo: product.sellerProfile ? {
+          ...product.sellerProfile.toObject(),
+          totalProducts: sellerProductsCount,
+          sellerSince: product.sellerProfile.createdAt
         } : null
       };
 

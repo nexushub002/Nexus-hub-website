@@ -53,11 +53,81 @@
   flex: 1;
   max-width: 600px;
   display: flex;
+  flex-direction: column;
   gap: 20px;
   padding: 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+}
+
+/* Supplier Link Header - Alibaba Style */
+.supplier-link-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.supplier-name-prominent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #1e40af;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.supplier-name-prominent:hover {
+  background: rgba(30, 64, 175, 0.1);
+  color: #1d4ed8;
+  transform: translateX(4px);
+}
+
+.supplier-name-prominent .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.link-arrow {
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.supplier-name-prominent:hover .link-arrow {
+  opacity: 1;
+  transform: translateX(4px);
+}
+
+.verified-supplier-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.verified-supplier-badge .material-symbols-outlined {
+  font-size: 16px;
+}
+
+/* Image Gallery Container */
+.image-gallery-container {
+  display: flex;
+  gap: 20px;
 }
 
 .thumbnails {
@@ -733,5 +803,439 @@
 
   .tab-panel {
     padding: 16px;
+  }
+}
+
+/* Seller Information Section */
+.seller-section {
+  margin: 24px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.seller-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.seller-section h3::before {
+  content: "🏪";
+  font-size: 20px;
+}
+
+.seller-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.seller-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.seller-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+}
+
+.seller-details h4 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.seller-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.seller-id {
+  font-size: 14px;
+  color: #64748b;
+  font-family: monospace;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.verified-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #059669;
+  font-weight: 500;
+}
+
+.verified-badge .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.seller-stats {
+  display: flex;
+  gap: 24px;
+  margin: 16px 0;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 6px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #3b82f6;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.seller-description {
+  margin: 16px 0;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+.seller-description p {
+  margin: 0;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.seller-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.btn-outline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid #3b82f6;
+  background: transparent;
+  color: #3b82f6;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-outline:hover {
+  background: #3b82f6;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-outline .material-symbols-outlined {
+  font-size: 18px;
+}
+
+/* Responsive Design for Seller Section */
+@media (max-width: 768px) {
+  .seller-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .seller-stats {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .seller-actions {
+    flex-direction: column;
+  }
+  
+  .btn-outline {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .seller-section {
+    margin: 16px 0;
+    padding: 16px;
+  }
+  
+  .seller-card {
+    padding: 16px;
+  }
+  
+  .seller-logo {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Seller Contact Information */
+.seller-contact {
+  margin: 16px 0;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+.seller-contact h5 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.contact-item .material-symbols-outlined {
+  font-size: 18px;
+  color: #3b82f6;
+}
+
+.contact-item span:last-child {
+  font-weight: 500;
+}
+
+/* Responsive adjustments for contact info */
+@media (max-width: 768px) {
+  .seller-contact {
+    margin: 12px 0;
+    padding: 12px;
+  }
+  
+  .contact-item {
+    font-size: 13px;
+  }
+  
+  .contact-item .material-symbols-outlined {
+    font-size: 16px;
+  }
+}
+
+/* Alibaba-style Company Name Link */
+.company-name-link {
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.company-name-clickable {
+  color: #1e40af;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 2px;
+}
+
+.company-name-clickable:hover {
+  color: #1d4ed8;
+  border-bottom-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.link-icon {
+  font-size: 18px;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+
+.company-name-clickable:hover .link-icon {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+/* Supplier Credentials */
+.supplier-credentials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.credential-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #0369a1;
+  font-weight: 500;
+}
+
+.credential-item .material-symbols-outlined {
+  font-size: 14px;
+  color: #0284c7;
+}
+
+/* Enhanced Supplier Action Buttons */
+.btn-supplier-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-supplier-profile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
+.btn-supplier-products {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: white;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.btn-supplier-products:hover {
+  background: #3b82f6;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+.btn-contact-supplier {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-contact-supplier:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+/* Enhanced Seller Actions Layout */
+.seller-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.seller-actions .btn-contact-supplier {
+  grid-column: 1 / -1;
+}
+
+/* Responsive adjustments for new styles */
+@media (max-width: 768px) {
+  .company-name-clickable {
+    font-size: 18px;
+  }
+  
+  .supplier-credentials {
+    gap: 8px;
+  }
+  
+  .credential-item {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  
+  .seller-actions {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .seller-actions .btn-contact-supplier {
+    grid-column: 1;
+  }
+  
+  .btn-supplier-profile,
+  .btn-supplier-products,
+  .btn-contact-supplier {
+    padding: 10px 16px;
+    font-size: 13px;
+    justify-content: center;
   }
 }

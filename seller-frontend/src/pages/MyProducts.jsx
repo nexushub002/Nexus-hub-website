@@ -6,7 +6,7 @@ const MyProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -22,7 +22,8 @@ const MyProducts = () => {
 
   const fetchMyProducts = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/seller/my-products', {
+      // Try new API first, fallback to old API
+      let response = await fetch('http://localhost:3000/api/products-new/my-products', {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -30,10 +31,21 @@ const MyProducts = () => {
         },
       });
 
+      if (!response.ok) {
+        // Fallback to old API
+        response = await fetch('http://localhost:3000/api/seller/products/my-products', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      }
+
       if (response.ok) {
         const data = await response.json();
         setProducts(data.products || []);
-        console.log('✅ Fetched seller products:', data.products.length);
+        console.log('✅ Fetched seller products:', data.products?.length || 0);
       } else {
         console.error('Failed to fetch products');
       }
@@ -56,25 +68,8 @@ const MyProducts = () => {
     e.preventDefault();
     
     try {
-      const url = editingProduct 
-        ? `http://localhost:3000/api/seller/my-products/${editingProduct._id}`
-        : 'http://localhost:3000/api/products';
-      
-      const method = editingProduct ? 'PUT' : 'POST';
-      
-      // For new products, we need to use the proper product creation format
-      const productData = editingProduct ? formData : {
-        name: formData.name,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        category: formData.category,
-        subcategory: formData.category, // Using category as subcategory for now
-        categoryKey: formData.category.replace(/\s+/g, '_'),
-        subcategoryKey: formData.category.replace(/\s+/g, '_'),
-        moq: 1, // Default MOQ
-        sampleAvailable: false,
-        images: formData.images || []
-      };
+      const url = `http://localhost:3000/api/seller/products/update/${editingProduct._id}`;
+      const method = 'PUT';
       
       const response = await fetch(url, {
         method,
@@ -82,25 +77,21 @@ const MyProducts = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(productData),
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
         const data = await response.json();
-        if (editingProduct) {
-          setProducts(prev => prev.map(p => p._id === editingProduct._id ? data.product : p));
-        } else {
-          setProducts(prev => [data.product, ...prev]);
-        }
+        setProducts(prev => prev.map(p => p._id === editingProduct._id ? data.product : p));
         resetForm();
         fetchMyProducts(); // Refresh the list
       } else {
         const errorData = await response.json();
-        alert(errorData.message || 'Failed to save product');
+        alert(errorData.message || 'Failed to update product');
       }
     } catch (error) {
-      console.error('Error saving product:', error);
-      alert('Error saving product');
+      console.error('Error updating product:', error);
+      alert('Error updating product');
     }
   };
 
@@ -114,14 +105,14 @@ const MyProducts = () => {
       stock: product.stock || 0,
       images: product.images || []
     });
-    setShowAddForm(true);
+    setShowEditForm(true);
   };
 
   const handleDelete = async (productId) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/seller/my-products/${productId}`, {
+      const response = await fetch(`http://localhost:3000/api/seller/products/delete/${productId}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -149,7 +140,7 @@ const MyProducts = () => {
       images: []
     });
     setEditingProduct(null);
-    setShowAddForm(false);
+    setShowEditForm(false);
   };
 
   if (loading) {
@@ -163,26 +154,17 @@ const MyProducts = () => {
   return (
     <div className="p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Products</h1>
-          <p className="text-gray-600">Manage your product catalog</p>
-        </div>
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-        >
-          <span>➕</span>
-          <span>Add Product</span>
-        </button>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">My Products</h1>
+        <p className="text-gray-600">View and manage your product catalog</p>
       </div>
 
-      {/* Add/Edit Product Form */}
-      {showAddForm && (
+      {/* Edit Product Form */}
+      {showEditForm && (
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">
-              {editingProduct ? 'Edit Product' : 'Add New Product'}
+              Edit Product
             </h2>
             <button
               onClick={resetForm}
@@ -281,7 +263,7 @@ const MyProducts = () => {
                 type="submit"
                 className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
               >
-                {editingProduct ? 'Update Product' : 'Create Product'}
+                Update Product
               </button>
               <button
                 type="button"
@@ -299,14 +281,8 @@ const MyProducts = () => {
       {products.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">📦</div>
-          <h3 className="text-lg font-medium mb-2">No products yet</h3>
-          <p className="text-gray-500 mb-4">Create your first product to start selling</p>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Add Your First Product
-          </button>
+          <h3 className="text-lg font-medium mb-2">No products added</h3>
+          <p className="text-gray-500 mb-4">You haven't added any products yet. Use the "Add Product" option from the sidebar to create your first product.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

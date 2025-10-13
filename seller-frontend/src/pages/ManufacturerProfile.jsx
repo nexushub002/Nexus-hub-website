@@ -34,7 +34,12 @@ const ManufacturerProfile = () => {
       const data = await response.json();
       
       if (data.success) {
-        setManufacturerData(data.seller.manufacturerProfile);
+        setManufacturerData({
+          ...data.seller.manufacturerProfile,
+          sellerId: data.seller.sellerId,
+          products: data.seller.products,
+          totalProducts: data.seller.totalProducts
+        });
         setFormData(data.seller.manufacturerProfile);
       }
     } catch (error) {
@@ -308,6 +313,27 @@ const ManufacturerProfile = () => {
           {manufacturerData && (
             <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-6 shadow-sm space-y-8`}>
               
+              {/* Seller Information Section */}
+              <div className="border-b pb-6">
+                <h2 className="text-xl font-semibold mb-4">Seller Information</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h3 className="text-sm font-medium text-blue-600 mb-1">Seller ID</h3>
+                    <p className="text-2xl font-bold text-blue-800">{manufacturerData.sellerId || 'Not assigned'}</p>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h3 className="text-sm font-medium text-green-600 mb-1">Total Products</h3>
+                    <p className="text-2xl font-bold text-green-800">{manufacturerData.totalProducts || 0}</p>
+                  </div>
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h3 className="text-sm font-medium text-purple-600 mb-1">Verification Status</h3>
+                    <p className={`text-lg font-semibold ${manufacturerData.verified ? 'text-green-600' : 'text-orange-600'}`}>
+                      {manufacturerData.verified ? '✓ Verified' : '⏳ Pending'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Company Logo Section */}
               <div className="border-b pb-6">
                 <h2 className="text-xl font-semibold mb-4">Company Logo</h2>

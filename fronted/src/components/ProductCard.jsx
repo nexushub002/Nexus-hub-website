@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import './ProductCard.css';
@@ -148,6 +148,25 @@ const ProductCard = ({ product }) => {
                     <div className="product-category">
                         {category} {subcategory && `• ${subcategory}`}
                     </div>
+
+                    {/* Seller Information */}
+                    {(product.sellerProfile || product.sellerInfo) && (
+                        <div className="seller-info-card">
+                            <Link 
+                                to={`/seller/${product.sellerProfile?.sellerId || product.sellerInfo?.sellerId || product.sellerId}`}
+                                className="seller-link"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <span className="material-symbols-outlined seller-icon">store</span>
+                                <span className="seller-name">
+                                    {product.sellerProfile?.companyName || product.sellerInfo?.companyName || 'Seller'}
+                                </span>
+                                {(product.sellerProfile?.verified || product.sellerInfo?.verified) && (
+                                    <span className="verified-icon material-symbols-outlined">verified</span>
+                                )}
+                            </Link>
+                        </div>
+                    )}
 
                     {/* Product Name */}
                     <h3 className="product-name" title={name}>

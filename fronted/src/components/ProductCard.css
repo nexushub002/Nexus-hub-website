@@ -581,3 +581,66 @@
     margin-bottom: 80px;
   }
 }
+
+/* Seller Information Styles */
+.seller-info-card {
+  margin: 8px 0;
+  padding: 6px 8px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.seller-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: #475569;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.seller-link:hover {
+  color: #3b82f6;
+  background: #eff6ff;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+}
+
+.seller-icon {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.seller-name {
+  font-weight: 500;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.verified-icon {
+  font-size: 14px;
+  color: #059669;
+}
+
+/* Responsive adjustments for seller info */
+@media (max-width: 768px) {
+  .seller-info-card {
+    margin: 6px 0;
+    padding: 4px 6px;
+  }
+  
+  .seller-link {
+    font-size: 11px;
+    gap: 4px;
+  }
+  
+  .seller-icon,
+  .verified-icon {
+    font-size: 12px;
+  }
+}

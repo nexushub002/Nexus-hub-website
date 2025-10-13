@@ -2,7 +2,7 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
-import Manufacturer from "../models/Manufacture.js";
+import Seller from "../models/SellerProfile.js";
 import { verifySeller } from "../middleware/sellerAuth.js";
 
 const router = express.Router();
@@ -65,24 +65,44 @@ router.post("/seller-register", async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+    // Generate unique seller ID
+    const generateSellerId = () => {
+      const prefix = "NXS";
+      const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
+      const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      return `${prefix}${timestamp}${random}`;
+    };
+
+    let sellerId = generateSellerId();
+    // Ensure sellerId is unique
+    while (await User.findOne({ sellerId })) {
+      sellerId = generateSellerId();
+    }
+
     // Create new seller user
     const newUser = new User({
       name: name.trim(),
       email: email.trim().toLowerCase(),
       phone: phone.trim(),
       password: hashedPassword,
+      sellerId: sellerId, // Add unique seller ID
       businessName: companyName.trim(), // Use companyName as businessName for backward compatibility
       gstNumber: gstin ? gstin.trim() : "",
       roles: ["seller"], // Set seller role
       isVerified: true, // Auto-verify for now
+      products: [], // Initialize empty products array
       createdAt: new Date()
     });
 
     await newUser.save();
 
-    // Create comprehensive manufacturer profile
-    const newManufacturer = new Manufacturer({
-      user: newUser._id,
+    // Create comprehensive seller profile using the same sellerId
+    const newSeller = new Seller({
+      sellerId,
+      name: newUser.name,
+      email: newUser.email,
+      phone: newUser.phone,
+      password: hashedPassword,
       companyName: companyName.trim(),
       yearOfEstablishment: yearOfEstablishment || undefined,
       numberOfEmployees: numberOfEmployees || undefined,
@@ -94,21 +114,17 @@ router.post("/seller-register", async (req, res) => {
         phone: contactPerson.phone.trim(),
         email: contactPerson.email.trim()
       },
-      gstin: gstin ? gstin.trim() : undefined,
+      gstNumber: gstNumber.trim(),
       cin: cin ? cin.trim() : undefined,
       pan: pan ? pan.trim() : undefined,
       aboutCompany: aboutCompany ? aboutCompany.trim() : undefined,
       website: website ? website.trim() : undefined,
       yearsInBusiness: yearsInBusiness || undefined,
-      verified: false, // Admin verification required
+      verified: false,
       products: [] // Initialize empty products array
     });
 
-    await newManufacturer.save();
-
-    // Link manufacturer profile to user
-    newUser.manufacturerProfile = newManufacturer._id;
-    await newUser.save();
+    await newSeller.save();
 
     // Generate JWT token
     const token = jwt.sign(
@@ -129,22 +145,23 @@ router.post("/seller-register", async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
-    // Return user data with manufacturer profile (without password)
+    // Return user data with seller profile (without password)
     const userResponse = {
       _id: newUser._id,
       name: newUser.name,
       email: newUser.email,
       phone: newUser.phone,
+      sellerId: newUser.sellerId, // Include seller ID
       businessName: newUser.businessName,
       gstNumber: newUser.gstNumber,
       roles: newUser.roles,
-      manufacturerProfile: newManufacturer,
+      sellerProfile: newSeller,
       createdAt: newUser.createdAt
     };
 
     res.status(201).json({
       success: true,
-      message: "Seller account and manufacturer profile created successfully",
+      message: "Seller account and seller profile created successfully",
       user: userResponse
     });
 
@@ -226,6 +243,7 @@ router.post("/seller-login", async (req, res) => {
       name: user.name,
       email: user.email,
       phone: user.phone,
+      sellerId: user.sellerId, // Include seller ID
       businessName: user.businessName,
       gstNumber: user.gstNumber,
       roles: user.roles

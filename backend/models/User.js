@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
   roles: { type: [String], default: ["buyer"] }, // buyer by default
   
   // Seller-specific fields
+  sellerId: { type: String, unique: true, sparse: true }, // Unique seller ID
   businessName: { type: String },
   gstNumber: { type: String },
   companyAddress: {
@@ -18,6 +19,7 @@ const userSchema = new mongoose.Schema({
     country: { type: String, default: "India" }
   },
   isVerified: { type: Boolean, default: false },
+  products: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }], // Array of product IDs
   
   manufacturerProfile: {
     type: mongoose.Schema.Types.ObjectId,

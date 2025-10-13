@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { useWishlist } from '../context/WishlistContext';
@@ -23,12 +23,17 @@ const ProductDetailsPage = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`http://localhost:3000/api/product/${id}`);
+        // Try new API first, fallback to old API
+        let res = await fetch(`http://localhost:3000/api/products-new/public/${id}`);
+        if (!res.ok) {
+          // Fallback to old API
+          res = await fetch(`http://localhost:3000/api/product/${id}`);
+        }
         if (!res.ok) {
           throw new Error('Product not found');
         }
         const data = await res.json();
-        setProduct(data);
+        setProduct(data.success ? data.product : data);
         setError(null);
       } catch (err) {
         console.error("Failed to fetch product:", err);
@@ -236,6 +241,89 @@ const ProductDetailsPage = () => {
                   Sample Price: {formatPrice(samplePrice)}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Seller Information */}
+          {(product.sellerInfo || product.sellerProfile) && (
+            <div className="seller-section">
+              <h3>Seller Information</h3>
+              <div className="seller-card">
+                <div className="seller-header">
+                  {(product.sellerInfo?.companyLogo?.url || product.sellerProfile?.companyLogo?.url) && (
+                    <img 
+                      src={product.sellerInfo?.companyLogo?.url || product.sellerProfile?.companyLogo?.url} 
+                      alt="Company Logo" 
+                      className="seller-logo"
+                    />
+                  )}
+                  <div className="seller-details">
+                    <h4>{product.sellerInfo?.companyName || product.sellerProfile?.companyName}</h4>
+                    <div className="seller-meta">
+                      <span className="seller-id">
+                        Seller ID: {product.sellerInfo?.sellerId || product.sellerProfile?.sellerId || product.sellerId}
+                      </span>
+                      {(product.sellerInfo?.verified || product.sellerProfile?.verified) && (
+                        <span className="verified-badge">
+                          <span className="material-symbols-outlined">verified</span>
+                          Verified Seller
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="seller-stats">
+                  <div className="stat-item">
+                    <span className="stat-value">{product.sellerInfo?.totalProducts || 'N/A'}</span>
+                    <span className="stat-label">Total Products</span>
+                  </div>
+                  {(product.sellerInfo?.yearOfEstablishment || product.sellerProfile?.yearOfEstablishment) && (
+                    <div className="stat-item">
+                      <span className="stat-value">{product.sellerInfo?.yearOfEstablishment || product.sellerProfile?.yearOfEstablishment}</span>
+                      <span className="stat-label">Established</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Contact Information */}
+                <div className="seller-contact">
+                  <h5>Contact Information</h5>
+                  <div className="contact-details">
+                    <div className="contact-item">
+                      <span className="material-symbols-outlined">phone</span>
+                      <span>{product.sellerInfo?.contactPerson?.phone || product.sellerProfile?.contactPerson?.phone || product.sellerInfo?.phone || product.sellerProfile?.phone || 'Not available'}</span>
+                    </div>
+                    <div className="contact-item">
+                      <span className="material-symbols-outlined">email</span>
+                      <span>{product.sellerInfo?.contactPerson?.email || product.sellerProfile?.contactPerson?.email || product.sellerInfo?.email || product.sellerProfile?.email || 'Not available'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {(product.sellerInfo?.aboutCompany || product.sellerProfile?.aboutCompany) && (
+                  <div className="seller-description">
+                    <p>{product.sellerInfo?.aboutCompany || product.sellerProfile?.aboutCompany}</p>
+                  </div>
+                )}
+
+                <div className="seller-actions">
+                  <Link 
+                    to={`/seller/${product.sellerInfo?.sellerId || product.sellerProfile?.sellerId || product.sellerId}`}
+                    className="btn-outline"
+                  >
+                    <span className="material-symbols-outlined">store</span>
+                    View Seller Profile
+                  </Link>
+                  <Link 
+                    to={`/seller/${product.sellerInfo?.sellerId || product.sellerProfile?.sellerId || product.sellerId}`}
+                    className="btn-outline"
+                  >
+                    <span className="material-symbols-outlined">inventory_2</span>
+                    View All Products
+                  </Link>
+                </div>
+              </div>
             </div>
           )}
 

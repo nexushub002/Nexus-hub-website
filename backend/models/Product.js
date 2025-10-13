@@ -99,19 +99,16 @@ const productSchema = new mongoose.Schema({
     type: Number,
     min: 0,
   },
-  manufacturerId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: false, // Make optional since we're using seller field now
-  },
-  seller: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+  // Seller Information - Links product to the seller who created it
+  sellerId: {
+    type: String,
     required: true,
+    index: true, // For efficient querying by seller
   },
-  manufacturer: {
+  sellerProfile: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Manufacturer",
+    ref: "Seller",
+    required: true,
   },
 
   images: [{ type: String }],  // store Cloudinary URLs of images
@@ -139,5 +136,9 @@ productSchema.statics.getSubcategories = function(category) {
 
 // Index for normalized key queries
 productSchema.index({ categoryKey: 1, subcategoryKey: 1 });
+
+// Index for seller queries
+productSchema.index({ sellerId: 1 });
+productSchema.index({ sellerProfile: 1 });
 
 export default mongoose.model("Product", productSchema);
