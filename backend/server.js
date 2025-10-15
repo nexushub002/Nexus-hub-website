@@ -14,6 +14,7 @@
   import sellerProductRoutes from "./routes/sellerProductRoutes.js";
   import sellerOrderRoutes from "./routes/sellerOrderRoutes.js";
   import orderRoutes from "./routes/orderRoutes.js";
+  import inquiryRoutes from "./routes/inquiries.js";
   import Product from "./models/Product.js"; // ✅ You forgot to import Product
   import Otp from "./models/Otp.js";
   import User from "./models/User.js";
@@ -975,6 +976,7 @@
   app.use("/api/seller/products", sellerProductRoutes);
   app.use("/api/seller/orders", sellerOrderRoutes);
   app.use("/api/orders", orderRoutes);
+  app.use("/api/inquiries", inquiryRoutes);
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {

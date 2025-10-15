@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
+import SendInquiryModal from "../components/SendInquiryModal";
 import "./ProductDetailsPage.css";
 
 const ProductDetailsPage = () => {
@@ -14,6 +15,7 @@ const ProductDetailsPage = () => {
   const [activeTab, setActiveTab] = useState('description');
   const [wishlistMessage, setWishlistMessage] = useState('');
   const [cartMessage, setCartMessage] = useState('');
+  const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
   
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart: addProductToCart } = useCart();
@@ -167,29 +169,31 @@ const ProductDetailsPage = () => {
       <div className="product-details-container">
         {/* Image Gallery Section */}
         <div className="image-section">
-          {/* Main Image */}
-          <div className="main-image-wrapper">
-            <img
-              src={images[mainIndex] || '/placeholder-image.jpg'}
-              alt={name}
-              className="main-image"
-            />
-            <div className="image-counter">
-              {mainIndex + 1} / {images.length}
+          <div className="image-gallery-container">
+            {/* Thumbnails Column */}
+            <div className="thumbnails">
+              {images.map((src, idx) => (
+                <img
+                  key={idx}
+                  src={src}
+                  alt={`${name} ${idx + 1}`}
+                  className={idx === mainIndex ? "thumb active" : "thumb"}
+                  onClick={() => handleThumbClick(idx)}
+                />
+              ))}
             </div>
-          </div>
-          
-          {/* Thumbnails Row */}
-          <div className="thumbnails">
-            {images.map((src, idx) => (
+            
+            {/* Main Image */}
+            <div className="main-image-wrapper">
               <img
-                key={idx}
-                src={src}
-                alt={`${name} ${idx + 1}`}
-                className={idx === mainIndex ? "thumb active" : "thumb"}
-                onClick={() => handleThumbClick(idx)}
+                src={images[mainIndex] || '/placeholder-image.jpg'}
+                alt={name}
+                className="main-image"
               />
-            ))}
+              <div className="image-counter">
+                {mainIndex + 1} / {images.length}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -381,6 +385,14 @@ const ProductDetailsPage = () => {
 
           {/* Action Buttons */}
           <div className="action-buttons">
+            <button 
+              className="btn-primary"
+              onClick={() => setIsInquiryModalOpen(true)}
+              style={{ backgroundColor: '#ff6b35' }}
+            >
+              <span className="material-symbols-outlined">mail</span>
+              Send Inquiry
+            </button>
             <button className="btn-primary" onClick={handleAddToCart}>
               <span className="material-symbols-outlined">shopping_cart</span>
               Add to Cart
@@ -496,6 +508,14 @@ const ProductDetailsPage = () => {
             </div>
           </div>
         </div>
+
+        {/* Send Inquiry Modal */}
+        <SendInquiryModal
+          isOpen={isInquiryModalOpen}
+          onClose={() => setIsInquiryModalOpen(false)}
+          product={product}
+          sellerInfo={product?.sellerInfo || product?.sellerProfile}
+        />
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Sidebar from '../compo/Sidebar'
 import { useSeller } from '../context/SellerContext'
 import { useSellerTracking } from '../hooks/useSellerTracking'
+import InquiryManagement from '../components/InquiryManagement'
 
 // Helpers: generate deterministic color and initial for avatar
 const getInitial = (nameOrEmail) => {
@@ -142,6 +143,7 @@ const Sellerdashboard = () => {
           <div className='flex items-center space-x-1 mb-6'>
             {[
               { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+              { id: 'inquiries', label: 'Inquiries', icon: '📧' },
               { id: 'orders', label: 'Orders', icon: '🛒' },
               { id: 'analytics', label: 'Analytics', icon: '📈' }
             ].map((tab) => (
@@ -250,18 +252,18 @@ const Sellerdashboard = () => {
                       <span className='text-sm font-medium'>View Orders</span>
                     </button>
                     <button 
+                      onClick={() => handleTabChange('inquiries')}
+                      className='flex items-center space-x-2 p-3 rounded-lg bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors'
+                    >
+                      <span>📧</span>
+                      <span className='text-sm font-medium'>View Inquiries</span>
+                    </button>
+                    <button 
                       onClick={() => handleTabChange('analytics')}
                       className='flex items-center space-x-2 p-3 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors'
                     >
                       <span>📊</span>
                       <span className='text-sm font-medium'>Analytics</span>
-                    </button>
-                    <button 
-                      onClick={() => window.open('http://localhost:5173/', '_blank')}
-                      className='flex items-center space-x-2 p-3 rounded-lg bg-orange-50 text-orange-700 hover:bg-orange-100 transition-colors'
-                    >
-                      <span>👥</span>
-                      <span className='text-sm font-medium'>Buyer View</span>
                     </button>
                   </div>
                 </div>
@@ -505,6 +507,11 @@ const Sellerdashboard = () => {
                 />
               )}
             </div>
+          )}
+
+          {/* Inquiries Tab */}
+          {activeTab === 'inquiries' && (
+            <InquiryManagement />
           )}
 
           {/* Orders Tab */}

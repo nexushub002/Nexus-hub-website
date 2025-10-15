@@ -2,7 +2,7 @@ import React from 'react'
 import Navbar from '../components/Navbar'
 import ProductList from '../components/ProductList'
 import SlideBar from '../components/SlideBar'
-import CategoryList from '../components/CategoryList'
+import CategoryListImproved from '../components/CategoryListImproved'
 import CategoryList1 from '../components/CategoryList1'
 import FeaturedSectionsImproved from '../components/FeaturedSectionsImproved'
 import TopDealsImproved from '../components/TopDealsImproved'
@@ -14,7 +14,7 @@ const Homepage = () => {
       <Navbar/>
       <CategoryList1/>
       <SlideBar/>
-      <CategoryList/>
+      <CategoryListImproved/>
       <FeaturedSectionsImproved/>
       <TopDealsImproved/>
       <ProductList/>
