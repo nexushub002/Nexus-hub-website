@@ -53,7 +53,7 @@ const activityTracker = {
     cookieUtils.set('seller_activities', updatedActivities, 30);
     
     // Also send to backend for persistent storage
-    fetch('http://localhost:3000/api/seller/activity/track', {
+    fetch('/api/seller/activity/track', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -161,7 +161,7 @@ export const SellerProvider = ({ children }) => {
       }
 
       // If no cookie, try API call
-      const response = await fetch('http://localhost:3000/api/seller/auth/me', {
+      const response = await fetch('/api/seller/auth/me', {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -235,7 +235,7 @@ export const SellerProvider = ({ children }) => {
     };
 
     try {
-      const response = await fetch('http://localhost:3000/api/seller/auth/seller-login', {
+      const response = await fetch('/api/seller/auth/seller-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -332,7 +332,7 @@ export const SellerProvider = ({ children }) => {
         });
       }
 
-      await fetch('http://localhost:3000/api/seller/auth/seller-logout', {
+      await fetch('/api/seller/auth/seller-logout', {
         method: 'POST',
         credentials: 'include', // Include cookies
         body: JSON.stringify({
@@ -387,7 +387,7 @@ export const SellerProvider = ({ children }) => {
     };
 
     try {
-      const response = await fetch('http://localhost:3000/api/seller/auth/seller-register', {
+      const response = await fetch('/api/seller/auth/seller-register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

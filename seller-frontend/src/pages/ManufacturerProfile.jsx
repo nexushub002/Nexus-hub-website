@@ -16,7 +16,7 @@ const ManufacturerProfile = () => {
   const handleToggleTheme = () => setIsDarkMode((v) => !v);
 
   const handleSwitchRole = () => {
-    window.location.href = 'http://localhost:5173/';
+    window.location.href = '/';
   };
 
   // Fetch manufacturer profile
@@ -28,19 +28,21 @@ const ManufacturerProfile = () => {
 
   const fetchManufacturerProfile = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/seller/profile', {
+      const response = await fetch('/api/seller-profile/profile', {
         credentials: 'include'
       });
       const data = await response.json();
       
-      if (data.success) {
+      if (response.ok && data.success) {
+        // The seller profile data structure from backend
+        const sellerData = data.seller;
         setManufacturerData({
-          ...data.seller.manufacturerProfile,
-          sellerId: data.seller.sellerId,
-          products: data.seller.products,
-          totalProducts: data.seller.totalProducts
+          ...sellerData,
+          totalProducts: sellerData.products?.length || 0
         });
-        setFormData(data.seller.manufacturerProfile);
+        setFormData(sellerData);
+      } else {
+        setMessage(data.message || 'Error loading manufacturer profile');
       }
     } catch (error) {
       console.error('Error fetching manufacturer profile:', error);
@@ -69,7 +71,7 @@ const ManufacturerProfile = () => {
 
   const handleSaveProfile = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/seller/manufacturer/profile', {
+      const response = await fetch('/api/seller-profile/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -79,8 +81,8 @@ const ManufacturerProfile = () => {
       });
 
       const data = await response.json();
-      if (data.success) {
-        setManufacturerData(data.manufacturer);
+      if (response.ok && data.success) {
+        setManufacturerData(data.seller);
         setIsEditing(false);
         setMessage('Profile updated successfully');
       } else {
@@ -100,7 +102,7 @@ const ManufacturerProfile = () => {
         formData.append('documents', file);
       });
 
-      const uploadResponse = await fetch('http://localhost:3000/api/upload/documents', {
+      const uploadResponse = await fetch('/api/upload/documents', {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -109,7 +111,7 @@ const ManufacturerProfile = () => {
       const uploadData = await uploadResponse.json();
       if (uploadData.success) {
         // Add documents to manufacturer profile
-        const addResponse = await fetch('http://localhost:3000/api/seller/manufacturer/documents', {
+        const addResponse = await fetch('/api/seller-profile/documents', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -143,7 +145,7 @@ const ManufacturerProfile = () => {
         formData.append('certificates', file);
       });
 
-      const uploadResponse = await fetch('http://localhost:3000/api/upload/certificates', {
+      const uploadResponse = await fetch('/api/upload/certificates', {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -152,7 +154,7 @@ const ManufacturerProfile = () => {
       const uploadData = await uploadResponse.json();
       if (uploadData.success) {
         // Add certificates to manufacturer profile
-        const addResponse = await fetch('http://localhost:3000/api/seller/manufacturer/certificates', {
+        const addResponse = await fetch('/api/seller-profile/certificates', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -184,7 +186,7 @@ const ManufacturerProfile = () => {
       const formData = new FormData();
       formData.append('logo', file);
 
-      const uploadResponse = await fetch('http://localhost:3000/api/upload/logo', {
+      const uploadResponse = await fetch('/api/upload/logo', {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -193,7 +195,7 @@ const ManufacturerProfile = () => {
       const uploadData = await uploadResponse.json();
       if (uploadData.success) {
         // Update logo in manufacturer profile
-        const updateResponse = await fetch('http://localhost:3000/api/seller/manufacturer/logo', {
+        const updateResponse = await fetch('/api/seller-profile/logo', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -221,7 +223,7 @@ const ManufacturerProfile = () => {
 
   const deleteDocument = async (documentId) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/seller/manufacturer/documents/${documentId}`, {
+      const response = await fetch(`/api/seller-profile/documents/${documentId}`, {
         method: 'DELETE',
         credentials: 'include'
       });
@@ -242,7 +244,7 @@ const ManufacturerProfile = () => {
 
   const deleteCertificate = async (certificateId) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/seller/manufacturer/certificates/${certificateId}`, {
+      const response = await fetch(`/api/seller-profile/certificates/${certificateId}`, {
         method: 'DELETE',
         credentials: 'include'
       });
@@ -570,13 +572,13 @@ const ManufacturerProfile = () => {
                     {isEditing ? (
                       <input
                         type="text"
-                        name="gstin"
-                        value={formData.gstin || ''}
+                        name="gstNumber"
+                        value={formData.gstNumber || ''}
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border rounded-lg"
                       />
                     ) : (
-                      <p className="text-gray-700">{manufacturerData.gstin || 'Not provided'}</p>
+                      <p className="text-gray-700">{manufacturerData.gstNumber || 'Not provided'}</p>
                     )}
                   </div>
 

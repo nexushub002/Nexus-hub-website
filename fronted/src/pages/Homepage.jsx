@@ -4,8 +4,9 @@ import ProductList from '../components/ProductList'
 import SlideBar from '../components/SlideBar'
 import CategoryList from '../components/CategoryList'
 import CategoryList1 from '../components/CategoryList1'
-import FeaturedSectionsTailwind from '../components/FeaturedSectionsTailwind'
-import TopDeals from '../components/TopDeals'
+import FeaturedSectionsImproved from '../components/FeaturedSectionsImproved'
+import TopDealsImproved from '../components/TopDealsImproved'
+import '../components/FeaturedSections.css'
 
 const Homepage = () => {
   return (
@@ -14,8 +15,8 @@ const Homepage = () => {
       <CategoryList1/>
       <SlideBar/>
       <CategoryList/>
-      <FeaturedSectionsTailwind/>
-      <TopDeals/>
+      <FeaturedSectionsImproved/>
+      <TopDealsImproved/>
       <ProductList/>
     </div>
   )

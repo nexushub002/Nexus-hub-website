@@ -180,7 +180,7 @@ const AddProduct = () => {
       const formData = new FormData()
       formData.append('images', file)
       
-      const response = await fetch('http://localhost:3000/api/upload/images', {
+      const response = await fetch('/api/upload/images', {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -249,7 +249,7 @@ const AddProduct = () => {
 
       console.log('Product data being sent:', body) // Debug log
 
-      const res = await fetch('http://localhost:3000/api/products', {
+      const res = await fetch('/api/products-new/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // Include cookies for authentication

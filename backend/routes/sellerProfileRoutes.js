@@ -23,15 +23,24 @@ const verifySeller = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "nexushub-seller-secret");
-    const seller = await Seller.findById(decoded.sellerId);
     
-    if (!seller) {
-      return res.status(401).json({ success: false, message: "Invalid token" });
+    // Find user first, then get seller profile using sellerId
+    const User = (await import("../models/User.js")).default;
+    const user = await User.findById(decoded.userId);
+    if (!user || !user.roles.includes("seller")) {
+      return res.status(401).json({ success: false, message: "Invalid seller token" });
     }
 
+    const seller = await Seller.findOne({ sellerId: user.sellerId });
+    if (!seller) {
+      return res.status(401).json({ success: false, message: "Seller profile not found" });
+    }
+
+    req.user = user;
     req.seller = seller;
     next();
   } catch (error) {
+    console.error("Token verification error:", error);
     return res.status(401).json({ success: false, message: "Invalid token" });
   }
 };

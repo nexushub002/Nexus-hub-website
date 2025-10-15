@@ -22,8 +22,8 @@ const MyProducts = () => {
 
   const fetchMyProducts = async () => {
     try {
-      // Try new API first, fallback to old API
-      let response = await fetch('http://localhost:3000/api/products-new/my-products', {
+      // Use the new API endpoint with proxy
+      const response = await fetch('/api/products-new/my-products', {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -31,23 +31,13 @@ const MyProducts = () => {
         },
       });
 
-      if (!response.ok) {
-        // Fallback to old API
-        response = await fetch('http://localhost:3000/api/seller/products/my-products', {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-      }
-
       if (response.ok) {
         const data = await response.json();
         setProducts(data.products || []);
         console.log('✅ Fetched seller products:', data.products?.length || 0);
       } else {
-        console.error('Failed to fetch products');
+        const errorData = await response.json();
+        console.error('Failed to fetch products:', errorData.message);
       }
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -68,7 +58,7 @@ const MyProducts = () => {
     e.preventDefault();
     
     try {
-      const url = `http://localhost:3000/api/seller/products/update/${editingProduct._id}`;
+      const url = `/api/products-new/update/${editingProduct._id}`;
       const method = 'PUT';
       
       const response = await fetch(url, {
@@ -112,7 +102,7 @@ const MyProducts = () => {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/seller/products/delete/${productId}`, {
+      const response = await fetch(`/api/products-new/delete/${productId}`, {
         method: 'DELETE',
         credentials: 'include',
       });

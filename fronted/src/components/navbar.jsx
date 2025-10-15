@@ -14,6 +14,7 @@ const Navbar = () => {
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const searchRef = useRef(null);
 
   const navigate = useNavigate();
@@ -97,7 +98,39 @@ const Navbar = () => {
   const handleSuggestionClick = (suggestion) => {
     setInputValue(suggestion);
     setShowSuggestions(false);
+    setSelectedSuggestionIndex(-1);
     navigate(`/search?q=${encodeURIComponent(suggestion)}`);
+  };
+
+  const handleKeyDown = (e) => {
+    if (!showSuggestions || searchSuggestions.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedSuggestionIndex(prev => 
+          prev < searchSuggestions.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedSuggestionIndex(prev => 
+          prev > 0 ? prev - 1 : searchSuggestions.length - 1
+        );
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (selectedSuggestionIndex >= 0) {
+          handleSuggestionClick(searchSuggestions[selectedSuggestionIndex]);
+        } else {
+          handleSearchSubmit(e);
+        }
+        break;
+      case 'Escape':
+        setShowSuggestions(false);
+        setSelectedSuggestionIndex(-1);
+        break;
+    }
   };
 
   const handleSearchSubmit = (e) => {
@@ -105,8 +138,16 @@ const Navbar = () => {
     const query = inputValue.trim();
     if (query) {
       setShowSuggestions(false);
+      setSelectedSuggestionIndex(-1);
       navigate(`/search?q=${encodeURIComponent(query)}`);
     }
+  };
+
+  const clearSearch = () => {
+    setInputValue('');
+    setShowSuggestions(false);
+    setSelectedSuggestionIndex(-1);
+    setSearchSuggestions([]);
   };
 
 
@@ -146,28 +187,55 @@ const Navbar = () => {
                 placeholder='Search for Products, Brands and More'
                 className='outline-none bg-transparent w-full text-gray-700'
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={(e) => {
+                  setInputValue(e.target.value);
+                  setSelectedSuggestionIndex(-1);
+                }}
                 onFocus={() => inputValue.length > 1 && setShowSuggestions(true)}
+                onKeyDown={handleKeyDown}
+                autoComplete="off"
               />
+              {inputValue && !isSearching && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="ml-2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-sm">close</span>
+                </button>
+              )}
               {isSearching && (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 ml-2"></div>
               )}
             </div>
           </form>
 
           {/* Search Suggestions Dropdown */}
           {showSuggestions && searchSuggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1">
+            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1 max-h-80 overflow-y-auto">
               {searchSuggestions.map((suggestion, index) => (
                 <div
                   key={index}
-                  className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center border-b border-gray-100 last:border-b-0"
+                  className={`px-4 py-3 cursor-pointer flex items-center border-b border-gray-100 last:border-b-0 transition-colors ${
+                    index === selectedSuggestionIndex 
+                      ? 'bg-blue-50 text-blue-700' 
+                      : 'hover:bg-gray-50 text-gray-700'
+                  }`}
                   onClick={() => handleSuggestionClick(suggestion)}
+                  onMouseEnter={() => setSelectedSuggestionIndex(index)}
                 >
-                  <span className="material-symbols-outlined text-gray-400 mr-3 text-sm">search</span>
-                  <span className="text-gray-700 text-sm">{suggestion}</span>
+                  <span className={`material-symbols-outlined mr-3 text-sm ${
+                    index === selectedSuggestionIndex ? 'text-blue-500' : 'text-gray-400'
+                  }`}>search</span>
+                  <span className="text-sm flex-1">{suggestion}</span>
+                  {index === selectedSuggestionIndex && (
+                    <span className="material-symbols-outlined text-blue-500 text-sm ml-2">arrow_forward</span>
+                  )}
                 </div>
               ))}
+              <div className="px-4 py-2 text-xs text-gray-500 bg-gray-50 border-t">
+                Use ↑↓ to navigate • Enter to select • Esc to close
+              </div>
             </div>
           )}
         </div>
@@ -312,28 +380,55 @@ const Navbar = () => {
                   placeholder='Search for Products, Brands and More'
                   className='outline-none bg-transparent w-full text-gray-700 text-sm'
                   value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
+                  onChange={(e) => {
+                    setInputValue(e.target.value);
+                    setSelectedSuggestionIndex(-1);
+                  }}
                   onFocus={() => inputValue.length > 1 && setShowSuggestions(true)}
+                  onKeyDown={handleKeyDown}
+                  autoComplete="off"
                 />
+                {inputValue && !isSearching && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="ml-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-sm">close</span>
+                  </button>
+                )}
                 {isSearching && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 ml-2"></div>
                 )}
               </div>
             </form>
 
             {/* Mobile Search Suggestions */}
             {showSuggestions && searchSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1">
+              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1 max-h-80 overflow-y-auto">
                 {searchSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center border-b border-gray-100 last:border-b-0"
+                    className={`px-4 py-3 cursor-pointer flex items-center border-b border-gray-100 last:border-b-0 transition-colors ${
+                      index === selectedSuggestionIndex 
+                        ? 'bg-blue-50 text-blue-700' 
+                        : 'hover:bg-gray-50 text-gray-700'
+                    }`}
                     onClick={() => handleSuggestionClick(suggestion)}
+                    onMouseEnter={() => setSelectedSuggestionIndex(index)}
                   >
-                    <span className="material-symbols-outlined text-gray-400 mr-3 text-sm">search</span>
-                    <span className="text-gray-700 text-sm">{suggestion}</span>
+                    <span className={`material-symbols-outlined mr-3 text-sm ${
+                      index === selectedSuggestionIndex ? 'text-blue-500' : 'text-gray-400'
+                    }`}>search</span>
+                    <span className="text-sm flex-1">{suggestion}</span>
+                    {index === selectedSuggestionIndex && (
+                      <span className="material-symbols-outlined text-blue-500 text-sm ml-2">arrow_forward</span>
+                    )}
                   </div>
                 ))}
+                <div className="px-4 py-2 text-xs text-gray-500 bg-gray-50 border-t">
+                  Tap to select • Use keyboard for navigation
+                </div>
               </div>
             )}
           </div>

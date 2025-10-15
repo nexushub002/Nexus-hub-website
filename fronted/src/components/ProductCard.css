@@ -2,7 +2,7 @@
 
 .product-card-container {
   width: 100%;
-  max-width: 280px;
+  max-width: 260px;
   margin: 0 auto;
 }
 
@@ -14,7 +14,7 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  height: 420px;
+  height: 480px;
   display: flex;
   flex-direction: column;
 }
@@ -24,9 +24,10 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
+/* Hover overlay disabled for better UX */
 .product-card.hovered .hover-overlay {
-  opacity: 1;
-  visibility: visible;
+  opacity: 0;
+  visibility: hidden;
 }
 
 /* Message Toast */
@@ -60,16 +61,20 @@
 .product-image-container {
   position: relative;
   width: 100%;
-  height: 200px;
+  height: 280px;
   overflow: hidden;
   background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .product-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.3s ease;
+  padding: 8px;
 }
 
 .product-card:hover .product-image {
@@ -160,7 +165,7 @@
   color: #059669;
 }
 
-/* Hover Overlay */
+/* Hover Overlay - Disabled for better UX */
 .hover-overlay {
   position: absolute;
   bottom: 0;
@@ -172,6 +177,7 @@
   visibility: hidden;
   transition: all 0.3s ease;
   z-index: 3;
+  display: none; /* Completely hide hover overlay */
 }
 
 .add-to-cart-btn {
@@ -387,15 +393,15 @@
 /* Tablet */
 @media (max-width: 1024px) {
   .product-card-container {
-    max-width: 260px;
+    max-width: 240px;
   }
   
   .product-card {
-    height: 400px;
+    height: 450px;
   }
   
   .product-image-container {
-    height: 180px;
+    height: 250px;
   }
   
   .product-name {
@@ -416,7 +422,7 @@
   }
   
   .product-card {
-    height: 320px;
+    height: 380px;
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     margin-bottom: 8px;
@@ -428,7 +434,11 @@
   }
   
   .product-image-container {
-    height: 140px;
+    height: 200px;
+  }
+  
+  .product-image {
+    padding: 6px;
   }
   
   .product-details {
@@ -522,11 +532,15 @@
 /* Small Mobile */
 @media (max-width: 480px) {
   .product-card {
-    height: 360px;
+    height: 400px;
   }
   
   .product-image-container {
-    height: 140px;
+    height: 220px;
+  }
+  
+  .product-image {
+    padding: 4px;
   }
   
   .product-details {
@@ -551,16 +565,16 @@
 /* Grid Layout Helpers */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
-  padding: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  padding: 16px;
 }
 
 @media (max-width: 1024px) {
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 10px;
-    padding: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+    padding: 12px;
   }
 }
 

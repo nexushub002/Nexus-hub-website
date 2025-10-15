@@ -61,6 +61,18 @@ router.post("/seller-register", async (req, res) => {
       });
     }
 
+    // Check if seller already exists
+    const existingSeller = await Seller.findOne({ 
+      $or: [{ email }, { phone }] 
+    });
+
+    if (existingSeller) {
+      return res.status(400).json({
+        success: false,
+        message: "Seller with this email or phone already exists"
+      });
+    }
+
     // Hash password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -114,7 +126,7 @@ router.post("/seller-register", async (req, res) => {
         phone: contactPerson.phone.trim(),
         email: contactPerson.email.trim()
       },
-      gstNumber: gstNumber.trim(),
+      gstNumber: gstin ? gstin.trim() : "",
       cin: cin ? cin.trim() : undefined,
       pan: pan ? pan.trim() : undefined,
       aboutCompany: aboutCompany ? aboutCompany.trim() : undefined,
