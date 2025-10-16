@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useSeller } from '../context/SellerContext'
 
-const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole }) => {
+const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole, isMobileMenuOpen, onMobileMenuToggle }) => {
   const [active, setActive] = useState('Dashboard (Overview)')
   const { seller } = useSeller()
   const navigate = useNavigate()
@@ -27,6 +27,10 @@ const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole }) => {
   const handleMenuClick = (item) => {
     setActive(item.label)
     navigate(item.path)
+    // Close mobile menu after navigation
+    if (onMobileMenuToggle) {
+      onMobileMenuToggle(false)
+    }
   }
 
   // helpers for letter avatar
@@ -46,7 +50,24 @@ const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole }) => {
   const bgColor = stringToColor(displayName)
 
   return (
-    <div className={`h-screen sticky top-0 w-64 px-4 py-6 ${isDarkMode ? 'bg-[#0f172a] text-white' : 'bg-white text-[#0f172a]'} border-r`}> 
+    <>
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => onMobileMenuToggle(false)}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <div className={`
+        h-screen sticky top-0 w-64 px-4 py-6 
+        ${isDarkMode ? 'bg-[#0f172a] text-white' : 'bg-white text-[#0f172a]'} 
+        border-r transition-transform duration-300 ease-in-out z-50
+        lg:translate-x-0 lg:static lg:block
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        fixed lg:relative
+      `}> 
       <div className="flex items-center gap-2 px-2 mb-6">
         <div
           className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white"
@@ -92,9 +113,10 @@ const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole }) => {
 
       <div className="mt-6 px-2">
         <div className="text-sm font-semibold mb-2">Switch Role</div>
-        <button onClick={onSwitchRole} className="w-full text-center px-3 py-2 rounded-lg bg-blue-600 text-white hover:opacity-90">Switch to Buyer</button>
+        <button onClick={onSwitchRole} className="w-full text-center px-3 py-2 rounded-lg bg-blue-600 text-white hover:opacity-90 transition-opacity">Switch to Buyer</button>
       </div>
     </div>
+    </>
   )
 }
 

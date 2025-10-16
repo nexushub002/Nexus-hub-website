@@ -4,6 +4,8 @@ import Sidebar from '../compo/Sidebar'
 import { useSeller } from '../context/SellerContext'
 import { useSellerTracking } from '../hooks/useSellerTracking'
 import InquiryManagement from '../components/InquiryManagement'
+import MobileNav from '../components/MobileNav'
+import './Sellerdashboard.css'
 
 // Helpers: generate deterministic color and initial for avatar
 const getInitial = (nameOrEmail) => {
@@ -26,6 +28,7 @@ const Sellerdashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [products, setProducts] = useState([])
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [dashboardStats, setDashboardStats] = useState({
     totalProducts: 0,
     activeProducts: 0,
@@ -99,18 +102,49 @@ const Sellerdashboard = () => {
     )
   }
 
+  // Add viewport meta tag for mobile optimization
+  useEffect(() => {
+    const viewport = document.querySelector('meta[name="viewport"]')
+    if (!viewport) {
+      const meta = document.createElement('meta')
+      meta.name = 'viewport'
+      meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
+      document.getElementsByTagName('head')[0].appendChild(meta)
+    }
+  }, [])
+
   return (
-    <div className={`${isDarkMode ? 'bg-[#eef1f7]/0 text-white' : 'bg-[#f5f7fb] text-[#0f172a]'} min-h-screen`}> 
+    <div className={`${isDarkMode ? 'bg-[#eef1f7]/0 text-white' : 'bg-[#f5f7fb] text-[#0f172a]'} min-h-screen mobile-dashboard-container`}> 
       <div className='flex'>
         <Sidebar
           isDarkMode={isDarkMode}
           onToggleTheme={handleToggleTheme}
           onSwitchRole={handleSwitchRole}
+          isMobileMenuOpen={isMobileMenuOpen}
+          onMobileMenuToggle={setIsMobileMenuOpen}
         />
 
-        <main className='flex-1 p-6'>
-          {/* Top bar */}
-          <div className='flex items-center justify-between mb-6'>
+        <main className='flex-1 p-3 sm:p-4 lg:p-6 lg:ml-0 pb-20 lg:pb-6 transition-all duration-300'>
+          {/* Mobile Header with Hamburger */}
+          <div className='lg:hidden flex items-center justify-between mb-4 p-3 bg-white rounded-lg shadow-sm mobile-touch-target fade-in'>
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className='p-2 rounded-lg hover:bg-gray-100 transition-colors mobile-touch-target'
+              aria-label='Open menu'
+              role='button'
+            >
+              <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 6h16M4 12h16M4 18h16' />
+              </svg>
+            </button>
+            <div className='font-semibold text-lg'>Dashboard</div>
+            <button onClick={handleSwitchRole} className='text-sm bg-blue-600 text-white px-3 py-2 rounded-lg mobile-touch-target transition-all hover:bg-blue-700 active:scale-95'>
+              Switch
+            </button>
+          </div>
+
+          {/* Desktop Top bar */}
+          <div className='hidden lg:flex items-center justify-between mb-6'>
             <div className='space-y-1'>
               <div className='text-2xl font-semibold'>
                 Welcome back, {seller?.name || 'Seller'}! 👋
@@ -125,12 +159,12 @@ const Sellerdashboard = () => {
               </div>
             </div>
             <div className='flex items-center gap-3'>
-              <div className={`hidden md:block ${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl px-3 py-2`}>🔔</div>
-              <div className={`hidden md:flex items-center gap-2 ${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl px-3 py-2`}>
+              <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl px-3 py-2`}>🔔</div>
+              <div className={`flex items-center gap-2 ${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl px-3 py-2`}>
                 <span className='opacity-70'>Search</span>
                 <input className={`outline-none bg-transparent w-40`} placeholder='Search' />
               </div>
-              <button onClick={handleSwitchRole} className='hidden md:flex items-center gap-2 bg-white rounded-full px-3 py-1 shadow text-sm'>
+              <button onClick={handleSwitchRole} className='flex items-center gap-2 bg-white rounded-full px-3 py-1 shadow text-sm'>
                 <span>Switch to Buyer</span>
                 <span className='relative inline-flex w-8 h-4 rounded-full bg-blue-500/30'>
                   <span className='absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-blue-600'></span>
@@ -140,7 +174,7 @@ const Sellerdashboard = () => {
           </div>
 
           {/* Navigation Tabs */}
-          <div className='flex items-center space-x-1 mb-6'>
+          <div className='flex items-center space-x-1 mb-4 lg:mb-6 overflow-x-auto pb-2 mobile-nav-tabs scroll-smooth'>
             {[
               { id: 'dashboard', label: 'Dashboard', icon: '📊' },
               { id: 'inquiries', label: 'Inquiries', icon: '📧' },
@@ -150,37 +184,37 @@ const Sellerdashboard = () => {
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                className={`flex items-center space-x-2 px-3 lg:px-4 py-2 rounded-lg transition-all duration-200 whitespace-nowrap mobile-touch-target ${
                   activeTab === tab.id
-                    ? isDarkMode ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700'
-                    : isDarkMode ? 'text-white/70 hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'
+                    ? isDarkMode ? 'bg-white/20 text-white shadow-md' : 'bg-blue-100 text-blue-700 shadow-md'
+                    : isDarkMode ? 'text-white/70 hover:bg-white/10 hover:scale-105' : 'text-gray-600 hover:bg-gray-100 hover:scale-105'
                 }`}
               >
                 <span>{tab.icon}</span>
-                <span className="font-medium">{tab.label}</span>
+                <span className="font-medium text-sm lg:text-base">{tab.label}</span>
               </button>
             ))}
           </div>
 
           {/* Content Area */}
           {activeTab === 'dashboard' && (
-            <div className='grid grid-cols-1 xl:grid-cols-3 gap-6'>
+            <div className='grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6'>
               {/* Main center column spans 2 */}
-              <div className='xl:col-span-2'>
+              <div className='xl:col-span-2 space-y-4 lg:space-y-6'>
                 {/* KPI cards */}
-                <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-6'>
+                <div className='grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4'>
                   {[
                     { label: 'Total Products', value: dashboardStats.totalProducts, change: '+12%', icon: '📦' },
                     { label: 'Active Products', value: dashboardStats.activeProducts, change: '+8%', icon: '✅' },
                     { label: 'Total Orders', value: dashboardStats.totalOrders, change: '+15%', icon: '🛒' },
                     { label: 'Revenue', value: `₹${dashboardStats.totalRevenue.toLocaleString()}`, change: '+23%', icon: '💰' }
                   ].map((k) => (
-                    <div key={k.label} className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-4 shadow-sm`}>
+                    <div key={k.label} className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl lg:rounded-2xl p-3 lg:p-4 shadow-sm mobile-card hover:shadow-md transition-all duration-200 hover:scale-105`}>
                       <div className='flex items-center justify-between mb-2'>
-                        <div className='text-sm opacity-70'>{k.label}</div>
-                        <span className='text-xl'>{k.icon}</span>
+                        <div className='text-xs lg:text-sm opacity-70'>{k.label}</div>
+                        <span className='text-lg lg:text-xl'>{k.icon}</span>
                       </div>
-                      <div className='text-2xl font-semibold'>{k.value}</div>
+                      <div className='text-lg lg:text-2xl font-semibold'>{k.value}</div>
                       <div className={`text-xs mt-1 ${k.change.startsWith('-') ? 'text-red-500' : 'text-green-600'}`}>{k.change}</div>
                       <div className='mt-3 h-2 w-full rounded-md bg-gradient-to-r from-blue-100 to-transparent opacity-70'></div>
                     </div>
@@ -188,7 +222,7 @@ const Sellerdashboard = () => {
                 </div>
 
                 {/* Recent Products Preview */}
-                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm mb-6`}>
+                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl lg:rounded-2xl p-4 lg:p-5 shadow-sm`}>
                   <div className='flex items-center justify-between mb-4'>
                     <div className='font-semibold'>Recent Products</div>
                     <button 
@@ -234,33 +268,33 @@ const Sellerdashboard = () => {
                 </div>
 
                 {/* Quick Actions */}
-                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm`}>
+                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl lg:rounded-2xl p-4 lg:p-5 shadow-sm`}>
                   <div className='font-semibold mb-4'>Quick Actions</div>
-                  <div className='grid grid-cols-2 gap-3'>
+                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
                     <button 
                       onClick={() => { window.location.href = 'http://localhost:5174/seller/add-product' }}
-                      className='flex items-center space-x-2 p-3 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors'
+                      className='flex items-center justify-center space-x-2 p-3 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors'
                     >
                       <span>➕</span>
                       <span className='text-sm font-medium'>Add Product</span>
                     </button>
                     <button 
                       onClick={() => navigate('/seller/my-orders')}
-                      className='flex items-center space-x-2 p-3 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors'
+                      className='flex items-center justify-center space-x-2 p-3 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors'
                     >
                       <span>📋</span>
                       <span className='text-sm font-medium'>View Orders</span>
                     </button>
                     <button 
                       onClick={() => handleTabChange('inquiries')}
-                      className='flex items-center space-x-2 p-3 rounded-lg bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors'
+                      className='flex items-center justify-center space-x-2 p-3 rounded-lg bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors'
                     >
                       <span>📧</span>
                       <span className='text-sm font-medium'>View Inquiries</span>
                     </button>
                     <button 
                       onClick={() => handleTabChange('analytics')}
-                      className='flex items-center space-x-2 p-3 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors'
+                      className='flex items-center justify-center space-x-2 p-3 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors'
                     >
                       <span>📊</span>
                       <span className='text-sm font-medium'>Analytics</span>
@@ -270,8 +304,8 @@ const Sellerdashboard = () => {
               </div>
 
               {/* Right sidebar panel */}
-              <div className='space-y-6'>
-                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm`}>
+              <div className='space-y-4 lg:space-y-6'>
+                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl lg:rounded-2xl p-4 lg:p-5 shadow-sm`}>
                   <div className='flex items-center gap-3 mb-4'>
                     <div className='relative cursor-pointer' onClick={() => navigate('/seller/profile')}>
                       <div
@@ -330,7 +364,7 @@ const Sellerdashboard = () => {
                   </div>
                 </div>
 
-                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm`}>
+                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl lg:rounded-2xl p-4 lg:p-5 shadow-sm`}>
                   <div className='font-semibold mb-2'>Seller Tips</div>
                   <div className='text-sm opacity-70 mb-3'>Boost your sales with these tips</div>
                   <div className='space-y-2 text-xs'>
@@ -349,7 +383,7 @@ const Sellerdashboard = () => {
                   </div>
                 </div>
 
-                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-5 shadow-sm`}>
+                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl lg:rounded-2xl p-4 lg:p-5 shadow-sm`}>
                   <div className='font-semibold mb-3'>Recent Activity</div>
                   <div className='space-y-3 text-sm'>
                     <div className='flex items-center gap-3'>
@@ -551,6 +585,13 @@ const Sellerdashboard = () => {
           )}
         </main>
       </div>
+      
+      {/* Mobile Bottom Navigation */}
+      <MobileNav 
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        isDarkMode={isDarkMode}
+      />
     </div>
   )
 }

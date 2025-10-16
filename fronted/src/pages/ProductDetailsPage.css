@@ -8,6 +8,21 @@
   background-color: #fff;
 }
 
+/* Desktop Layout: images left, details right */
+@media (min-width: 769px) {
+  .product-details-container {
+    flex-direction: row;
+  }
+  
+  .image-section {
+    order: 1;
+  }
+  
+  .info-section {
+    order: 2;
+  }
+}
+
 /* Loading and Error States */
 .loading-container {
   display: flex;
@@ -128,6 +143,22 @@
 .image-gallery-container {
   display: flex;
   gap: 20px;
+}
+
+/* Desktop Layout: thumbnails left, main image right */
+@media (min-width: 769px) {
+  .image-gallery-container {
+    flex-direction: row;
+  }
+  
+  .thumbnails {
+    order: 1;
+    flex-direction: column;
+  }
+  
+  .main-image-wrapper {
+    order: 2;
+  }
 }
 
 .thumbnails {
@@ -633,51 +664,47 @@
 }
 
 /* Responsive Design */
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (min-width: 769px) {
   .product-details-container {
-    flex-direction: column;
+    flex-direction: row;
     gap: 32px;
   }
 
   .image-section {
     max-width: none;
-    flex-direction: column;
-    gap: 20px;
     padding: 20px;
-  }
-
-  .main-image-wrapper {
     order: 1;
   }
 
-  .thumbnails {
+  .info-section {
+    max-width: none;
     order: 2;
+  }
+
+  /* Tablet Layout: keep desktop style (thumbnails left, main image right) */
+  .image-gallery-container {
     flex-direction: row;
-    max-height: none;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding-right: 0;
-    padding-bottom: 8px;
+    gap: 20px;
+  }
+
+  .thumbnails {
+    order: 1;
+    flex-direction: column;
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 8px;
+    padding-bottom: 0;
     gap: 12px;
+  }
+
+  .main-image-wrapper {
+    order: 2;
   }
 
   .thumbnails::-webkit-scrollbar {
     height: 6px;
     width: auto;
-  }
-
-  .thumb {
-    width: 70px;
-    height: 70px;
-    flex-shrink: 0;
-  }
-
-  .main-image {
-    height: 400px;
-  }
-
-  .info-section {
-    max-width: none;
   }
 }
 @media (max-width: 768px) {
@@ -685,9 +712,12 @@
     padding: 16px;
     gap: 24px;
     margin-bottom: 80px; /* Space for mobile bottom nav */
+    flex-direction: column;
   }
 
+  /* Mobile Layout: images above, details below */
   .image-section {
+    order: 1;
     flex-direction: column;
     gap: 16px;
     padding: 16px;
@@ -695,10 +725,20 @@
     border-radius: 16px;
   }
 
+  .info-section {
+    order: 2;
+  }
+
+  /* Mobile Layout: main image above, thumbnails below */
+  .image-gallery-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+
   .main-image-wrapper {
     order: 1;
     border-radius: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 0;
   }
 
   .thumbnails {

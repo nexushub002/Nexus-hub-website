@@ -6,11 +6,12 @@ import CategoryListImproved from '../components/CategoryListImproved'
 import CategoryList1 from '../components/CategoryList1'
 import FeaturedSectionsImproved from '../components/FeaturedSectionsImproved'
 import TopDealsImproved from '../components/TopDealsImproved'
+import Footer from '../components/Footer'
 import '../components/FeaturedSections.css'
 
 const Homepage = () => {
   return (
-    <div className="w-full overflow-x-hidden pb-16 md:pb-0">
+    <div className="w-full overflow-x-hidden">
       <Navbar/>
       <CategoryList1/>
       <SlideBar/>
@@ -18,6 +19,7 @@ const Homepage = () => {
       <FeaturedSectionsImproved/>
       <TopDealsImproved/>
       <ProductList/>
+      <Footer/>
     </div>
   )
 }
