@@ -23,6 +23,13 @@ logs
 .DS_Store
 Thumbs.db
 
+
 # Backend Dependencies & Secrets
 /backend/node_modules
 /backend/.env
+
+# Frontend Dependencies & Secrets
+/fronted/.env.local
+
+# Seller Frontend Dependencies & Secrets
+/seller-fronted/.env.local
