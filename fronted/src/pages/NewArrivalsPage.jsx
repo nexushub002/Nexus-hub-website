@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import ProductCard from '../components/ProductCard';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
