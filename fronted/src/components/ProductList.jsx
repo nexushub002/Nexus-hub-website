@@ -11,7 +11,10 @@ const ProductList = () => {
   useEffect(() => {
     // Fetch data from backend API
     setLoading(true);
-    fetch("http://localhost:3000/api/showAllProducts")
+
+    const url = `${import.meta.env.VITE_API_BASE_URL}/api/showAllProducts`;
+
+    fetch(url)
       .then((res) => {
         if (!res.ok) {
           throw new Error('Failed to fetch products');

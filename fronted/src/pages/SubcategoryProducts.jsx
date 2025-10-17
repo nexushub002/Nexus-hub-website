@@ -17,8 +17,10 @@ const SubcategoryProducts = () => {
       setLoading(true);
       setError('');
       try {
-        const endpoint = `http://localhost:3000/api/products/by-keys?categoryKey=${categoryKey}&subcategoryKey=${subcategoryKey}&page=${page}&limit=24`;
-        const res = await fetch(endpoint);
+
+        const url = `${import.meta.env.VITE_API_BASE_URL}/api/products/by-keys?categoryKey=${categoryKey}&subcategoryKey=${subcategoryKey}&page=${page}&limit=24`;
+        
+        const res = await fetch(url);
         const data = await res.json();
         if (!res.ok || data.success === false) {
           throw new Error(data.message || 'Failed to fetch');

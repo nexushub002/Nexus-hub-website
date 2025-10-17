@@ -9,6 +9,9 @@ export default function UserProvider({ children }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+
+        const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart/remove/${productId}?userId=${userId}`;
+        
         const res = await fetch("http://localhost:3000/api/auth/me", {
           credentials: "include"
         });

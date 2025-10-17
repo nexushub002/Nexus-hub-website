@@ -13,7 +13,10 @@ const OrdersPage = () => {
       setLoading(true);
       setError('');
       try {
-        const res = await fetch('http://localhost:3000/api/orders/my', { credentials: 'include' });
+
+        const url = `${import.meta.env.VITE_API_BASE_URL}/api/orders/my`;
+
+        const res = await fetch(url, { credentials: 'include' });
         if (res.status === 401) {
           setError('Please login to view your orders.');
           setOrders([]);

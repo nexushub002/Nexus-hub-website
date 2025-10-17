@@ -12,7 +12,10 @@ export default function LoginModel({ onClose, onLoginSuccess }) {
   // Send OTP
   const sendOtp = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/auth/send-otp', {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/auth/send-otp`;
+
+      const res = await fetch(url , {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone }),
@@ -35,7 +38,10 @@ export default function LoginModel({ onClose, onLoginSuccess }) {
   const verifyOtp = async () => {
     try {
       console.log("🔔 Verifying OTP for phone:", phone, "otp:", otp);
-      const res = await fetch("http://localhost:3000/api/auth/verify-otp", {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/auth/verify-otp`;
+
+      const res = await fetch(url , {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, otp }),

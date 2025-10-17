@@ -56,7 +56,9 @@ const SendInquiryModal = ({ isOpen, onClose, product, sellerInfo }) => {
       
       console.log('Inquiry data being sent:', inquiryData);
 
-      const response = await fetch('http://localhost:3000/api/inquiries/send', {
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/inquiries/send`;
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

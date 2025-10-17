@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
-const API_BASE_URL = 'http://localhost:3000/api';
 
 // Normalized keys to match existing browse route
 const CATEGORY_KEY_MAP = {
@@ -83,7 +82,10 @@ function TopDealsPage() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE_URL}/showAllProducts`);
+
+        const url = `${import.meta.env.VITE_API_BASE_URL}/api/showAllProducts`;
+
+        const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch products');
         const data = await res.json();
         setProducts(Array.isArray(data) ? data : []);

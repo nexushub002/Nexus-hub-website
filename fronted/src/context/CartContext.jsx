@@ -17,8 +17,6 @@ export const CartProvider = ({ children }) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { user } = useContext(UserContext);
 
-  // API base URL
-  const API_BASE = 'http://localhost:3000/api/cart';
 
   // Helper function to get auth headers
   const getAuthHeaders = () => {
@@ -37,7 +35,10 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     try {
       const userId = user?._id || "60f7b3b3b3b3b3b3b3b3b3b3"; // Default test user ID
-      const response = await fetch(`${API_BASE}?userId=${userId}`, {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart?userId=${userId}`;
+
+      const response = await fetch(url, {
         method: 'GET',
         credentials: 'include',
         headers: getAuthHeaders()
@@ -61,8 +62,10 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     try {
       console.log('Adding to cart:', product._id, 'quantity:', quantity);
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart/add`;
       
-      const response = await fetch(`${API_BASE}/add`, {
+      const response = await fetch(url, {
         method: 'POST',
         credentials: 'include',
         headers: getAuthHeaders(),
@@ -127,7 +130,10 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     try {
       const userId = user?._id || "60f7b3b3b3b3b3b3b3b3b3b3";
-      const response = await fetch(`${API_BASE}/update/${productId}`, {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart/update/${productId}`;
+
+      const response = await fetch(url, {
         method: 'PUT',
         credentials: 'include',
         headers: getAuthHeaders(),
@@ -161,7 +167,10 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     try {
       const userId = user?._id || "60f7b3b3b3b3b3b3b3b3b3b3";
-      const response = await fetch(`${API_BASE}/remove/${productId}?userId=${userId}`, {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart/remove/${productId}?userId=${userId}`;
+
+      const response = await fetch(url, {
         method: 'DELETE',
         credentials: 'include',
         headers: getAuthHeaders()
@@ -187,7 +196,10 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     try {
       const userId = user?._id || "60f7b3b3b3b3b3b3b3b3b3b3";
-      const response = await fetch(`${API_BASE}/clear?userId=${userId}`, {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart/clear?userId=${userId}`;
+
+      const response = await fetch(url, {
         method: 'DELETE',
         credentials: 'include',
         headers: getAuthHeaders()

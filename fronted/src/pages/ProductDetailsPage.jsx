@@ -25,11 +25,17 @@ const ProductDetailsPage = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
+
+        const url1 = `${import.meta.env.VITE_API_BASE_URL}/api/products-new/public/${id}`;
+
         // Try new API first, fallback to old API
-        let res = await fetch(`http://localhost:3000/api/products-new/public/${id}`);
+        let res = await fetch(url1);
         if (!res.ok) {
           // Fallback to old API
-          res = await fetch(`http://localhost:3000/api/product/${id}`);
+
+          const url2 = `${import.meta.env.VITE_API_BASE_URL}/api/product/${id}`;
+
+          res = await fetch(url2);
         }
         if (!res.ok) {
           throw new Error('Product not found');

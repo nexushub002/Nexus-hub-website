@@ -15,7 +15,10 @@ const SearchResultPage = () => {
     if (query) {
       setLoading(true);
       setError(null);
-      fetch(`http://localhost:3000/api/search?q=${encodeURIComponent(query)}`)
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`;
+
+      fetch(url)
         .then((res) => {
           if (!res.ok) {
             throw new Error('Search failed');

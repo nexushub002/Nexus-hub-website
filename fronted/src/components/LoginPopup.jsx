@@ -47,7 +47,10 @@ const LoginPopup = ({ isOpen, onClose, onLoginSuccess }) => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/auth/send-otp', {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/auth/send-otp`;
+
+      const response = await fetch(url , {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,7 +106,10 @@ const LoginPopup = ({ isOpen, onClose, onLoginSuccess }) => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/auth/verify-otp', {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/auth/verify-otp`;
+
+      const response = await fetch(url , {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +141,10 @@ const LoginPopup = ({ isOpen, onClose, onLoginSuccess }) => {
     
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/auth/send-otp', {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/auth/send-otp`;
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -8,7 +8,6 @@ import Navbar from '../components/Navbar';
 // - Each subcategory section shows top 3 products (by createdAt desc)
 // - Clicking subcategory title navigates to /browse/:categoryKey/:subcategoryKey
 
-const API_BASE_URL = 'http://localhost:3000/api';
 
 // Normalized keys to match existing browse route
 const CATEGORY_KEY_MAP = {
@@ -82,7 +81,10 @@ function TopRankingPage() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE_URL}/showAllProducts`);
+
+        const url = `${import.meta.env.VITE_API_BASE_URL}/api/showAllProducts`;
+
+        const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch products');
         const data = await res.json();
         setProducts(Array.isArray(data) ? data : []);

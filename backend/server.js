@@ -42,7 +42,7 @@
 
   // Enable CORS
   app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176"], // frontend + seller frontend
+    origin: ["http://localhost:5173", "http://localhost:5174", "https://nexus-hub-fronted.vercel.app/", "http://localhost:5176"], // frontend + seller frontend
     credentials: true
   }));
 

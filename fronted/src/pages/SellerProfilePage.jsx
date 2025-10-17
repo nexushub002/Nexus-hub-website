@@ -23,7 +23,10 @@ const SellerProfilePage = () => {
   const fetchSellerProfile = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3000/api/seller-profile/public/${sellerId}`);
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/public/${sellerId}`;
+
+      const response = await fetch(url);
       const data = await response.json();
       
       if (data.success) {
@@ -41,7 +44,10 @@ const SellerProfilePage = () => {
 
   const fetchSellerProducts = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/seller-profile/products/${sellerId}?page=${productsPage}&limit=12`);
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/products/${sellerId}?page=${productsPage}&limit=12`;
+
+      const response = await fetch(url);
       const data = await response.json();
       
       if (data.success) {

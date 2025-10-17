@@ -39,6 +39,9 @@ const Navbar = () => {
       if (query && query.length > 1) {
         setIsSearching(true);
         try {
+
+            const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart/showAllProducts`;
+
           const response = await fetch(`http://localhost:3000/api/search?q=${encodeURIComponent(query)}&limit=5`);
           const products = await response.json();
           
@@ -152,7 +155,10 @@ const Navbar = () => {
 
 
   const handleLogout = async () => {
-    await fetch("http://localhost:3000/api/auth/logout", {
+
+    const url = `${import.meta.env.VITE_API_BASE_URL}/api/auth/logout`;
+
+    await fetch(url, {
       method: "POST",
       credentials: "include",
     });

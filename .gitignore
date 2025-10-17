@@ -1,0 +1,28 @@
+# Dependencies
+/node_modules
+/fronted/node_modules
+/seller-fronted/node_modules
+
+# Environment Variables - VERY IMPORTANT FOR SECURITY
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Build output
+/dist
+/fronted/dist
+/seller-fronted/dist
+
+# Logs
+logs
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Backend Dependencies & Secrets
+/backend/node_modules
+/backend/.env

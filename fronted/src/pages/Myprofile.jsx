@@ -20,7 +20,11 @@ const Myprofile = () => {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/auth/logout", { method: "POST", credentials: "include" });
+  
+      // Combine the base URL from your .env file with the specific endpoint
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/auth/logout`;
+
+      const res = await fetch(url, { method: "POST", credentials: "include" });
       if (res.ok) { setUser(null); window.location.href = "/"; }
     } catch (err) { console.error("Logout error:", err); }
   };

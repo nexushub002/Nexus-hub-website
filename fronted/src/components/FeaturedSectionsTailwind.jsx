@@ -13,16 +13,17 @@ const FeaturedSectionsTailwind = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
 
-  // API endpoints
-  const API_BASE_URL = 'http://localhost:3000/api';
+  
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+
+        const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart/showAllProducts`;
         
         // Fetch all products from your API
-        const response = await fetch(`${API_BASE_URL}/showAllProducts`);
+        const response = await fetch(url);
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }

@@ -36,7 +36,10 @@ export const WishlistProvider = ({ children }) => {
     setLoading(true);
     try {
       const userId = user?._id || "60f7b3b3b3b3b3b3b3b3b3b3"; // Default test user ID
-      const response = await fetch(`${API_BASE}?userId=${userId}`, {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/wishlist?userId=${userId}`;
+
+      const response = await fetch(url , {
         method: 'GET',
         credentials: 'include',
         headers: getAuthHeaders()
@@ -112,7 +115,10 @@ export const WishlistProvider = ({ children }) => {
     setLoading(true);
     try {
       const userId = user?._id || "60f7b3b3b3b3b3b3b3b3b3b3"; // Default test user ID
-      const response = await fetch(`${API_BASE}/remove/${productId}?userId=${userId}`, {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/wishlist/remove/${productId}?userId=${userId}`;
+
+      const response = await fetch(url, {
         method: 'DELETE',
         credentials: 'include',
         headers: getAuthHeaders()

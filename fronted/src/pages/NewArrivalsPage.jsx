@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 
-const API_BASE_URL = 'http://localhost:3000/api';
-
 // Normalized keys to match existing browse route
 const CATEGORY_KEY_MAP = {
   'Apparel & Accessories': 'Apparel_Accessories',
@@ -73,22 +71,65 @@ function NewArrivalsPage() {
   const catMenuRef = useRef(null);
   const [catMenuOpen, setCatMenuOpen] = useState(false);
 
+  // useEffect(() => {
+  //   const fetchProducts = async () => {
+  //     try {
+  //       setLoading(true);
+
+  //       const url = `${import.meta.env.VITE_API_BASE_URL}/api/showAllProducts`;
+
+  //       const res = await fetch(url);
+  //       if (!res.ok) throw new Error('Failed to fetch products');
+  //       const data = await res.json();
+  //       setProducts(Array.isArray(data) ? data : []);
+  //     } catch (e) {
+  //       setError(e.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchProducts();
+  // }, []);
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(`${API_BASE_URL}/showAllProducts`);
-        if (!res.ok) throw new Error('Failed to fetch products');
-        const data = await res.json();
-        setProducts(Array.isArray(data) ? data : []);
-      } catch (e) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
+  // 1. Create a controller to manage the fetch request
+  const controller = new AbortController();
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null); // Reset error state on new fetch
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/showAllProducts`;
+
+      // 2. Pass the controller's signal to the fetch request
+      const res = await fetch(url, { signal: controller.signal });
+      
+      if (!res.ok) {
+        throw new Error('Failed to fetch products from the server');
       }
-    };
-    fetchProducts();
-  }, []);
+      
+      const data = await res.json();
+      setProducts(Array.isArray(data) ? data : []);
+
+    } catch (e) {
+      // Don't set an error if the fetch was aborted by our code
+      if (e.name !== 'AbortError') {
+        setError(e.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProducts();
+
+  // 3. Return a cleanup function
+  // This runs when the component unmounts
+  return () => {
+    controller.abort(); // Cancel the fetch request
+  };
+}, []); // Empty dependency array means this runs once on mount
 
   // Group by category -> subcategory and pick top 3 by newest (createdAt desc)
   const grouped = useMemo(() => {
