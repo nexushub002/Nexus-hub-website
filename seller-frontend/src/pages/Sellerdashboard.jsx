@@ -52,14 +52,20 @@ const Sellerdashboard = () => {
 
   const handleSwitchRole = () => {
     trackDashboardActivity('switch_role', { target: 'buyer' })
-    window.location.href = 'http://localhost:5173/'
+
+    const url = `${import.meta.env.FRONTED_URL}`;
+
+    window.location.href = url
   }
 
   const fetchDashboardData = async () => {
     if (!seller) return
     
     try {
-      const response = await fetch('http://localhost:3000/api/seller/products/dashboard-stats', {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/products/dashboard-stats`;
+
+      const response = await fetch(url , {
         method: 'GET',
         credentials: 'include',
         headers: {

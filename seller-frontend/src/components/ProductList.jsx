@@ -18,7 +18,10 @@ const ProductList = ({ isDarkMode = false, onEditProduct }) => {
     
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3000/api/seller/products?sellerId=${seller._id || seller.id}`, {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/products?sellerId=${seller._id || seller.id}`;
+
+      const response = await fetch(url , {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -47,7 +50,10 @@ const ProductList = ({ isDarkMode = false, onEditProduct }) => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/api/seller/products/${productId}`, {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/products/${productId}`;
+
+      const response = await fetch(url , {
         method: 'DELETE',
         credentials: 'include',
         headers: {
@@ -71,7 +77,10 @@ const ProductList = ({ isDarkMode = false, onEditProduct }) => {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
     
     try {
-      const response = await fetch(`http://localhost:3000/api/seller/products/${productId}`, {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/products/${productId}`;
+
+      const response = await fetch(url , {
         method: 'PATCH',
         credentials: 'include',
         headers: {

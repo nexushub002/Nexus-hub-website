@@ -49,7 +49,10 @@ const SellerProfile = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/seller/auth/me', { credentials: 'include' });
+
+        const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/auth/me`;
+
+        const res = await fetch(url , { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
           const u = data.user || {};
@@ -101,7 +104,10 @@ const SellerProfile = () => {
     if (!validate()) return;
     setSaving(true);
     try {
-      const res = await fetch('http://localhost:3000/api/seller/auth/profile', {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/auth/profile`;
+
+      const res = await fetch(url , {
         method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
       });
       const data = await res.json();

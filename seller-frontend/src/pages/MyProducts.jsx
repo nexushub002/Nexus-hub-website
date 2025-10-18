@@ -23,7 +23,10 @@ const MyProducts = () => {
   const fetchMyProducts = async () => {
     try {
       // Use the new API endpoint with proxy
-      const response = await fetch('/api/products-new/my-products', {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/products-new/my-products`;
+
+      const response = await fetch(url , {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -58,7 +61,7 @@ const MyProducts = () => {
     e.preventDefault();
     
     try {
-      const url = `/api/products-new/update/${editingProduct._id}`;
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/products-new/update/${editingProduct._id}`;
       const method = 'PUT';
       
       const response = await fetch(url, {
@@ -102,7 +105,10 @@ const MyProducts = () => {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      const response = await fetch(`/api/products-new/delete/${productId}`, {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/products-new/delete/${productId}`;
+
+      const response = await fetch(url , {
         method: 'DELETE',
         credentials: 'include',
       });

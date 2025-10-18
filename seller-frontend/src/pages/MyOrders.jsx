@@ -14,7 +14,10 @@ const MyOrders = () => {
 
   const fetchMyOrders = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/seller/orders/my-orders', {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/orders/my-orders`;
+
+      const response = await fetch(url , {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -37,7 +40,10 @@ const MyOrders = () => {
 
   const updateOrderStatus = async (orderId, itemId, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/seller/orders/update-status/${orderId}`, {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/orders/update-status/${orderId}`;
+
+      const response = await fetch(url , {
         method: 'PUT',
         credentials: 'include',
         headers: {

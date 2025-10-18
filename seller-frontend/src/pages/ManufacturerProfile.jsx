@@ -28,7 +28,10 @@ const ManufacturerProfile = () => {
 
   const fetchManufacturerProfile = async () => {
     try {
-      const response = await fetch('/api/seller-profile/profile', {
+      
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/profile`;
+
+      const response = await fetch(url , {
         credentials: 'include'
       });
       const data = await response.json();
@@ -71,7 +74,10 @@ const ManufacturerProfile = () => {
 
   const handleSaveProfile = async () => {
     try {
-      const response = await fetch('/api/seller-profile/profile', {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/profile`;
+
+      const response = await fetch(url, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -101,8 +107,10 @@ const ManufacturerProfile = () => {
       Array.from(files).forEach(file => {
         formData.append('documents', file);
       });
+      
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/upload/documents`;
 
-      const uploadResponse = await fetch('/api/upload/documents', {
+      const uploadResponse = await fetch(url , {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -111,7 +119,10 @@ const ManufacturerProfile = () => {
       const uploadData = await uploadResponse.json();
       if (uploadData.success) {
         // Add documents to manufacturer profile
-        const addResponse = await fetch('/api/seller-profile/documents', {
+
+        const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/documents`;
+
+        const addResponse = await fetch(url , {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -144,8 +155,10 @@ const ManufacturerProfile = () => {
       Array.from(files).forEach(file => {
         formData.append('certificates', file);
       });
+      
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/upload/certificates`;
 
-      const uploadResponse = await fetch('/api/upload/certificates', {
+      const uploadResponse = await fetch(url , {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -154,7 +167,10 @@ const ManufacturerProfile = () => {
       const uploadData = await uploadResponse.json();
       if (uploadData.success) {
         // Add certificates to manufacturer profile
-        const addResponse = await fetch('/api/seller-profile/certificates', {
+
+        const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/certificates`;
+
+        const addResponse = await fetch(url , {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -185,8 +201,10 @@ const ManufacturerProfile = () => {
     try {
       const formData = new FormData();
       formData.append('logo', file);
+      
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/upload/logo`;
 
-      const uploadResponse = await fetch('/api/upload/logo', {
+      const uploadResponse = await fetch(url , {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -195,7 +213,10 @@ const ManufacturerProfile = () => {
       const uploadData = await uploadResponse.json();
       if (uploadData.success) {
         // Update logo in manufacturer profile
-        const updateResponse = await fetch('/api/seller-profile/logo', {
+
+        const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/logo`;
+
+        const updateResponse = await fetch(url , {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -223,7 +244,10 @@ const ManufacturerProfile = () => {
 
   const deleteDocument = async (documentId) => {
     try {
-      const response = await fetch(`/api/seller-profile/documents/${documentId}`, {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/documents/${documentId}`;
+
+      const response = await fetch(url , {
         method: 'DELETE',
         credentials: 'include'
       });
@@ -244,7 +268,10 @@ const ManufacturerProfile = () => {
 
   const deleteCertificate = async (certificateId) => {
     try {
-      const response = await fetch(`/api/seller-profile/certificates/${certificateId}`, {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/certificates/${certificateId}`;
+
+      const response = await fetch(url , {
         method: 'DELETE',
         credentials: 'include'
       });

@@ -53,7 +53,9 @@ const activityTracker = {
     cookieUtils.set('seller_activities', updatedActivities, 30);
     
     // Also send to backend for persistent storage
-    fetch('/api/seller/activity/track', {
+    const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/activity/track`;
+
+    fetch(url , {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -161,7 +163,10 @@ export const SellerProvider = ({ children }) => {
       }
 
       // If no cookie, try API call
-      const response = await fetch('/api/seller/auth/me', {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/auth/me`;
+
+      const response = await fetch(url , {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -235,7 +240,10 @@ export const SellerProvider = ({ children }) => {
     };
 
     try {
-      const response = await fetch('/api/seller/auth/seller-login', {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/auth/seller-login`;
+
+      const response = await fetch(url , {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -331,8 +339,10 @@ export const SellerProvider = ({ children }) => {
           ...logoutData
         });
       }
+       
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/auth/seller-logout`;
 
-      await fetch('/api/seller/auth/seller-logout', {
+      await fetch(url , {
         method: 'POST',
         credentials: 'include', // Include cookies
         body: JSON.stringify({
@@ -387,7 +397,10 @@ export const SellerProvider = ({ children }) => {
     };
 
     try {
-      const response = await fetch('/api/seller/auth/seller-register', {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/auth/seller-register`;
+
+      const response = await fetch(url , {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

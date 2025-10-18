@@ -39,8 +39,9 @@ const InquiryManagement = () => {
         return;
       }
       
-      const response = await fetch(
-        `http://localhost:3000/api/inquiries/seller/${sellerId}?status=${selectedStatus}`,
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/inquiries/seller/${sellerId}?status=${selectedStatus}`;
+
+      const response = await fetch(url ,
         {
           credentials: 'include'
         }
@@ -70,8 +71,10 @@ const InquiryManagement = () => {
         return;
       }
       
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/inquiries/stats/${sellerId}`;
+
       const response = await fetch(
-        `http://localhost:3000/api/inquiries/stats/${sellerId}`,
+        url,
         {
           credentials: 'include'
         }
@@ -90,8 +93,11 @@ const InquiryManagement = () => {
     if (!replyMessage.trim()) return;
 
     try {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/inquiries/reply/${selectedInquiry._id}`;
+
       const response = await fetch(
-        `http://localhost:3000/api/inquiries/reply/${selectedInquiry._id}`,
+        url,
         {
           method: 'PUT',
           headers: {
@@ -125,8 +131,11 @@ const InquiryManagement = () => {
 
   const updateStatus = async (inquiryId, status) => {
     try {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/inquiries/status/${inquiryId}`;
+
       const response = await fetch(
-        `http://localhost:3000/api/inquiries/status/${inquiryId}`,
+        url ,
         {
           method: 'PUT',
           headers: {

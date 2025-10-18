@@ -125,7 +125,10 @@ const AddProduct = () => {
 
   const handleSwitchRole = () => {
     // Navigate to buyer app dev server
-    window.location.href = 'http://localhost:5173/'
+    
+    const fronted_url = `${import.meta.env.FRONTED_URL}`;
+
+    window.location.href = fronted_url
   }
 
   // Show loading state while checking authentication
@@ -180,7 +183,9 @@ const AddProduct = () => {
       const formData = new FormData()
       formData.append('images', file)
       
-      const response = await fetch('/api/upload/images', {
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/upload/images`;
+
+      const response = await fetch(url, {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -249,7 +254,9 @@ const AddProduct = () => {
 
       console.log('Product data being sent:', body) // Debug log
 
-      const res = await fetch('/api/products-new/create', {
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/products-new/create`;
+
+      const res = await fetch(url , {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // Include cookies for authentication
