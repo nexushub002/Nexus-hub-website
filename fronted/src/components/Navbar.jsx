@@ -462,7 +462,7 @@ const Navbar = () => {
 
         <div 
           className="flex flex-col items-center cursor-pointer p-2"
-          onClick={() => window.location.href = "http://localhost:5174"}
+          onClick={() => window.location.href = `${import.meta.env.VITE_SELLER_FRONTEND_URL}`}
         >
           <span className="material-symbols-outlined text-gray-600 text-xl mb-1">storefront</span>
           <span className="text-gray-600">Sell</span>
