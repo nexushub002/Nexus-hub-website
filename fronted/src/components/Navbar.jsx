@@ -349,7 +349,8 @@ const Navbar = () => {
           {/* Become a Seller */}
           <div 
             className="flex items-center cursor-pointer" 
-            onClick={() => window.location.href = "http://localhost:5174"}
+
+            onClick={() => window.location.href = `${import.meta.env.SELLER_FRONTEND_URL}`}
           >
             <span className="material-symbols-outlined mr-1">storefront</span>
             <span className="text-sm">Become a Seller</span>
