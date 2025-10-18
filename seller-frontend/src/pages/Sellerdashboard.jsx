@@ -53,7 +53,7 @@ const Sellerdashboard = () => {
   const handleSwitchRole = () => {
     trackDashboardActivity('switch_role', { target: 'buyer' })
 
-    const url = `${import.meta.env.FRONTED_URL}`;
+    const url = `${import.meta.env.VITE_FRONTED_URL}`;
 
     window.location.href = url
   }
@@ -263,7 +263,7 @@ const Sellerdashboard = () => {
                         <div className='text-4xl mb-2'>📦</div>
                         <p>No products yet</p>
                         <button 
-                          onClick={() => { window.location.href = 'http://localhost:5174/seller/add-product' }}
+                          onClick={() => { window.location.href = `${import.meta.env.VITE_API_BASE_URL}/seller/add-product` }}
                           className='mt-2 text-blue-600 hover:text-blue-700 text-sm'
                         >
                           Create your first product
@@ -278,7 +278,7 @@ const Sellerdashboard = () => {
                   <div className='font-semibold mb-4'>Quick Actions</div>
                   <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
                     <button 
-                      onClick={() => { window.location.href = 'http://localhost:5174/seller/add-product' }}
+                      onClick={() => { window.location.href = `${import.meta.env.VITE_API_BASE_URL}/seller/add-product` }}
                       className='flex items-center justify-center space-x-2 p-3 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors'
                     >
                       <span>➕</span>
