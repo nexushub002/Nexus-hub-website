@@ -13,12 +13,12 @@ const router = express.Router();
 router.post("/seller-register", async (req, res) => {
   try {
     console.log("📝 Registration data received:", JSON.stringify(req.body, null, 2));
-    
-    const { 
-      name, 
-      email, 
-      phone, 
-      password, 
+
+    const {
+      name,
+      email,
+      phone,
+      password,
       // Manufacturer Information
       companyName,
       yearOfEstablishment,
@@ -50,8 +50,8 @@ router.post("/seller-register", async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ 
-      $or: [{ email }, { phone }] 
+    const existingUser = await User.findOne({
+      $or: [{ email }, { phone }]
     });
 
     if (existingUser) {
@@ -62,8 +62,8 @@ router.post("/seller-register", async (req, res) => {
     }
 
     // Check if seller already exists
-    const existingSeller = await Seller.findOne({ 
-      $or: [{ email }, { phone }] 
+    const existingSeller = await Seller.findOne({
+      $or: [{ email }, { phone }]
     });
 
     if (existingSeller) {
@@ -140,10 +140,10 @@ router.post("/seller-register", async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { 
+      {
         userId: newUser._id,
         email: newUser.email,
-        roles: newUser.roles 
+        roles: newUser.roles
       },
       process.env.JWT_SECRET || "nexushub-seller-secret",
       { expiresIn: "30d" }
@@ -152,8 +152,8 @@ router.post("/seller-register", async (req, res) => {
     // Set HTTP-only cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: true, // <-- SET TO true
+      sameSite: "none", // <-- FIX
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
@@ -202,8 +202,8 @@ router.post("/seller-login", async (req, res) => {
     }
 
     // Find user by email
-    const user = await User.findOne({ 
-      email: email.trim().toLowerCase() 
+    const user = await User.findOne({
+      email: email.trim().toLowerCase()
     });
 
     if (!user) {
@@ -232,10 +232,10 @@ router.post("/seller-login", async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { 
+      {
         userId: user._id,
         email: user.email,
-        roles: user.roles 
+        roles: user.roles
       },
       process.env.JWT_SECRET || "nexushub-seller-secret",
       { expiresIn: "30d" }
@@ -244,8 +244,8 @@ router.post("/seller-login", async (req, res) => {
     // Set HTTP-only cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: true, // <-- SET TO true
+      sameSite: "none", // <-- FIX
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 

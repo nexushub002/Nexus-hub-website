@@ -5,6 +5,7 @@ import { useSeller } from '../context/SellerContext'
 import { useSellerTracking } from '../hooks/useSellerTracking'
 import InquiryManagement from '../components/InquiryManagement'
 import MobileNav from '../components/MobileNav'
+import ProductCreationForm from '../components/ProductCreationForm'
 import './Sellerdashboard.css'
 
 // Helpers: generate deterministic color and initial for avatar
@@ -427,102 +428,11 @@ const Sellerdashboard = () => {
                     </button>
                   </div>
                   
-                  <form className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Product Name</label>
-                        <input
-                          type="text"
-                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                            isDarkMode ? 'bg-white/10 border-white/20' : 'bg-white border-gray-300'
-                          }`}
-                          placeholder="Enter product name"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Category</label>
-                        <select
-                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                            isDarkMode ? 'bg-white/10 border-white/20' : 'bg-white border-gray-300'
-                          }`}
-                        >
-                          <option value="">Select category</option>
-                          <option value="Electronics">Electronics</option>
-                          <option value="Clothing">Clothing</option>
-                          <option value="Home & Garden">Home & Garden</option>
-                          <option value="Sports">Sports</option>
-                          <option value="Books">Books</option>
-                        </select>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Description</label>
-                      <textarea
-                        rows={3}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          isDarkMode ? 'bg-white/10 border-white/20' : 'bg-white border-gray-300'
-                        }`}
-                        placeholder="Describe your product"
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Price (₹)</label>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                            isDarkMode ? 'bg-white/10 border-white/20' : 'bg-white border-gray-300'
-                          }`}
-                          placeholder="0.00"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Stock Quantity</label>
-                        <input
-                          type="number"
-                          min="0"
-                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                            isDarkMode ? 'bg-white/10 border-white/20' : 'bg-white border-gray-300'
-                          }`}
-                          placeholder="0"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="flex space-x-4 pt-4">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          // Simulate product creation
-                          const newProduct = {
-                            _id: Date.now().toString(),
-                            name: 'Sample Product',
-                            category: 'Electronics',
-                            price: 999,
-                            stock: 10,
-                            status: 'active',
-                            createdAt: new Date().toISOString(),
-                            images: []
-                          };
-                          handleProductCreated(newProduct);
-                        }}
-                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
-                      >
-                        Create Product
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowProductForm(false)}
-                        className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
+                  <ProductCreationForm 
+                    isDarkMode={isDarkMode}
+                    onProductCreated={handleProductCreated}
+                    onCancel={() => setShowProductForm(false)}
+                  />
                 </div>
               ) : (
                 <div className='flex items-center justify-between mb-4'>

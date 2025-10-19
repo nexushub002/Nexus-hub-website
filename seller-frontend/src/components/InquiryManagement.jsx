@@ -29,12 +29,12 @@ const InquiryManagement = () => {
       setLoading(true);
       console.log('Fetching inquiries for seller:', seller);
       
-      // Try different possible seller ID fields
-      const sellerId = seller?.sellerId || seller?.id || seller?._id;
+      // Use only sellerId (unique ID like NXS123456)
+      const sellerId = seller?.sellerId;
       console.log('Seller ID being used:', sellerId);
       
       if (!sellerId) {
-        setError('Seller ID not found');
+        setError('Seller ID not found. Please login again.');
         setLoading(false);
         return;
       }
@@ -47,6 +47,7 @@ const InquiryManagement = () => {
         }
       );
       const data = await response.json();
+      console.log('Inquiry data:', data);
       
       if (data.success) {
         setInquiries(data.inquiries);
@@ -63,11 +64,12 @@ const InquiryManagement = () => {
 
   const fetchStats = async () => {
     try {
-      const sellerId = seller?.sellerId || seller?.id || seller?._id;
+      // Use only sellerId (unique ID like NXS123456)
+      const sellerId = seller?.sellerId;
       console.log('Fetching stats for seller ID:', sellerId);
       
       if (!sellerId) {
-        console.error('No seller ID found for stats');
+        console.error('No seller ID found for stats. Please login again.');
         return;
       }
       
@@ -84,6 +86,7 @@ const InquiryManagement = () => {
       if (data.success) {
         setStats(data.stats);
       }
+      console.log('Stats data:', data);
     } catch (err) {
       console.error('Error fetching stats:', err);
     }

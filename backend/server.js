@@ -7,20 +7,21 @@
   import axios from "axios";
   dotenv.config();
 
-  import productRoutes from "./routes/productRoutes.js";
-  import uploadRoutes from "./routes/uploadRoutes.js";
-  import wishlistRoutes from "./routes/wishlistRoutes.js";
-  import cartRoutes from "./routes/cartRoutes.js";
-  import sellerProductRoutes from "./routes/sellerProductRoutes.js";
-  import sellerOrderRoutes from "./routes/sellerOrderRoutes.js";
-  import orderRoutes from "./routes/orderRoutes.js";
-  import inquiryRoutes from "./routes/inquiries.js";
-  import Product from "./models/Product.js"; // ✅ You forgot to import Product
-  import Otp from "./models/Otp.js";
-  import User from "./models/User.js";
-  import Seller from "./models/SellerProfile.js";
-  import Wishlist from "./models/Wishlist.js";
-  import Cart from "./models/Cart.js";
+import productRoutes from "./routes/productRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
+import wishlistRoutes from "./routes/wishlistRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
+import sellerProductRoutes from "./routes/sellerProductRoutes.js";
+import sellerOrderRoutes from "./routes/sellerOrderRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import inquiryRoutes from "./routes/inquiries.js";
+import newProductRoutes, { verifySeller } from "./routes/newProductRoutes.js";
+import Product from "./models/Product.js"; // You forgot to import Product
+import Otp from "./models/Otp.js";
+import User from "./models/User.js";
+import Seller from "./models/SellerProfile.js";
+import Wishlist from "./models/Wishlist.js";
+import Cart from "./models/Cart.js";
 
  
 
@@ -230,14 +231,14 @@
    // Import routes
   import sellerAuthRoutes from "./routes/sellerAuthRoutes.js";
   import sellerProfileRoutes from "./routes/sellerProfileRoutes.js";
-  import newProductRoutes from "./routes/newProductRoutes.js";
+  import sellerActivityRoutes from "./routes/sellerActivityRoutes.js";
 
   //use seller routes
   app.use("/api/seller/auth", sellerAuthRoutes);
+  app.use("/api/seller/activity", sellerActivityRoutes);
   
   // New seller profile routes (using SellerProfile schema)
   app.use("/api/seller-profile", sellerProfileRoutes);
-  app.use("/api/products-new", newProductRoutes);
 
 
   
@@ -817,8 +818,8 @@
 });
 
 
-  // Create product (JSON only, images as URLs). Associates manufacturerId as seller.
-  app.post('/api/products', async (req, res) => {
+  // Create product (JSON only, images as URLs). Associates sellerId as seller.
+  app.post('/api/products', verifySeller, async (req, res) => {
     try {
       const {
         name,
@@ -833,7 +834,7 @@
         moq,
         sampleAvailable,
         samplePrice,
-        manufacturerId,
+        sellerId,
         hsCode,
         warranty,
         returnPolicy,
@@ -842,32 +843,21 @@
         videos = []
       } = req.body
 
-      // Find or create seller profile for the seller
-      let sellerProfile = await Seller.findOne({ email: manufacturerId });
-      if (!sellerProfile) {
-        // Get seller info to create seller profile
-        const seller = await User.findById(manufacturerId);
-        if (!seller) {
-          return res.status(400).json({ success: false, message: 'Seller not found' });
-        }
+      // Validate required fields
+      if (!name || !category || !subcategory || !price || !moq || !sellerId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Missing required fields: name, category, subcategory, price, moq, sellerId' 
+        });
+      }
 
-        // Create basic seller profile
-        sellerProfile = await Seller.create({
-          sellerId: `NXS${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
-          name: seller.name || 'Seller Name',
-          email: seller.email,
-          phone: seller.phone || '0000000000',
-          password: 'temp-password', // This should be properly handled
-          companyName: seller.businessName || seller.name || 'Company Name',
-          companyAddress: seller.companyAddress?.street || 'Address not provided',
-          contactPerson: {
-            name: seller.name || 'Contact Person',
-            phone: seller.phone || '0000000000',
-            email: seller.email || 'email@example.com'
-          },
-          gstNumber: seller.gstNumber || 'TEMP-GST',
-          verified: false,
-          products: []
+      // Find the seller profile by sellerId (string)
+      let sellerProfile = await Seller.findOne({ sellerId });
+      
+      if (!sellerProfile) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Seller profile not found. Please complete your seller registration first.' 
         });
       }
 
@@ -977,8 +967,9 @@
   app.use("/api/seller/orders", sellerOrderRoutes);
   app.use("/api/orders", orderRoutes);
   app.use("/api/inquiries", inquiryRoutes);
+  app.use("/api/products-new", newProductRoutes);
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(` Server running on http://localhost:${PORT}`);
   });

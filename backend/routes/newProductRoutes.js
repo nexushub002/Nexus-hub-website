@@ -9,7 +9,17 @@ const router = express.Router();
 // Middleware to verify seller token
 const verifySeller = async (req, res, next) => {
   try {
-    const token = req.cookies.token;
+    // Check for token in cookies first, then in Authorization header
+    let token = req.cookies.token;
+    
+    if (!token) {
+      // Check Authorization header (Bearer token)
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.slice(7); // Remove 'Bearer ' prefix
+      }
+    }
+    
     if (!token) {
       return res.status(401).json({ success: false, message: "No token provided" });
     }
@@ -387,3 +397,4 @@ router.get("/public/:id", async (req, res) => {
 });
 
 export default router;
+export { verifySeller };

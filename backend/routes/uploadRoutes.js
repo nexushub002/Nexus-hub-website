@@ -1,6 +1,6 @@
 // routes/uploadRoutes.js
 import express from "express";
-import { uploadImages, uploadDocuments, uploadCertificates, uploadLogo } from "../middleware/upload.js";
+import { uploadImages, uploadVideos, uploadDocuments, uploadCertificates, uploadLogo } from "../middleware/upload.js";
 
 const router = express.Router();
 
@@ -27,6 +27,33 @@ router.post("/images", uploadImages.array("images", 5), async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: "Error uploading images" 
+    });
+  }
+});
+
+// ✅ Upload videos to Cloudinary
+router.post("/videos", uploadVideos.array("videos", 3), async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "No videos uploaded" 
+      });
+    }
+
+    // Extract Cloudinary URLs from uploaded files
+    const videoUrls = req.files.map(file => file.path);
+    
+    res.json({ 
+      success: true, 
+      videos: videoUrls,
+      message: `${videoUrls.length} video(s) uploaded successfully`
+    });
+  } catch (error) {
+    console.error("Video upload error:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Error uploading videos" 
     });
   }
 });

@@ -544,4 +544,224 @@ router.get("/products/:sellerId", async (req, res) => {
   }
 });
 
+// ----------------------
+// ADD DOCUMENTS TO SELLER PROFILE
+// ----------------------
+router.post("/documents", verifySeller, async (req, res) => {
+  try {
+    const { documents } = req.body;
+    
+    if (!documents || !Array.isArray(documents)) {
+      return res.status(400).json({
+        success: false,
+        message: "Documents array is required"
+      });
+    }
+
+    // Add documents to seller profile
+    const seller = await Seller.findById(req.seller._id);
+    
+    if (!seller) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Seller not found" 
+      });
+    }
+
+    // Initialize documents array if it doesn't exist
+    if (!seller.documents) {
+      seller.documents = [];
+    }
+
+    // Add new documents
+    seller.documents.push(...documents);
+    await seller.save();
+
+    res.json({
+      success: true,
+      message: "Documents added successfully",
+      documents: seller.documents
+    });
+  } catch (error) {
+    console.error("Error adding documents:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error adding documents",
+      error: error.message
+    });
+  }
+});
+
+// ----------------------
+// DELETE DOCUMENT FROM SELLER PROFILE
+// ----------------------
+router.delete("/documents/:documentId", verifySeller, async (req, res) => {
+  try {
+    const { documentId } = req.params;
+
+    const seller = await Seller.findById(req.seller._id);
+    
+    if (!seller) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Seller not found" 
+      });
+    }
+
+    // Remove document by ID
+    seller.documents = seller.documents.filter(
+      doc => doc._id.toString() !== documentId
+    );
+    
+    await seller.save();
+
+    res.json({
+      success: true,
+      message: "Document deleted successfully",
+      documents: seller.documents
+    });
+  } catch (error) {
+    console.error("Error deleting document:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting document",
+      error: error.message
+    });
+  }
+});
+
+// ----------------------
+// ADD CERTIFICATES TO SELLER PROFILE
+// ----------------------
+router.post("/certificates", verifySeller, async (req, res) => {
+  try {
+    const { certificates } = req.body;
+    
+    if (!certificates || !Array.isArray(certificates)) {
+      return res.status(400).json({
+        success: false,
+        message: "Certificates array is required"
+      });
+    }
+
+    // Add certificates to seller profile
+    const seller = await Seller.findById(req.seller._id);
+    
+    if (!seller) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Seller not found" 
+      });
+    }
+
+    // Initialize certificates array if it doesn't exist
+    if (!seller.certificates) {
+      seller.certificates = [];
+    }
+
+    // Add new certificates
+    seller.certificates.push(...certificates);
+    await seller.save();
+
+    res.json({
+      success: true,
+      message: "Certificates added successfully",
+      certificates: seller.certificates
+    });
+  } catch (error) {
+    console.error("Error adding certificates:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error adding certificates",
+      error: error.message
+    });
+  }
+});
+
+// ----------------------
+// DELETE CERTIFICATE FROM SELLER PROFILE
+// ----------------------
+router.delete("/certificates/:certificateId", verifySeller, async (req, res) => {
+  try {
+    const { certificateId } = req.params;
+
+    const seller = await Seller.findById(req.seller._id);
+    
+    if (!seller) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Seller not found" 
+      });
+    }
+
+    // Remove certificate by ID
+    seller.certificates = seller.certificates.filter(
+      cert => cert._id.toString() !== certificateId
+    );
+    
+    await seller.save();
+
+    res.json({
+      success: true,
+      message: "Certificate deleted successfully",
+      certificates: seller.certificates
+    });
+  } catch (error) {
+    console.error("Error deleting certificate:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting certificate",
+      error: error.message
+    });
+  }
+});
+
+// ----------------------
+// UPDATE COMPANY LOGO
+// ----------------------
+router.put("/logo", verifySeller, async (req, res) => {
+  try {
+    const { logo } = req.body;
+    
+    if (!logo || !logo.url) {
+      return res.status(400).json({
+        success: false,
+        message: "Logo URL is required"
+      });
+    }
+
+    // Update logo in seller profile
+    const seller = await Seller.findById(req.seller._id);
+    
+    if (!seller) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Seller not found" 
+      });
+    }
+
+    // Save full logo object with metadata
+    seller.companyLogo = {
+      url: logo.url,
+      originalName: logo.originalName || 'company-logo',
+      format: logo.format || 'image',
+      uploadedAt: new Date()
+    };
+    await seller.save();
+
+    res.json({
+      success: true,
+      message: "Logo updated successfully",
+      logo: seller.companyLogo.url
+    });
+  } catch (error) {
+    console.error("Error updating logo:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating logo",
+      error: error.message
+    });
+  }
+});
+
 export default router;

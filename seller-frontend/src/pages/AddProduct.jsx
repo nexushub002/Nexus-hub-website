@@ -18,7 +18,9 @@ const initialState = {
   returnPolicy: '',
   customization: false,
   images: [], // Array of uploaded image files
-  imageUrls: [] // Array of Cloudinary URLs after upload
+  imageUrls: [], // Array of Cloudinary URLs after upload
+  videos: [], // Array of uploaded video files
+  videoUrls: [] // Array of Cloudinary URLs after upload
 }
 
 // Define the same categories as in the backend
@@ -178,12 +180,41 @@ const AddProduct = () => {
     }))
   }
 
+  const handleVideoChange = (e) => {
+    const files = Array.from(e.target.files)
+    
+    // Validate video files (max 100MB each)
+    const validFiles = files.filter(file => {
+      if (!file.type.startsWith('video/')) {
+        alert(`${file.name} is not a video file`)
+        return false
+      }
+      if (file.size > 100 * 1024 * 1024) { // 100MB limit
+        alert(`${file.name} is too large. Maximum size is 100MB`)
+        return false
+      }
+      return true
+    })
+    
+    setForm((f) => ({
+      ...f,
+      videos: [...f.videos, ...validFiles]
+    }))
+  }
+
+  const removeVideo = (index) => {
+    setForm((f) => ({
+      ...f,
+      videos: f.videos.filter((_, i) => i !== index)
+    }))
+  }
+
   const uploadImagesToCloudinary = async (imageFiles) => {
     const uploadPromises = imageFiles.map(async (file) => {
       const formData = new FormData()
       formData.append('images', file)
       
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/upload/images`;
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/upload`;
 
       const response = await fetch(url, {
         method: 'POST',
@@ -202,24 +233,69 @@ const AddProduct = () => {
     return Promise.all(uploadPromises)
   }
 
+  const uploadVideosToCloudinary = async (videoFiles) => {
+    const uploadPromises = videoFiles.map(async (file) => {
+      const formData = new FormData()
+      formData.append('videos', file)
+      
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/upload/videos`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload video')
+      }
+      
+      const data = await response.json()
+      return data.videos[0] // Return the Cloudinary video URL
+    })
+    
+    return Promise.all(uploadPromises)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitting(true)
     setMessage('')
+    
     try {
       // Check if seller is properly authenticated
       if (!seller || (!seller._id && !seller.id)) {
-        setMessage('Error: Seller not authenticated. Please log in again.')
-        return
+        throw new Error('Seller not authenticated. Please log in again.')
       }
 
-      console.log('Seller info:', seller) // Debug log
+      // Validate required fields
+      if (!form.name || !form.category || !form.subcategory || !form.price || !form.moq) {
+        throw new Error('Please fill in all required fields (Name, Category, Subcategory, Price, MOQ)')
+      }
 
       // Upload images to Cloudinary first
       let imageUrls = []
       if (form.images.length > 0) {
-        setMessage('Uploading images...')
-        imageUrls = await uploadImagesToCloudinary(form.images)
+        setMessage({ type: 'info', text: 'Uploading images...' })
+        try {
+          imageUrls = await uploadImagesToCloudinary(form.images)
+        } catch (error) {
+          throw new Error('Failed to upload images. Please try again.')
+        }
+      } else {
+        throw new Error('Please upload at least one product image')
+      }
+
+      // Upload videos to Cloudinary if any
+      let videoUrls = []
+      if (form.videos.length > 0) {
+        setMessage({ type: 'info', text: 'Uploading videos...' })
+        try {
+          videoUrls = await uploadVideosToCloudinary(form.videos)
+        } catch (error) {
+          console.warn('Video upload failed:', error)
+          // Don't throw error for videos, they are optional
+        }
       }
 
       // Resolve normalized keys for category and subcategory
@@ -228,46 +304,85 @@ const AddProduct = () => {
         ? SUBCATEGORY_KEY_MAP[form.category][form.subcategory]
         : toKey(form.subcategory)
 
-      const sellerId = seller._id || seller.id // Handle both possible field names
+      // Get seller ID - use only sellerId (unique ID like NXS123456)
+      const sellerId = seller.sellerId
+      
+      if (!sellerId) {
+        throw new Error('Seller ID not found. Please login again.');
+      }
 
-      const body = {
-        name: form.name,
-        // Store both label and normalized key
+      const productData = {
+        name: form.name.trim(),
         category: form.category,
         subcategory: form.subcategory,
         categoryKey,
         subcategoryKey,
-        description: form.description,
+        description: form.description?.trim() || '',
         price: Number(form.price),
         priceRangeMin: Number(form.priceRangeMin) || undefined,
         priceRangeMax: Number(form.priceRangeMax) || undefined,
-        moq: Number(form.moq),
+        moq: Math.max(1, Number(form.moq) || 1), // Ensure MOQ is at least 1
         sampleAvailable: !!form.sampleAvailable,
         samplePrice: form.samplePrice ? Number(form.samplePrice) : undefined,
-        manufacturerId: sellerId,
-        hsCode: form.hsCode,
-        warranty: form.warranty,
-        returnPolicy: form.returnPolicy,
+        sellerId: sellerId, // Send the seller's unique ID (string)
+        hsCode: form.hsCode?.trim(),
+        warranty: form.warranty?.trim(),
+        returnPolicy: form.returnPolicy?.trim(),
         customization: !!form.customization,
-        images: imageUrls
-      }
+        images: imageUrls,
+        videos: videoUrls // Send uploaded video URLs
+      };
+      
+      console.log('Product data being sent:', productData);
 
-      console.log('Product data being sent:', body) // Debug log
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/products`;
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/products-new/create`;
-
-      const res = await fetch(url , {
+      const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Include cookies for authentication
-        body: JSON.stringify(body)
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || 'Failed to create product')
-      setMessage('Product created successfully')
+        headers: { 
+          'Content-Type': 'application/json',
+          // 'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Accept': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(productData)
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error('Error response from server:', errorData);
+        throw new Error(errorData.message || 'Failed to create product');
+      }
+      
+      const data = await res.json();
+      
+      // Show success message with a nice toast notification
+      setMessage({ type: 'success', text: 'Product created successfully! Redirecting to My Products...' })
+      
+      // Clear the form
       setForm(initialState)
-    } catch (err) {
-      setMessage(err.message)
+      
+    //   // Redirect to My Products page after a short delay
+    //   setTimeout(() => {
+    //     // Use React Router's navigation if available, otherwise use window.location
+    //     if (window.history && window.history.pushState) {
+    //       window.history.pushState(null, '', '/seller/my-products')
+    //       window.dispatchEvent(new Event('popstate'))
+    //     } else {
+    //       window.location.href = '/seller/my-products'
+    //     }
+    //   }, 1500)
+    // } catch (err) {
+    //   // Handle different types of errors
+    //   const errorMessage = err.response?.data?.message || err.message || 'An error occurred while creating the product'
+    //   setMessage({ type: 'error', text: errorMessage })
+      
+      // Log the full error for debugging
+      console.error('Product creation error:', {
+        error: err,
+        response: err.response?.data,
+        stack: err.stack
+      })
     } finally {
       setSubmitting(false)
     }
@@ -295,11 +410,11 @@ const AddProduct = () => {
             <h1 className='text-xl font-semibold mb-4'>Create New Product</h1>
             {message && (
               <div className={`mb-4 p-3 rounded-lg text-sm ${
-                message.includes('successfully') 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-red-100 text-red-800'
+                message.type === 'success' 
+                  ? 'bg-green-100 text-green-800 border border-green-200' 
+                  : 'bg-red-100 text-red-800 border border-red-200'
               }`}>
-                {message}
+                {message.text}
               </div>
             )}
             
@@ -478,6 +593,70 @@ const AddProduct = () => {
                           </button>
                           <div className='absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg'>
                             {file.name}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Video Upload Section */}
+              <div className='md:col-span-2'>
+                <label className='block text-sm font-medium mb-2'>Product Videos (Optional)</label>
+                <div className='border-2 border-dashed border-gray-300 rounded-lg p-6 text-center'>
+                  <input
+                    type='file'
+                    multiple
+                    accept='video/*'
+                    onChange={handleVideoChange}
+                    className='hidden'
+                    id='video-upload'
+                  />
+                  <label
+                    htmlFor='video-upload'
+                    className='cursor-pointer flex flex-col items-center'
+                  >
+                    <svg className='w-12 h-12 text-gray-400 mb-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z' />
+                    </svg>
+                    <span className='text-sm text-gray-600'>
+                      Click to upload videos or drag and drop
+                    </span>
+                    <span className='text-xs text-gray-500 mt-1'>
+                      MP4, MOV, AVI up to 100MB each
+                    </span>
+                  </label>
+                </div>
+                
+                {/* Display selected videos */}
+                {form.videos.length > 0 && (
+                  <div className='mt-4'>
+                    <h4 className='text-sm font-medium mb-2'>Selected Videos ({form.videos.length})</h4>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                      {form.videos.map((file, index) => (
+                        <div key={index} className='relative group border rounded-lg p-4 bg-gray-50'>
+                          <div className='flex items-center gap-3'>
+                            <div className='flex-shrink-0'>
+                              <svg className='w-12 h-12 text-blue-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z' />
+                              </svg>
+                            </div>
+                            <div className='flex-1 min-w-0'>
+                              <p className='text-sm font-medium text-gray-900 truncate'>
+                                {file.name}
+                              </p>
+                              <p className='text-xs text-gray-500'>
+                                {(file.size / (1024 * 1024)).toFixed(2)} MB
+                              </p>
+                            </div>
+                            <button
+                              type='button'
+                              onClick={() => removeVideo(index)}
+                              className='flex-shrink-0 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600'
+                            >
+                              ×
+                            </button>
                           </div>
                         </div>
                       ))}

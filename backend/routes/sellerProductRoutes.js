@@ -7,10 +7,10 @@ const router = express.Router();
 // Get all products for the authenticated seller only
 router.get("/my-products", verifySeller, async (req, res) => {
   try {
-    const sellerId = req.user._id;
+    const sellerId = req.user.sellerId;
     
     const products = await Product.find({ 
-      seller: sellerId 
+      sellerId: sellerId 
     }).sort({ createdAt: -1 });
     
     res.json({
@@ -31,12 +31,12 @@ router.get("/my-products", verifySeller, async (req, res) => {
 // Get single product (only if owned by seller)
 router.get("/product/:id", verifySeller, async (req, res) => {
   try {
-    const sellerId = req.user._id;
+    const sellerId = req.user.sellerId;
     const productId = req.params.id;
     
     const product = await Product.findOne({
       _id: productId,
-      seller: sellerId
+      sellerId: sellerId
     });
     
     if (!product) {
@@ -63,7 +63,7 @@ router.get("/product/:id", verifySeller, async (req, res) => {
 // Create new product
 router.post("/create", verifySeller, async (req, res) => {
   try {
-    const sellerId = req.user._id;
+    const sellerId = req.user.sellerId;
     const {
       name,
       description,
@@ -114,13 +114,13 @@ router.post("/create", verifySeller, async (req, res) => {
 // Update product (only if owned by seller)
 router.put("/update/:id", verifySeller, async (req, res) => {
   try {
-    const sellerId = req.user._id;
+    const sellerId = req.user.sellerId;
     const productId = req.params.id;
     
     // First check if product exists and belongs to seller
     const existingProduct = await Product.findOne({
       _id: productId,
-      seller: sellerId
+      sellerId: sellerId
     });
     
     if (!existingProduct) {
@@ -157,12 +157,12 @@ router.put("/update/:id", verifySeller, async (req, res) => {
 // Delete product (only if owned by seller)
 router.delete("/delete/:id", verifySeller, async (req, res) => {
   try {
-    const sellerId = req.user._id;
+    const sellerId = req.user.sellerId;
     const productId = req.params.id;
     
     const product = await Product.findOneAndDelete({
       _id: productId,
-      seller: sellerId
+      sellerId: sellerId
     });
     
     if (!product) {
@@ -189,18 +189,30 @@ router.delete("/delete/:id", verifySeller, async (req, res) => {
 // Get seller dashboard stats
 router.get("/dashboard-stats", verifySeller, async (req, res) => {
   try {
-    const sellerId = req.user._id;
+    // Use the unique sellerId string (e.g., "NXS123456789")
+    const sellerId = req.user.sellerId;
     
-    const totalProducts = await Product.countDocuments({ seller: sellerId });
-    const activeProducts = await Product.countDocuments({ 
-      seller: sellerId, 
-      status: 'active' 
-    });
+    if (!sellerId) {
+      return res.status(400).json({
+        success: false,
+        message: "Seller ID not found"
+      });
+    }
+    
+    // Count all products for this seller
+    const totalProducts = await Product.countDocuments({ sellerId: sellerId });
+    
+    // Count active products (assuming products have a status field or are active by default)
+    // If there's no status field, all products are considered active
+    const activeProducts = await Product.countDocuments({ sellerId: sellerId });
     
     // Get recent products
-    const recentProducts = await Product.find({ seller: sellerId })
+    const recentProducts = await Product.find({ sellerId: sellerId })
       .sort({ createdAt: -1 })
-      .limit(5);
+      .limit(5)
+      .select('name price images category subcategory createdAt');
+    
+    console.log(`Dashboard stats for seller ${sellerId}: ${totalProducts} total products, ${activeProducts} active`);
     
     res.json({
       success: true,

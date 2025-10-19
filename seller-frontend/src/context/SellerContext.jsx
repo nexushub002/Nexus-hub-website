@@ -52,17 +52,25 @@ const activityTracker = {
     // Store in cookies
     cookieUtils.set('seller_activities', updatedActivities, 30);
     
-    // Also send to backend for persistent storage
-    const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/activity/track`;
-
-    fetch(url , {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(activityData),
-    }).catch(err => console.warn('Activity tracking failed:', err));
+    // Also send to backend for persistent storage (non-blocking, optional)
+    try {
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller/activity/track`;
+      
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(activityData),
+      }).catch(err => {
+        // Silently fail - activity tracking is optional
+        console.debug('Activity tracking skipped:', err.message);
+      });
+    } catch (err) {
+      // Ignore all errors from activity tracking
+      console.debug('Activity tracking initialization failed');
+    }
   },
   
   getHistory: () => {
@@ -178,18 +186,20 @@ export const SellerProvider = ({ children }) => {
         const data = await response.json();
         
         if (data.user && data.user.roles?.includes('seller')) {
-          // Ensure both _id and id fields are available
-          const sellerWithBothIds = {
+          // Ensure sellerId is always available
+          const sellerWithCompleteInfo = {
             ...data.user,
             _id: data.user._id,
-            id: data.user._id
+            id: data.user._id,
+            sellerId: data.user.sellerId // Store unique seller ID
           };
-          setSeller(sellerWithBothIds);
+          setSeller(sellerWithCompleteInfo);
           
-          // Store seller info in cookies
+          // Store seller info in cookies including sellerId
           cookieUtils.set('seller_info', {
             id: data.user._id,
             _id: data.user._id,
+            sellerId: data.user.sellerId, // Store unique seller ID
             name: data.user.name,
             email: data.user.email,
             businessName: data.user.businessName,
@@ -261,18 +271,20 @@ export const SellerProvider = ({ children }) => {
 
       if (response.ok) {
         const user = data.user || { email, roles: ['seller'] };
-        // Ensure both _id and id fields are available
-        const sellerWithBothIds = {
+        // Ensure sellerId is always available
+        const sellerWithCompleteInfo = {
           ...user,
           _id: user._id || user.id,
-          id: user._id || user.id
+          id: user._id || user.id,
+          sellerId: user.sellerId // CRITICAL: Store the unique seller ID
         };
-        setSeller(sellerWithBothIds);
+        setSeller(sellerWithCompleteInfo);
         
-        // Store comprehensive seller info
+        // Store comprehensive seller info including sellerId
         cookieUtils.set('seller_info', {
           id: user._id || user.id,
           _id: user._id || user.id,
+          sellerId: user.sellerId, // Store unique seller ID
           name: user.name,
           email: user.email,
           businessName: user.businessName,
