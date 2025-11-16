@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
 import "./ProductCard.css"; // Import the CSS for grid layout
+import { buildApiUrl } from '../config/api';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -12,7 +13,7 @@ const ProductList = () => {
     // Fetch data from backend API
     setLoading(true);
 
-    const url = `${import.meta.env.VITE_API_BASE_URL}/api/showAllProducts`;
+    const url = buildApiUrl('/api/showAllProducts');
 
     fetch(url)
       .then((res) => {

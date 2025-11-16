@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
+import { buildApiUrl } from '../config/api';
 
 // Normalized keys to match existing browse route
 const CATEGORY_KEY_MAP = {
@@ -100,7 +101,7 @@ function NewArrivalsPage() {
       setLoading(true);
       setError(null); // Reset error state on new fetch
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/showAllProducts`;
+      const url = buildApiUrl('/api/showAllProducts');
 
       // 2. Pass the controller's signal to the fetch request
       const res = await fetch(url, { signal: controller.signal });

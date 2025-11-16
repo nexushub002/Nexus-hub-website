@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { buildApiUrl } from '../config/api';
 
 
 const ITEMS_PER_CATEGORY = 3;    // how many deals per category
@@ -32,7 +33,7 @@ const TopDeals = () => {
       try {
         setLoading(true);
 
-        const url = `${import.meta.env.VITE_API_BASE_URL}/api/showAllProducts`;
+        const url = buildApiUrl('/api/showAllProducts');
 
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch products');

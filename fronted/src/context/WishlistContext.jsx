@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserContext } from './UserContext';
+import { buildApiUrl } from '../config/api';
 
 const WishlistContext = createContext();
 
@@ -17,7 +18,6 @@ export const WishlistProvider = ({ children }) => {
   const { user } = useContext(UserContext);
 
   // API base URL
-  const API_BASE = 'http://localhost:3000/api/wishlist';
 
   // Helper function to get auth headers
   const getAuthHeaders = () => {
@@ -37,7 +37,7 @@ export const WishlistProvider = ({ children }) => {
     try {
       const userId = user?._id || "60f7b3b3b3b3b3b3b3b3b3b3"; // Default test user ID
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/wishlist?userId=${userId}`;
+      const url = buildApiUrl(`/api/wishlist?userId=${userId}`);
 
       const response = await fetch(url , {
         method: 'GET',
@@ -64,8 +64,10 @@ export const WishlistProvider = ({ children }) => {
     try {
       console.log('Adding to wishlist:', product._id);
       console.log('User:', user);
-      
-      const response = await fetch(`${API_BASE}/add`, {
+
+      const url = buildApiUrl('/api/wishlist/add');
+
+      const response = await fetch(url, {
         method: 'POST',
         credentials: 'include',
         headers: getAuthHeaders(),
@@ -116,7 +118,7 @@ export const WishlistProvider = ({ children }) => {
     try {
       const userId = user?._id || "60f7b3b3b3b3b3b3b3b3b3b3"; // Default test user ID
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/wishlist/remove/${productId}?userId=${userId}`;
+      const url = buildApiUrl(`/api/wishlist/remove/${productId}?userId=${userId}`);
 
       const response = await fetch(url, {
         method: 'DELETE',
@@ -149,7 +151,9 @@ export const WishlistProvider = ({ children }) => {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/clear`, {
+      const url = buildApiUrl('/api/wishlist/clear');
+
+      const response = await fetch(url, {
         method: 'DELETE',
         credentials: 'include',
         headers: getAuthHeaders()

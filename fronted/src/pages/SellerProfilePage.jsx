@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import './SellerProfilePage.css';
+import { buildApiUrl } from '../config/api';
 
 const SellerProfilePage = () => {
   const { sellerId } = useParams();
@@ -24,7 +25,7 @@ const SellerProfilePage = () => {
     try {
       setLoading(true);
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/public/${sellerId}`;
+      const url = buildApiUrl(`/api/seller-profile/public/${sellerId}`);
 
       const response = await fetch(url);
       const data = await response.json();
@@ -45,7 +46,7 @@ const SellerProfilePage = () => {
   const fetchSellerProducts = async () => {
     try {
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/products/${sellerId}?page=${productsPage}&limit=12`;
+      const url = buildApiUrl(`/api/seller-profile/products/${sellerId}?page=${productsPage}&limit=12`);
 
       const response = await fetch(url);
       const data = await response.json();

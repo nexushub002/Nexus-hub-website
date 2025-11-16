@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserContext } from './UserContext';
+import { buildApiUrl } from '../config/api';
 
 const CartContext = createContext();
 
@@ -36,7 +37,7 @@ export const CartProvider = ({ children }) => {
     try {
       const userId = user?._id || "60f7b3b3b3b3b3b3b3b3b3b3"; // Default test user ID
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart?userId=${userId}`;
+      const url = buildApiUrl(`/api/cart?userId=${userId}`);
 
       const response = await fetch(url, {
         method: 'GET',
@@ -63,8 +64,8 @@ export const CartProvider = ({ children }) => {
     try {
       console.log('Adding to cart:', product._id, 'quantity:', quantity);
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart/add`;
-      
+      const url = buildApiUrl('/api/cart/add');
+
       const response = await fetch(url, {
         method: 'POST',
         credentials: 'include',
@@ -131,7 +132,7 @@ export const CartProvider = ({ children }) => {
     try {
       const userId = user?._id || "60f7b3b3b3b3b3b3b3b3b3b3";
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart/update/${productId}`;
+      const url = buildApiUrl(`/api/cart/update/${productId}`);
 
       const response = await fetch(url, {
         method: 'PUT',
@@ -168,7 +169,7 @@ export const CartProvider = ({ children }) => {
     try {
       const userId = user?._id || "60f7b3b3b3b3b3b3b3b3b3b3";
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart/remove/${productId}?userId=${userId}`;
+      const url = buildApiUrl(`/api/cart/remove/${productId}?userId=${userId}`);
 
       const response = await fetch(url, {
         method: 'DELETE',
@@ -197,7 +198,7 @@ export const CartProvider = ({ children }) => {
     try {
       const userId = user?._id || "60f7b3b3b3b3b3b3b3b3b3b3";
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart/clear?userId=${userId}`;
+      const url = buildApiUrl(`/api/cart/clear?userId=${userId}`);
 
       const response = await fetch(url, {
         method: 'DELETE',

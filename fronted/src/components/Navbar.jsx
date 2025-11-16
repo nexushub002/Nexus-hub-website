@@ -4,6 +4,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { UserContext } from '../context/UserContext';
 import LoginPopup from "./LoginPopup";
+import { buildApiUrl } from '../config/api';
 
 const Navbar = () => {
 
@@ -11,6 +12,8 @@ const Navbar = () => {
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -39,10 +42,9 @@ const Navbar = () => {
       if (query && query.length > 1) {
         setIsSearching(true);
         try {
+          const url = buildApiUrl(`/api/search?q=${encodeURIComponent(query)}&limit=5`);
 
-            const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart/showAllProducts`;
-
-          const response = await fetch(`http://localhost:3000/api/search?q=${encodeURIComponent(query)}&limit=5`);
+          const response = await fetch(url);
           const products = await response.json();
           
           // Extract unique suggestions from product names and categories
@@ -156,7 +158,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
 
-    const url = `${import.meta.env.VITE_API_BASE_URL}/api/auth/logout`;
+    const url = buildApiUrl('/api/auth/logout');
 
     await fetch(url, {
       method: "POST",
@@ -171,79 +173,122 @@ const Navbar = () => {
       <div className="bg-blue-600 h-1 w-full"></div>
       
       {/* Desktop Navigation Bar */}
-      <div className="nav bg-white px-4 py-2 md:px-8 md:py-3 flex justify-between items-center border-b border-gray-200 hidden md:flex">
-        {/* NexusHub Logo on the left */}
-        <div className="logo flex items-center cursor-pointer" onClick={() => navigate('/')}>
-          <div className="flex flex-col leading-tight">
-            <div className="flex items-center">
-              <span className="text-xs text-gray-600">Explore Plus</span>
-              <span className="material-symbols-outlined text-yellow-500 text-xs ml-1">star</span>
-            </div>
-            <div className="text-2xl font-bold text-blue-600">NexusHub</div>
+      <div className="nav bg-white px-4 py-1 md:px-6 md:py-2 flex justify-between items-center border-b border-black/50 hidden md:flex">
+        <div className="flex items-center flex-1 min-w-0">
+
+          {/* NexusHub Logo on the left */}
+          <div className="logo flex items-center cursor-pointer mr-6" onClick={() => navigate('/')}>
+            <img
+              src="/Nexushub_logo.png"
+              alt="NexusHub logo"
+              className="h-24 w-auto object-contain"
+            />
           </div>
-        </div>
 
-        {/* Search Bar */}
-        <div className="flex-1 max-w-2xl mx-4 relative" ref={searchRef}>
-          <form onSubmit={handleSearchSubmit}>
-            <div className="bg-gray-100 rounded-md flex items-center px-4 py-2 h-[40px]">
-              <span className="material-symbols-outlined text-gray-500 mr-2">search</span>
-              <input
-                type="text"
-                placeholder='Search for Products, Brands and More'
-                className='outline-none bg-transparent w-full text-gray-700'
-                value={inputValue}
-                onChange={(e) => {
-                  setInputValue(e.target.value);
-                  setSelectedSuggestionIndex(-1);
-                }}
-                onFocus={() => inputValue.length > 1 && setShowSuggestions(true)}
-                onKeyDown={handleKeyDown}
-                autoComplete="off"
-              />
-              {inputValue && !isSearching && (
-                <button
-                  type="button"
-                  onClick={clearSearch}
-                  className="ml-2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <span className="material-symbols-outlined text-sm">close</span>
-                </button>
-              )}
-              {isSearching && (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 ml-2"></div>
-              )}
+          <div className="relative hidden md:block mr-6">
+            <div
+              className="flex items-center text-sm text-gray-700 cursor-pointer whitespace-nowrap"
+              onClick={() => setShowCategoryDropdown(prev => !prev)}
+            >
+              <span className="material-symbols-outlined text-[20px] mr-1">menu</span>
+              <span>Categories</span>
+              <span className="material-symbols-outlined text-sm ml-1">expand_more</span>
             </div>
-          </form>
 
-          {/* Search Suggestions Dropdown */}
-          {showSuggestions && searchSuggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1 max-h-80 overflow-y-auto">
-              {searchSuggestions.map((suggestion, index) => (
+            {showCategoryDropdown && (
+              <div
+                className="absolute left-0 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-40 py-2"
+                onMouseLeave={() => setShowCategoryDropdown(false)}
+              >
                 <div
-                  key={index}
-                  className={`px-4 py-3 cursor-pointer flex items-center border-b border-gray-100 last:border-b-0 transition-colors ${
-                    index === selectedSuggestionIndex 
-                      ? 'bg-blue-50 text-blue-700' 
-                      : 'hover:bg-gray-50 text-gray-700'
-                  }`}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  onMouseEnter={() => setSelectedSuggestionIndex(index)}
+                  className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    navigate('/category/apparel-accessories');
+                    setShowCategoryDropdown(false);
+                  }}
                 >
-                  <span className={`material-symbols-outlined mr-3 text-sm ${
-                    index === selectedSuggestionIndex ? 'text-blue-500' : 'text-gray-400'
-                  }`}>search</span>
-                  <span className="text-sm flex-1">{suggestion}</span>
-                  {index === selectedSuggestionIndex && (
-                    <span className="material-symbols-outlined text-blue-500 text-sm ml-2">arrow_forward</span>
-                  )}
+                  Apparel & Accessories
                 </div>
-              ))}
-              <div className="px-4 py-2 text-xs text-gray-500 bg-gray-50 border-t">
-                Use ↑↓ to navigate • Enter to select • Esc to close
+                <div
+                  className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    navigate('/category/jewelry');
+                    setShowCategoryDropdown(false);
+                  }}
+                >
+                  Jewelry
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+
+          {/* Search Bar */}
+          <div className="flex-1 max-w-2xl relative" ref={searchRef}>
+            <form onSubmit={handleSearchSubmit}>
+              <div className="bg-white border border-gray-300 rounded-full flex items-center pl-4 pr-2 h-[42px] shadow-sm">
+                <input
+                  type="text"
+                  placeholder='Search for Products, Brands and More'
+                  className='outline-none bg-transparent w-full text-gray-700'
+                  value={inputValue}
+                  onChange={(e) => {
+                    setInputValue(e.target.value);
+                    setSelectedSuggestionIndex(-1);
+                  }}
+                  onFocus={() => inputValue.length > 1 && setShowSuggestions(true)}
+                  onKeyDown={handleKeyDown}
+                  autoComplete="off"
+                />
+                {inputValue && !isSearching && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="ml-2 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                  >
+                    <span className="material-symbols-outlined text-sm">close</span>
+                  </button>
+                )}
+                {isSearching && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 ml-2"></div>
+                )}
+                <button
+                  type="submit"
+                  className="ml-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full h-8 w-8 flex items-center justify-center flex-shrink-0 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-sm">search</span>
+                </button>
+              </div>
+            </form>
+
+            {/* Search Suggestions Dropdown */}
+            {showSuggestions && searchSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1 max-h-80 overflow-y-auto">
+                {searchSuggestions.map((suggestion, index) => (
+                  <div
+                    key={index}
+                    className={`px-4 py-3 cursor-pointer flex items-center border-b border-gray-100 last:border-b-0 transition-colors ${
+                      index === selectedSuggestionIndex 
+                        ? 'bg-blue-50 text-blue-700' 
+                        : 'hover:bg-gray-50 text-gray-700'
+                    }`}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    onMouseEnter={() => setSelectedSuggestionIndex(index)}
+                  >
+                    <span className={`material-symbols-outlined mr-3 text-sm ${
+                      index === selectedSuggestionIndex ? 'text-blue-500' : 'text-gray-400'
+                    }`}>search</span>
+                    <span className="text-sm flex-1">{suggestion}</span>
+                    {index === selectedSuggestionIndex && (
+                      <span className="material-symbols-outlined text-blue-500 text-sm ml-2">arrow_forward</span>
+                    )}
+                  </div>
+                ))}
+                <div className="px-4 py-2 text-xs text-gray-500 bg-gray-50 border-t">
+                  Use ↑↓ to navigate • Enter to select • Esc to close
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right side navigation */}
@@ -363,25 +408,40 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* Mobile Categories Row */}
+      <div className="md:hidden bg-white px-3 py-2 border-b border-gray-200 flex gap-2 overflow-x-auto">
+        <button
+          type="button"
+          className="px-3 py-1 rounded-full border border-gray-300 text-xs text-gray-800 whitespace-nowrap"
+          onClick={() => navigate('/category/apparel-accessories')}
+        >
+          Apparel & Accessories
+        </button>
+        <button
+          type="button"
+          className="px-3 py-1 rounded-full border border-gray-300 text-xs text-gray-800 whitespace-nowrap"
+          onClick={() => navigate('/category/jewelry')}
+        >
+          Jewelry
+        </button>
+      </div>
+
       {/* Mobile Navigation Header */}
-      <div className="md:hidden bg-white px-4 py-3 border-b border-gray-200">
-        <div className="flex items-center space-x-4">
+      <div className="md:hidden bg-white px-3 py-2 border-b border-black/50">
+        <div className="flex items-center space-x-3">
           {/* NexusHub Logo */}
           <div className="logo flex items-center cursor-pointer flex-shrink-0" onClick={() => navigate('/')}>
-            <div className="flex flex-col leading-tight">
-              <div className="flex items-center">
-                <span className="text-[10px] text-gray-600">Explore Plus</span>
-                <span className="material-symbols-outlined text-yellow-500 text-xs ml-1">star</span>
-              </div>
-              <div className="text-lg font-bold text-blue-600">NexusHub</div>
-            </div>
+            <img
+              src="/Nexushub_logo.png"
+              alt="NexusHub logo"
+              className="h-10 w-auto object-contain"
+            />
           </div>
 
           {/* Mobile Search Bar - Full Width */}
           <div className="flex-1 relative" ref={searchRef}>
             <form onSubmit={handleSearchSubmit}>
-              <div className="bg-gray-100 rounded-lg flex items-center px-4 py-2 h-[40px]">
-                <span className="material-symbols-outlined text-gray-500 mr-3">search</span>
+              <div className="bg-white border border-gray-300 rounded-full flex items-center pl-3 pr-2 h-[40px] shadow-sm">
                 <input
                   type="text"
                   placeholder='Search for Products, Brands and More'
@@ -399,7 +459,7 @@ const Navbar = () => {
                   <button
                     type="button"
                     onClick={clearSearch}
-                    className="ml-2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="ml-2 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
                   >
                     <span className="material-symbols-outlined text-sm">close</span>
                   </button>
@@ -407,6 +467,12 @@ const Navbar = () => {
                 {isSearching && (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 ml-2"></div>
                 )}
+                <button
+                  type="submit"
+                  className="ml-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full h-8 w-8 flex items-center justify-center flex-shrink-0 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-sm">search</span>
+                </button>
               </div>
             </form>
 

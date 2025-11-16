@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { buildApiUrl } from '../config/api';
 
 
 // Normalized keys to match existing browse route
@@ -83,7 +84,7 @@ function TopDealsPage() {
       try {
         setLoading(true);
 
-        const url = `${import.meta.env.VITE_API_BASE_URL}/api/showAllProducts`;
+        const url = buildApiUrl('/api/showAllProducts');
 
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch products');

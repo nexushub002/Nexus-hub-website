@@ -5,6 +5,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import SendInquiryModal from "../components/SendInquiryModal";
 import "./ProductDetailsPage.css";
+import { buildApiUrl } from "../config/api";
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
@@ -26,14 +27,14 @@ const ProductDetailsPage = () => {
       try {
         setLoading(true);
 
-        const url1 = `${import.meta.env.VITE_API_BASE_URL}/api/products-new/public/${id}`;
+        const url1 = buildApiUrl(`/api/products-new/public/${id}`);
 
         // Try new API first, fallback to old API
         let res = await fetch(url1);
         if (!res.ok) {
           // Fallback to old API
 
-          const url2 = `${import.meta.env.VITE_API_BASE_URL}/api/product/${id}`;
+          const url2 = buildApiUrl(`/api/product/${id}`);
 
           res = await fetch(url2);
         }

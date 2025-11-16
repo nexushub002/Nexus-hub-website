@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import './LoginModel.css';
+import { buildApiUrl } from '../config/api';
 
 export default function LoginModel({ onClose, onLoginSuccess }) {
   const [step, setStep] = useState(1);
@@ -13,7 +14,7 @@ export default function LoginModel({ onClose, onLoginSuccess }) {
   const sendOtp = async () => {
     try {
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/auth/send-otp`;
+      const url = buildApiUrl('/api/auth/send-otp');
 
       const res = await fetch(url , {
         method: 'POST',
@@ -39,7 +40,7 @@ export default function LoginModel({ onClose, onLoginSuccess }) {
     try {
       console.log("🔔 Verifying OTP for phone:", phone, "otp:", otp);
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/auth/verify-otp`;
+      const url = buildApiUrl('/api/auth/verify-otp');
 
       const res = await fetch(url , {
         method: "POST",

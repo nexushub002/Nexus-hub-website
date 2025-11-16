@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './LoginPopup.css';
+import { buildApiUrl } from '../config/api';
 
 const LoginPopup = ({ isOpen, onClose, onLoginSuccess }) => {
   const [step, setStep] = useState(1); // 1: Mobile, 2: OTP
@@ -48,7 +49,7 @@ const LoginPopup = ({ isOpen, onClose, onLoginSuccess }) => {
     setLoading(true);
     try {
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/auth/send-otp`;
+      const url = buildApiUrl('/api/auth/send-otp');
 
       const response = await fetch(url , {
         method: 'POST',
@@ -107,7 +108,7 @@ const LoginPopup = ({ isOpen, onClose, onLoginSuccess }) => {
     setLoading(true);
     try {
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/auth/verify-otp`;
+      const url = buildApiUrl('/api/auth/verify-otp');
 
       const response = await fetch(url , {
         method: 'POST',
@@ -141,8 +142,7 @@ const LoginPopup = ({ isOpen, onClose, onLoginSuccess }) => {
     
     setLoading(true);
     try {
-
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/auth/send-otp`;
+      const url = buildApiUrl('/api/auth/send-otp');
 
       const response = await fetch(url, {
         method: 'POST',

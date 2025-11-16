@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { UserContext } from '../context/UserContext';
+import { buildApiUrl } from '../config/api';
 
 const SendInquiryModal = ({ isOpen, onClose, product, sellerInfo }) => {
   const { user } = useContext(UserContext);
@@ -56,7 +57,7 @@ const SendInquiryModal = ({ isOpen, onClose, product, sellerInfo }) => {
       
       console.log('Inquiry data being sent:', inquiryData);
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/inquiries/send`;
+      const url = buildApiUrl('/api/inquiries/send');
 
       const response = await fetch(url, {
         method: 'POST',

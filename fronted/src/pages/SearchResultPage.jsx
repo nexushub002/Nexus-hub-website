@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import ProductCart from "../components/ProductCard";
 import Navbar from "../components/Navbar";
 import "./SearchResultPage.css";
+import { buildApiUrl } from "../config/api";
 
 const SearchResultPage = () => {
   const location = useLocation();
@@ -16,7 +17,7 @@ const SearchResultPage = () => {
       setLoading(true);
       setError(null);
 
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`;
+      const url = buildApiUrl(`/api/search?q=${encodeURIComponent(query)}`);
 
       fetch(url)
         .then((res) => {

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
+import { buildApiUrl } from '../config/api';
 
 const SubcategoryProducts = () => {
   const { categoryKey, subcategoryKey } = useParams();
@@ -18,7 +19,7 @@ const SubcategoryProducts = () => {
       setError('');
       try {
 
-        const url = `${import.meta.env.VITE_API_BASE_URL}/api/products/by-keys?categoryKey=${categoryKey}&subcategoryKey=${subcategoryKey}&page=${page}&limit=24`;
+        const url = buildApiUrl(`/api/products/by-keys?categoryKey=${categoryKey}&subcategoryKey=${subcategoryKey}&page=${page}&limit=24`);
         
         const res = await fetch(url);
         const data = await res.json();

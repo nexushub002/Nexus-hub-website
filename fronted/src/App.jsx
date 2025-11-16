@@ -12,6 +12,7 @@ import WishlistPage from "./pages/WishlistPage";
 import HelpSupport from "./pages/HelpSupport";
 import OrdersPage from "./pages/OrdersPage";
 import SubcategoryProducts from "./pages/SubcategoryProducts";
+import CategoryLandingPage from "./pages/CategoryLandingPage";
 import TopRankingPage from './pages/TopRankingPage';
 import TopDealsPage from './pages/TopDealsPage';
 import NewArrivalsPage from './pages/NewArrivalsPage';
@@ -37,6 +38,7 @@ function App() {
               <Route path="/wishlist" element={<WishlistPage />} />
               <Route path="/help" element={<HelpSupport />} />
               <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/category/:categoryKey" element={<CategoryLandingPage />} />
               <Route path="/browse/:categoryKey/:subcategoryKey" element={<SubcategoryProducts />} />
             </Routes>
             <CartPanel />

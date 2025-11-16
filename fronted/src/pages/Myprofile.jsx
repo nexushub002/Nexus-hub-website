@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { UserContext } from "../context/UserContext";
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { buildApiUrl } from '../config/api';
 
 const getInitial = (s) => (s && s.trim() ? s.trim().charAt(0).toUpperCase() : 'U');
 const stringToColor = (str = 'user') => {
@@ -22,7 +23,7 @@ const Myprofile = () => {
     try {
   
       // Combine the base URL from your .env file with the specific endpoint
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/auth/logout`;
+      const url = buildApiUrl('/api/auth/logout');
 
       const res = await fetch(url, { method: "POST", credentials: "include" });
       if (res.ok) { setUser(null); window.location.href = "/"; }

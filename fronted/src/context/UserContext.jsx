@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect } from "react";
+import { buildApiUrl } from "../config/api";
 
 export const UserContext = createContext();
 
@@ -9,11 +10,10 @@ export default function UserProvider({ children }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        const url = buildApiUrl("/api/auth/me");
 
-        const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart/remove/${productId}?userId=${userId}`;
-        
-        const res = await fetch("http://localhost:3000/api/auth/me", {
-          credentials: "include"
+        const res = await fetch(url, {
+          credentials: "include",
         });
         if (res.ok) {
           const data = await res.json();

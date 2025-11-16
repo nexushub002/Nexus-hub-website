@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
+import { buildApiUrl } from '../config/api';
 
 const formatCurrency = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(n || 0);
 
@@ -14,7 +15,7 @@ const OrdersPage = () => {
       setError('');
       try {
 
-        const url = `${import.meta.env.VITE_API_BASE_URL}/api/orders/my`;
+        const url = buildApiUrl('/api/orders/my');
 
         const res = await fetch(url, { credentials: 'include' });
         if (res.status === 401) {

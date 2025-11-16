@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
+import { buildApiUrl } from '../config/api';
 
 const FeaturedSectionsTailwind = () => {
   const [topRankingProducts, setTopRankingProducts] = useState([]);
@@ -20,7 +21,7 @@ const FeaturedSectionsTailwind = () => {
       try {
         setLoading(true);
 
-        const url = `${import.meta.env.VITE_API_BASE_URL}/api/cart/showAllProducts`;
+        const url = buildApiUrl('/api/showAllProducts');
         
         // Fetch all products from your API
         const response = await fetch(url);
