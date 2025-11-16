@@ -52,7 +52,7 @@ const SlideBar = () => {
   ];
 
   return (
-    <div className="w-full">
+    <div className="w-full  bg-white">
       {/* Main Banner Slider */}
       <div className="relative">
         <Swiper

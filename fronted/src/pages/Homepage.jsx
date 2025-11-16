@@ -22,7 +22,7 @@ const Homepage = () => {
   }, []);
 
   return (
-    <div className="w-full overflow-x-hidden">
+    <div className="w-full overflow-x-hidden bg-white">
       <Navbar/>
       {isMobile && <CategoryList1/>}
       <SlideBar/>

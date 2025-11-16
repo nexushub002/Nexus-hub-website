@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
-import './ProductCard.css';
+// import './ProductCard.css';
 
 const ProductCard = ({ product }) => {
     const [isHovered, setIsHovered] = useState(false);
@@ -94,13 +94,12 @@ const ProductCard = ({ product }) => {
 
     return (
         <div className="product-card-container">
-            <div 
-                className={`product-card ${isHovered ? 'hovered' : ''}`}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                onClick={handleProductClick}
-            >
-                {/* Message Toast */}
+            
+                <div
+                onClick={handleProductClick}>
+                   
+
+                   {/* Message Toast */}
                 {showMessage && (
                     <div className="message-toast">
                         {showMessage}
@@ -128,46 +127,12 @@ const ProductCard = ({ product }) => {
                             {isWishlisted ? 'favorite' : 'favorite_border'}
                         </span>
                     </button>
-
-
-                    {/* Hover Overlay with Add to Cart */}
-                    <div className="hover-overlay">
-                        <button 
-                            className="add-to-cart-btn action-button"
-                            onClick={handleAddToCart}
-                        >
-                            <span className="material-symbols-outlined">shopping_cart</span>
-                            <span className="add-to-cart-text">Add to Cart</span>
-                        </button>
-                    </div>
+                    
                 </div>
 
                 {/* Product Details */}
                 <div className="product-details">
-                    {/* Category */}
-                    <div className="product-category">
-                        {category} {subcategory && `• ${subcategory}`}
-                    </div>
-
-                    {/* Seller Information */}
-                    {(product.sellerProfile || product.sellerInfo) && (
-                        <div className="seller-info-card">
-                            <Link 
-                                to={`/seller/${product.sellerProfile?.sellerId || product.sellerInfo?.sellerId || product.sellerId}`}
-                                className="seller-link"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <span className="material-symbols-outlined seller-icon">store</span>
-                                <span className="seller-name">
-                                    {product.sellerProfile?.companyName || product.sellerInfo?.companyName || 'Seller'}
-                                </span>
-                                {(product.sellerProfile?.verified || product.sellerInfo?.verified) && (
-                                    <span className="verified-icon material-symbols-outlined">verified</span>
-                                )}
-                            </Link>
-                        </div>
-                    )}
-
+                    
                     {/* Product Name */}
                     <h3 className="product-name" title={name}>
                         {name}
@@ -193,27 +158,30 @@ const ProductCard = ({ product }) => {
                         </div>
                     )}
 
-                    {/* Action Buttons Row */}
-                    <div className="action-buttons-row">
-                        <button 
-                            className="quick-add-btn action-button"
-                            onClick={handleAddToCart}
-                            title="Add to Cart"
-                        >
-                            <span className="material-symbols-outlined">shopping_cart</span>
-                        </button>
-                        <button 
-                            className="view-details-btn"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/product-detail/${_id}`);
-                            }}
-                        >
-                            <span className="view-details-text">View Details</span>
-                        </button>
-                    </div>
+                    {/* Seller Information */}
+                    {(product.sellerProfile || product.sellerInfo) && (
+                        <div className="seller-info-card">
+                            <Link 
+                                to={`/seller/${product.sellerProfile?.sellerId || product.sellerInfo?.sellerId || product.sellerId}`}
+                                className="seller-link"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <span className="material-symbols-outlined seller-icon">store</span>
+                                <span className="seller-name">
+                                    {product.sellerProfile?.companyName || product.sellerInfo?.companyName || 'Seller'}
+                                </span>
+                                {(product.sellerProfile?.verified || product.sellerInfo?.verified) && (
+                                    <span className="verified-icon material-symbols-outlined">verified</span>
+                                )}
+                            </Link>
+                        </div>
+                    )}
+
+                   
+                   
                 </div>
-            </div>
+                </div>
+            
         </div>
     );
 };

@@ -169,23 +169,22 @@ const Navbar = () => {
 
   return (
     <div>
-      {/* Top blue strip */}
-      <div className="bg-blue-600 h-1 w-full"></div>
+      
       
       {/* Desktop Navigation Bar */}
-      <div className="nav bg-white px-4 py-1 md:px-6 md:py-2 flex justify-between items-center border-b border-black/50 hidden md:flex">
+      <div className="nav bg-white px-4 py-1 md:px-6 md:py-5 flex justify-between items-center  border-b border-black/50 hidden md:flex">
         <div className="flex items-center flex-1 min-w-0">
 
           {/* NexusHub Logo on the left */}
-          <div className="logo flex items-center cursor-pointer mr-6" onClick={() => navigate('/')}>
+          <div className="logo flex items-center cursor-pointer mr-3" onClick={() => navigate('/')}>
             <img
               src="/Nexushub_logo.png"
               alt="NexusHub logo"
-              className="h-24 w-auto object-contain"
+              className="h-7 w-auto object-contain"
             />
           </div>
 
-          <div className="relative hidden md:block mr-6">
+          <div className="relative hidden md:block mx-5 ">
             <div
               className="flex items-center text-sm text-gray-700 cursor-pointer whitespace-nowrap"
               onClick={() => setShowCategoryDropdown(prev => !prev)}
@@ -402,30 +401,12 @@ const Navbar = () => {
           </div>
 
           {/* More options */}
-          <div className="flex items-center cursor-pointer">
-            <span className="material-symbols-outlined">more_vert</span>
-          </div>
+          
         </div>
       </div>
 
       {/* Mobile Categories Row */}
-      <div className="md:hidden bg-white px-3 py-2 border-b border-gray-200 flex gap-2 overflow-x-auto">
-        <button
-          type="button"
-          className="px-3 py-1 rounded-full border border-gray-300 text-xs text-gray-800 whitespace-nowrap"
-          onClick={() => navigate('/category/apparel-accessories')}
-        >
-          Apparel & Accessories
-        </button>
-        <button
-          type="button"
-          className="px-3 py-1 rounded-full border border-gray-300 text-xs text-gray-800 whitespace-nowrap"
-          onClick={() => navigate('/category/jewelry')}
-        >
-          Jewelry
-        </button>
-      </div>
-
+      
       {/* Mobile Navigation Header */}
       <div className="md:hidden bg-white px-3 py-2 border-b border-black/50">
         <div className="flex items-center space-x-3">
@@ -434,7 +415,7 @@ const Navbar = () => {
             <img
               src="/Nexushub_logo.png"
               alt="NexusHub logo"
-              className="h-10 w-auto object-contain"
+              className="h-7 w-auto object-contain"
             />
           </div>
 

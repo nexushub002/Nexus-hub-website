@@ -77,8 +77,8 @@ const ProductList = () => {
   }
 
   return (
-    <div className="w-full">
-      <div className="products-grid">
+    <div className="w-full py-1">
+      <div className="products grid grid-cols-2 md:grid-cols-4 gap-2">
         {products.map((product) => (
           <ProductCard key={product._id} product={product} />
         ))}
