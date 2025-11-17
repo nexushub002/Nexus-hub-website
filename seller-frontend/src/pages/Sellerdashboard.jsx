@@ -36,16 +36,24 @@ const Sellerdashboard = () => {
     totalOrders: 0,
     totalRevenue: 0
   })
+  const [shopLink, setShopLink] = useState('')
+  const [shopName, setShopName] = useState('')
+  const [sellerId, setSellerId] = useState('')
+  const [shopLinkError, setShopLinkError] = useState('')
+  const [shopLinkLoading, setShopLinkLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
   
   const { seller, isAuthenticated, loading } = useSeller()
   const { trackPageView, trackProductActivity, trackDashboardActivity } = useSellerTracking()
   const navigate = useNavigate()
+  const PUBLIC_SHOP_BASE_URL = import.meta.env.VITE_PUBLIC_SHOP_BASE_URL || 'https://nexus-hub-fronted.vercel.app'
 
   // Track page view and load data on mount
   useEffect(() => {
     if (seller) {
       trackPageView('seller_dashboard', { tab: activeTab })
       fetchDashboardData()
+      fetchShopLink()
     }
   }, [seller, activeTab])
 
@@ -81,6 +89,75 @@ const Sellerdashboard = () => {
       }
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error)
+    }
+  }
+
+  const fetchShopLink = async () => {
+    if (!seller) {
+      setShopLink('')
+      setShopName('')
+      setSellerId('')
+      return
+    }
+
+    setShopLinkLoading(true)
+    setShopLinkError('')
+
+    try {
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/profile`;
+
+      const response = await fetch(url , {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        const sellerData = data.seller || {}
+        const currentShopName = sellerData.shopName || ''
+        const currentSellerId = sellerData.sellerId || ''
+        setShopName(currentShopName)
+        setSellerId(currentSellerId)
+
+        if (currentShopName && currentSellerId) {
+          const segment = currentShopName.trim().replace(/[^A-Za-z0-9]/g, '')
+          if (segment) {
+            setShopLink(`${PUBLIC_SHOP_BASE_URL}/${segment}/${currentSellerId}`)
+          } else {
+            setShopLink('')
+          }
+        } else {
+          setShopLink('')
+        }
+      } else {
+        setShopLinkError(data.message || 'Unable to load your shop link right now.')
+        setShopLink('')
+      }
+    } catch (error) {
+      console.error('Error loading shop link:', error)
+      setShopLinkError('Unable to load your shop link right now.')
+      setShopLink('')
+    } finally {
+      setShopLinkLoading(false)
+    }
+  }
+
+  const handleCopyLink = async () => {
+    if (!shopLink) return
+    try {
+      await navigator.clipboard.writeText(shopLink)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (error) {
+      console.error('Copy failed:', error)
+    }
+  }
+
+  const handleOpenShopPage = () => {
+    if (shopLink) {
+      window.open(shopLink, '_blank', 'noopener,noreferrer')
     }
   }
 
@@ -226,6 +303,60 @@ const Sellerdashboard = () => {
                       <div className='mt-3 h-2 w-full rounded-md bg-gradient-to-r from-blue-100 to-transparent opacity-70'></div>
                     </div>
                   ))}
+                </div>
+
+                {/* Shop Link */}
+                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl lg:rounded-2xl p-4 lg:p-5 shadow-sm`}>
+                  <div className='flex items-center justify-between mb-3'>
+                    <div>
+                      <div className='text-xs uppercase tracking-wide text-gray-500'>Shop Link</div>
+                      <div className='text-lg font-semibold'>
+                        {shopName ? shopName : 'Set your shop name'}
+                      </div>
+                      {sellerId && (
+                        <div className='text-xs text-gray-500 mt-1'>Seller ID: {sellerId}</div>
+                      )}
+                    </div>
+                    <button
+                      onClick={fetchShopLink}
+                      className='text-xs font-semibold text-blue-600 hover:text-blue-700'
+                    >
+                      Refresh
+                    </button>
+                  </div>
+
+                  {shopLinkLoading ? (
+                    <p className='text-sm text-gray-500'>Generating your unique link...</p>
+                  ) : shopLink ? (
+                    <>
+                      <div className='bg-gray-50 rounded-lg p-3 text-sm break-all font-medium text-gray-800'>
+                        {shopLink}
+                      </div>
+                      <div className='flex flex-wrap gap-2 mt-3'>
+                        <button
+                          onClick={handleCopyLink}
+                          className='px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition'
+                        >
+                          {copied ? 'Copied!' : 'Copy Link'}
+                        </button>
+                        <button
+                          onClick={handleOpenShopPage}
+                          className='px-4 py-2 text-sm border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition'
+                        >
+                          Preview
+                        </button>
+                      </div>
+                      <p className='text-xs text-gray-500 mt-2'>
+                        Share this with buyers: {PUBLIC_SHOP_BASE_URL}/ShopName/SellerID
+                      </p>
+                    </>
+                  ) : (
+                    <p className='text-sm text-gray-500'>
+                      {shopLinkError
+                        ? shopLinkError
+                        : 'Set your shop name in Manufacturer Profile to generate your link.'}
+                    </p>
+                  )}
                 </div>
 
                 {/* Recent Products Preview */}

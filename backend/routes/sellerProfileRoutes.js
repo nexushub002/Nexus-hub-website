@@ -331,8 +331,8 @@ router.get("/profile", verifySeller, async (req, res) => {
 // ----------------------
 router.put("/profile", verifySeller, async (req, res) => {
   try {
-    const updateData = req.body;
-    
+    const updateData = { ...req.body };
+
     // Remove fields that shouldn't be updated
     delete updateData.sellerId;
     delete updateData.email;
@@ -341,6 +341,38 @@ router.put("/profile", verifySeller, async (req, res) => {
     delete updateData.createdAt;
     delete updateData.updatedAt;
 
+    // Normalize shopName if provided (trim and collapse spaces)
+    if (typeof updateData.shopName === "string") {
+      const normalizedShopName = updateData.shopName.trim();
+      updateData.shopName = normalizedShopName || undefined;
+
+      if (normalizedShopName) {
+        // Prevent changing shop name once set
+        if (
+          req.seller.shopName &&
+          req.seller.shopName.toLowerCase() !== normalizedShopName.toLowerCase()
+        ) {
+          return res.status(400).json({
+            success: false,
+            message: "Shop name cannot be changed once it is set. Please contact support for assistance.",
+          });
+        }
+
+        // Check if another seller already uses this shop name (case-insensitive)
+        const existingWithShopName = await Seller.findOne({
+          _id: { $ne: req.seller._id },
+          shopName: new RegExp(`^${normalizedShopName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"),
+        });
+
+        if (existingWithShopName) {
+          return res.status(400).json({
+            success: false,
+            message: "This shop name is already taken. Please choose a different, unique shop name.",
+          });
+        }
+      }
+    }
+
     const updatedSeller = await Seller.findByIdAndUpdate(
       req.seller._id,
       updateData,
@@ -348,23 +380,92 @@ router.put("/profile", verifySeller, async (req, res) => {
     );
 
     if (!updatedSeller) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Seller not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Seller not found",
       });
     }
 
     res.json({
       success: true,
       message: "Profile updated successfully",
-      seller: updatedSeller
+      seller: updatedSeller,
     });
   } catch (error) {
     console.error("Error updating seller profile:", error);
+
+    // Handle MongoDB duplicate key error for shopName
+    if (error.code === 11000 && error.keyPattern && error.keyPattern.shopName) {
+      return res.status(400).json({
+        success: false,
+        message: "This shop name is already taken. Please choose a different, unique shop name.",
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: "Error updating seller profile",
-      error: error.message
+      error: error.message,
+    });
+  }
+});
+
+// ----------------------
+// CHECK SHOP NAME AVAILABILITY
+// ----------------------
+router.get("/shop-name/check", verifySeller, async (req, res) => {
+  try {
+    const { name } = req.query;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        available: false,
+        message: "Shop name is required for availability check.",
+      });
+    }
+
+    const normalizedShopName = name.trim();
+
+    // If seller is checking their own current shop name, it's available
+    if (
+      req.seller.shopName &&
+      req.seller.shopName.toLowerCase() === normalizedShopName.toLowerCase()
+    ) {
+      return res.json({
+        success: true,
+        available: true,
+        isCurrent: true,
+        message: "This is your current shop name.",
+      });
+    }
+
+    const existingSeller = await Seller.findOne({
+      shopName: new RegExp(`^${normalizedShopName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"),
+    });
+
+    if (existingSeller) {
+      return res.json({
+        success: true,
+        available: false,
+        isCurrent: false,
+        message: "This shop name is already taken.",
+      });
+    }
+
+    res.json({
+      success: true,
+      available: true,
+      isCurrent: false,
+      message: "Great choice! This shop name is available.",
+    });
+  } catch (error) {
+    console.error("Error checking shop name availability:", error);
+    res.status(500).json({
+      success: false,
+      available: false,
+      isCurrent: false,
+      message: "Unable to check shop name right now. Please try again later.",
     });
   }
 });

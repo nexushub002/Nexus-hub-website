@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSeller } from '../context/SellerContext';
 import Sidebar from '../compo/Sidebar';
 
@@ -12,6 +12,11 @@ const ManufacturerProfile = () => {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [message, setMessage] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [shopNameStatus, setShopNameStatus] = useState(null); // null | checking | available | taken | current | error
+  const [shopNameFeedback, setShopNameFeedback] = useState('');
+  const [shopNameInput, setShopNameInput] = useState('');
+  const [savingShopName, setSavingShopName] = useState(false);
+  const shopNameCheckTimeout = useRef(null);
 
   const handleToggleTheme = () => setIsDarkMode((v) => !v);
 
@@ -28,7 +33,7 @@ const ManufacturerProfile = () => {
 
   const fetchManufacturerProfile = async () => {
     try {
-      
+      setMessage('');
       const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/profile`;
 
       const response = await fetch(url , {
@@ -44,6 +49,7 @@ const ManufacturerProfile = () => {
           totalProducts: sellerData.products?.length || 0
         });
         setFormData(sellerData);
+        setShopNameInput(sellerData.shopName || '');
       } else {
         setMessage(data.message || 'Error loading manufacturer profile');
       }
@@ -51,6 +57,138 @@ const ManufacturerProfile = () => {
       console.error('Error fetching manufacturer profile:', error);
       setMessage('Error loading manufacturer profile');
     }
+  };
+  useEffect(() => {
+    return () => {
+      if (shopNameCheckTimeout.current) {
+        clearTimeout(shopNameCheckTimeout.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (manufacturerData) {
+      setShopNameInput(manufacturerData.shopName || '');
+      if (manufacturerData.shopName) {
+        setShopNameStatus('current');
+        setShopNameFeedback('This is your current shop name.');
+      } else {
+        setShopNameStatus(null);
+        setShopNameFeedback('Choose a unique shop name visible to buyers.');
+      }
+    }
+  }, [manufacturerData?.shopName]);
+
+  const scheduleShopNameCheck = (value) => {
+    if (shopNameCheckTimeout.current) {
+      clearTimeout(shopNameCheckTimeout.current);
+    }
+
+    if (!value || !value.trim()) {
+      setShopNameStatus(null);
+      setShopNameFeedback('Choose a unique shop name visible to buyers.');
+      return;
+    }
+
+    shopNameCheckTimeout.current = setTimeout(() => {
+      checkShopNameAvailability(value);
+    }, 600);
+  };
+
+  const checkShopNameAvailability = async (nameToCheck) => {
+    const trimmed = nameToCheck.trim();
+    if (!trimmed) {
+      setShopNameStatus(null);
+      setShopNameFeedback('');
+      return;
+    }
+
+    if (
+      manufacturerData?.shopName &&
+      manufacturerData.shopName.toLowerCase() === trimmed.toLowerCase()
+    ) {
+      setShopNameStatus('current');
+      setShopNameFeedback('This is your current shop name.');
+      return;
+    }
+
+    setShopNameStatus('checking');
+    setShopNameFeedback('Checking availability...');
+
+    try {
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/shop-name/check?name=${encodeURIComponent(trimmed)}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        throw new Error(text || 'Server returned an unexpected response while checking the shop name.');
+      }
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Unable to check shop name.');
+      }
+
+      if (data.available && data.isCurrent) {
+        setShopNameStatus('current');
+        setShopNameFeedback('This is your current shop name.');
+      } else if (data.available) {
+        setShopNameStatus('available');
+        setShopNameFeedback('Great! This shop name is available.');
+      } else {
+        setShopNameStatus('taken');
+        setShopNameFeedback('This shop name is already taken. Please choose another.');
+      }
+    } catch (error) {
+      console.error('Shop name availability error:', error);
+      setShopNameStatus('error');
+      setShopNameFeedback(error.message || 'Unable to check shop name right now.');
+    }
+  };
+
+  const hasPermanentShopName = Boolean(manufacturerData?.shopName);
+
+  const handleShopNameChange = (e) => {
+    if (hasPermanentShopName) {
+      return;
+    }
+
+    const { value } = e.target;
+    if (shopNameCheckTimeout.current) {
+      clearTimeout(shopNameCheckTimeout.current);
+    }
+
+    setShopNameInput(value);
+    setFormData(prev => ({
+      ...prev,
+      shopName: value
+    }));
+
+    if (!value || !value.trim()) {
+      setShopNameStatus(null);
+      setShopNameFeedback('Choose a unique shop name visible to buyers.');
+      return;
+    }
+
+    if (
+      manufacturerData?.shopName &&
+      manufacturerData.shopName.toLowerCase() === value.trim().toLowerCase()
+    ) {
+      setShopNameStatus('current');
+      setShopNameFeedback('This is your current shop name.');
+      return;
+    }
+
+    setShopNameStatus('checking');
+    setShopNameFeedback('Checking availability...');
+    scheduleShopNameCheck(value);
   };
 
   const handleInputChange = (e) => {
@@ -75,6 +213,11 @@ const ManufacturerProfile = () => {
   const handleSaveProfile = async () => {
     try {
 
+      if (formData.shopName && (shopNameStatus === 'taken' || shopNameStatus === 'checking')) {
+        setMessage('Please ensure your shop name is unique before saving.');
+        return;
+      }
+
       const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/profile`;
 
       const response = await fetch(url, {
@@ -91,12 +234,80 @@ const ManufacturerProfile = () => {
         setManufacturerData(data.seller);
         setIsEditing(false);
         setMessage('Profile updated successfully');
+        if (data.seller?.shopName) {
+          setShopNameInput(data.seller.shopName);
+        }
       } else {
         setMessage(data.message || 'Error updating profile');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
       setMessage('Error updating profile');
+    }
+  };
+
+  const handleSaveShopName = async () => {
+    if (hasPermanentShopName) {
+      setMessage('Shop name is already set and cannot be changed.');
+      return;
+    }
+
+    const trimmed = shopNameInput.trim();
+
+    if (!trimmed) {
+      setMessage('Shop name cannot be empty.');
+      return;
+    }
+
+    if (shopNameStatus === 'checking') {
+      setMessage('Please wait until the availability check finishes.');
+      return;
+    }
+
+    if (shopNameStatus === 'taken') {
+      setMessage('This shop name is already taken. Please choose a different one.');
+      return;
+    }
+
+    if (
+      manufacturerData?.shopName &&
+      manufacturerData.shopName.toLowerCase() === trimmed.toLowerCase()
+    ) {
+      setMessage('This is already your current shop name.');
+      return;
+    }
+
+    try {
+      setSavingShopName(true);
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/profile`;
+
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ shopName: trimmed })
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setManufacturerData(prev => prev ? { ...prev, shopName: data.seller.shopName } : data.seller);
+        setFormData(prev => ({
+          ...prev,
+          shopName: data.seller.shopName
+        }));
+        setShopNameStatus('current');
+        setShopNameFeedback('This is your current shop name.');
+        setMessage('Shop name updated successfully');
+      } else {
+        setMessage(data.message || 'Error updating shop name');
+      }
+    } catch (error) {
+      console.error('Error updating shop name:', error);
+      setMessage('Error updating shop name');
+    } finally {
+      setSavingShopName(false);
     }
   };
 
@@ -363,6 +574,73 @@ const ManufacturerProfile = () => {
                 </div>
               </div>
 
+              {/* Shop Name Section */}
+              <div className="border-b pb-6">
+                <h2 className="text-xl font-semibold mb-4">Shop Name</h2>
+                <div className={`flex flex-col md:flex-row gap-4 ${hasPermanentShopName ? 'opacity-75' : ''}`}>
+                  <input
+                    type="text"
+                    name="shopNameInput"
+                    value={shopNameInput}
+                    onChange={handleShopNameChange}
+                    className="w-full md:flex-1 px-3 py-2 border rounded-lg"
+                    placeholder={hasPermanentShopName ? 'Shop name is locked' : 'Enter your public shop name'}
+                    disabled={hasPermanentShopName || savingShopName}
+                  />
+                  <button
+                    onClick={handleSaveShopName}
+                    disabled={
+                      hasPermanentShopName ||
+                      savingShopName ||
+                      shopNameStatus === 'checking' ||
+                      shopNameStatus === 'taken' ||
+                      !shopNameInput.trim() ||
+                      (manufacturerData?.shopName
+                        ? manufacturerData.shopName.toLowerCase() === shopNameInput.trim().toLowerCase()
+                        : false)
+                    }
+                    className={`px-4 py-2 rounded-lg text-white transition ${
+                      savingShopName ||
+                      shopNameStatus === 'checking' ||
+                      shopNameStatus === 'taken' ||
+                      !shopNameInput.trim() ||
+                      (manufacturerData?.shopName
+                        ? manufacturerData.shopName.toLowerCase() === shopNameInput.trim().toLowerCase()
+                        : false)
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    }`}
+                  >
+                    {savingShopName
+                      ? 'Saving...'
+                      : hasPermanentShopName
+                        ? 'Shop Name Locked'
+                        : manufacturerData?.shopName
+                        ? 'Update Shop Name'
+                        : 'Save Shop Name'}
+                  </button>
+                </div>
+                <p
+                  className={`text-sm mt-2 ${
+                    hasPermanentShopName
+                      ? 'text-green-600'
+                      : shopNameStatus === 'taken'
+                      ? 'text-red-600'
+                      : shopNameStatus === 'available' || shopNameStatus === 'current'
+                        ? 'text-green-600'
+                        : shopNameStatus === 'error'
+                          ? 'text-orange-600'
+                          : 'text-gray-500'
+                  }`}
+                >
+                  {hasPermanentShopName
+                    ? 'This shop name is permanent. Contact support if you need to request a change.'
+                    : shopNameStatus === 'checking'
+                    ? 'Checking availability...'
+                    : shopNameFeedback || 'This name is visible to buyers and must be unique across all sellers.'}
+                </p>
+              </div>
+
               {/* Company Logo Section */}
               <div className="border-b pb-6">
                 <h2 className="text-xl font-semibold mb-4">Company Logo</h2>
@@ -396,6 +674,16 @@ const ManufacturerProfile = () => {
               <div className="border-b pb-6">
                 <h2 className="text-xl font-semibold mb-4">Company Information</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium mb-2">Shop Name (Unique)</label>
+                    <p className="text-gray-700">
+                      {manufacturerData.shopName || 'Not set yet'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      This name is visible to buyers and must be unique across all sellers.
+                    </p>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium mb-2">Company Name</label>
                     {isEditing ? (

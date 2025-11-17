@@ -5,7 +5,7 @@ import './SellerProfilePage.css';
 import { buildApiUrl } from '../config/api';
 
 const SellerProfilePage = () => {
-  const { sellerId } = useParams();
+  const { sellerId, shopName: shopNameParam } = useParams();
   const [seller, setSeller] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -107,8 +107,8 @@ const SellerProfilePage = () => {
       <div className="seller-profile-container">
         {/* Seller Header */}
         <div className="seller-header-section">
-          <div className="seller-header-content">
-            <div className="seller-avatar">
+        <div className="seller-header-content">
+          <div className="seller-avatar">
               {seller.companyLogo?.url ? (
                 <img src={seller.companyLogo.url} alt={seller.companyName} />
               ) : (
@@ -119,7 +119,15 @@ const SellerProfilePage = () => {
             </div>
             
             <div className="seller-info">
-              <h1>{seller.companyName}</h1>
+              <h1>{seller.shopName || seller.companyName}</h1>
+              {seller.shopName && seller.companyName && seller.companyName !== seller.shopName && (
+                <p className="seller-subtitle">{seller.companyName}</p>
+              )}
+              {shopNameParam && seller.shopName && shopNameParam.toLowerCase() !== seller.shopName.toLowerCase() && (
+                <p className="seller-subtitle mismatch-note">
+                  (You were redirected via "{shopNameParam}", official shop name is "{seller.shopName}")
+                </p>
+              )}
               <div className="seller-meta">
                 <span className="seller-id">ID: {seller.sellerId}</span>
                 {seller.verified && (
@@ -248,7 +256,7 @@ const SellerProfilePage = () => {
                     {products.map((product) => (
                       <Link 
                         key={product._id} 
-                        to={`/product/${product._id}`}
+                        to={`/product-detail/${product._id}`}
                         className="product-card"
                       >
                         <div className="product-image">

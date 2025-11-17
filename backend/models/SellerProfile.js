@@ -41,6 +41,14 @@ const sellerSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+
+    // Public facing unique shop name (for marketplace display)
+    shopName: {
+      type: String,
+      trim: true,
+      unique: true, // ensure uniqueness at DB level
+      sparse: true, // allow many null/undefined until seller sets it
+    },
     yearOfEstablishment: {
       type: Number,
     },

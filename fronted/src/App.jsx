@@ -33,6 +33,7 @@ function App() {
               <Route path="/new-arrivals" element={<NewArrivalsPage />} />
               <Route path="/product-detail/:id" element={<ProductDetailsPage />} />
               <Route path="/seller/:sellerId" element={<SellerProfilePage />} />
+              <Route path="/:shopName/:sellerId" element={<SellerProfilePage />} />
               <Route path="/myprofile" element={<Myprofile />} />
               <Route path="/search" element={<SearchResultPage />} />
               <Route path="/wishlist" element={<WishlistPage />} />

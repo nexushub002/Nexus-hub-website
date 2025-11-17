@@ -55,6 +55,17 @@
   font-weight: 700;
 }
 
+.seller-subtitle {
+  margin: -8px 0 8px 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 16px;
+}
+
+.seller-subtitle.mismatch-note {
+  font-size: 14px;
+  color: #fed7aa;
+}
+
 .seller-meta {
   display: flex;
   align-items: center;
