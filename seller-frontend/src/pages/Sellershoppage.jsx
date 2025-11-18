@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 const Sellershoppage = () => {
@@ -7,6 +7,7 @@ const Sellershoppage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [currentBanner, setCurrentBanner] = useState(0);
 
   useEffect(() => {
     const fetchSellerData = async () => {
@@ -53,6 +54,34 @@ const Sellershoppage = () => {
     fetchSellerData();
   }, [sellerId]);
 
+  const bannerImages = useMemo(
+    () => (seller?.websiteBanners || []).filter((banner) => banner?.url),
+    [seller?.websiteBanners]
+  );
+
+  useEffect(() => {
+    if (bannerImages.length <= 1) return;
+    const timer = setInterval(
+      () => setCurrentBanner((prev) => (prev + 1) % bannerImages.length),
+      3000
+    );
+    return () => clearInterval(timer);
+  }, [bannerImages.length]);
+
+  useEffect(() => {
+    setCurrentBanner(0);
+  }, [bannerImages.length]);
+
+  const goToPrev = () => {
+    if (!bannerImages.length) return;
+    setCurrentBanner((prev) => (prev - 1 + bannerImages.length) % bannerImages.length);
+  };
+
+  const goToNext = () => {
+    if (!bannerImages.length) return;
+    setCurrentBanner((prev) => (prev + 1) % bannerImages.length);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-800">
@@ -78,6 +107,66 @@ const Sellershoppage = () => {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 px-4 py-10">
       <div className="max-w-6xl mx-auto">
+        <section className="mb-8 -mx-4 sm:mx-0">
+          {bannerImages.length > 0 ? (
+            <div className="relative h-64 sm:h-72 md:h-[460px] w-full overflow-hidden bg-gray-200">
+              {bannerImages.map((banner, index) => (
+                <img
+                  key={banner._id || banner.url}
+                  src={banner.url}
+                  alt={`Banner ${index + 1}`}
+                  className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
+                    index === currentBanner ? 'opacity-100' : 'opacity-0'
+                  }`}
+                />
+              ))}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent pointer-events-none" />
+              <div className="absolute bottom-6 left-6 right-6 text-white drop-shadow-lg max-w-5xl mx-auto px-4">
+                <p className="text-xs md:text-sm uppercase tracking-[0.35em] text-white/70">Featured</p>
+                <h2 className="text-2xl md:text-4xl font-semibold capitalize">
+                  {seller.shopName || seller.companyName || 'Our Store'}
+                </h2>
+                <p className="text-sm md:text-base text-white/80 mt-2 max-w-2xl">
+                  Premium selections curated directly from {seller.companyName || 'our manufacturing unit'}.
+                </p>
+              </div>
+              {bannerImages.length > 1 && (
+                <>
+                  <button
+                    onClick={goToPrev}
+                    aria-label="Previous banner"
+                    className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-2 shadow"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    onClick={goToNext}
+                    aria-label="Next banner"
+                    className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-2 shadow"
+                  >
+                    ›
+                  </button>
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                    {bannerImages.map((_, idx) => (
+                      <span
+                        key={idx}
+                        className={`h-2 w-2 rounded-full ${idx === currentBanner ? 'bg-white' : 'bg-white/40'}`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-3xl bg-gradient-to-r from-blue-50 via-white to-purple-50 p-8 shadow-sm">
+              <h2 className="text-2xl font-semibold mb-2">Showcase in progress</h2>
+              <p className="text-gray-600">
+                This seller has not uploaded website banners yet. Check back soon to explore their highlights.
+              </p>
+            </div>
+          )}
+        </section>
+
         <header className="bg-white rounded-2xl shadow-sm p-6 mb-8 flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
           <div>
             <p className="text-sm uppercase text-gray-400 tracking-wide">Shop</p>

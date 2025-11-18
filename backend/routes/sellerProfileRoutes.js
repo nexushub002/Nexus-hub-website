@@ -865,4 +865,57 @@ router.put("/logo", verifySeller, async (req, res) => {
   }
 });
 
+// ----------------------
+// UPDATE WEBSITE BANNERS
+// ----------------------
+router.put("/website-banners", verifySeller, async (req, res) => {
+  try {
+    const { banners } = req.body;
+
+    if (!Array.isArray(banners)) {
+      return res.status(400).json({
+        success: false,
+        message: "Banners array is required",
+      });
+    }
+
+    if (banners.length > 4) {
+      return res.status(400).json({
+        success: false,
+        message: "You can upload a maximum of 4 website banners.",
+      });
+    }
+
+    const sanitizedBanners = banners.map((banner) => {
+      if (!banner || !banner.url) {
+        throw new Error("Each banner must include a URL.");
+      }
+      return {
+        url: banner.url,
+        originalName: banner.originalName || "website-banner",
+        format: banner.format || "image",
+        uploadedAt: banner.uploadedAt ? new Date(banner.uploadedAt) : new Date(),
+      };
+    });
+
+    req.seller.websiteBanners = sanitizedBanners;
+    await req.seller.save();
+
+    res.json({
+      success: true,
+      message: "Website banners updated successfully",
+      banners: req.seller.websiteBanners,
+    });
+  } catch (error) {
+    console.error("Error updating website banners:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Error updating website banners",
+    });
+  }
+});
+
+// ----------------------
+// UPLOAD WEBSITE BANNERS (Cloudinary + Mongo)
+// ----------------------
 export default router;

@@ -109,6 +109,22 @@ const sellerSchema = new mongoose.Schema(
       uploadedAt: { type: Date, default: Date.now }
     }, // Cloudinary URL with metadata
     
+    websiteBanners: {
+      type: [{
+        url: { type: String, required: true },
+        originalName: { type: String },
+        format: { type: String },
+        uploadedAt: { type: Date, default: Date.now }
+      }],
+      validate: {
+        validator: function (val) {
+          return !val || val.length <= 4;
+        },
+        message: "You can upload a maximum of 4 website banners."
+      },
+      default: []
+    },
+    
     certificates: [{
       url: { type: String, required: true },
       originalName: { type: String },

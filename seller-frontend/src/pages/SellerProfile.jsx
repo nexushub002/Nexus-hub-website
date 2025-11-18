@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSeller } from '../context/SellerContext';
 
 // Helpers for avatar
@@ -35,6 +36,7 @@ const Card = ({ title, children, right }) => (
 
 const SellerProfile = () => {
   const { seller, checkAuthStatus } = useSeller();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '', email: '', phone: '', businessName: '', gstNumber: '',
     companyAddress: { street: '', city: '', state: '', zipCode: '' }
@@ -129,7 +131,7 @@ const SellerProfile = () => {
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,rgba(59,130,246,0.08),transparent_40%),radial-gradient(ellipse_at_bottom_right,rgba(168,85,247,0.08),transparent_40%)] p-6">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center justify-between">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-semibold"
                  style={{ backgroundColor: stringToColor(displayName) }}>
@@ -140,9 +142,18 @@ const SellerProfile = () => {
               <p className="text-gray-600">View and edit your personal and company information</p>
             </div>
           </div>
-          <div className="hidden md:flex items-center gap-3">
-            <div className="px-3 py-1 text-xs rounded-full bg-blue-50 text-blue-700 border border-blue-200">Secure</div>
-            <div className="px-3 py-1 text-xs rounded-full bg-purple-50 text-purple-700 border border-purple-200">Editable</div>
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="px-3 py-1 text-xs rounded-full bg-blue-50 text-blue-700 border border-blue-200">Secure</div>
+              <div className="px-3 py-1 text-xs rounded-full bg-purple-50 text-purple-700 border border-purple-200">Editable</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/seller/website-maker')}
+              className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition"
+            >
+              Complete Manufacturer Profile
+            </button>
           </div>
         </div>
 

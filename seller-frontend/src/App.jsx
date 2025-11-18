@@ -10,6 +10,7 @@ import MyOrders from './pages/MyOrders';
 import SellerProfile from './pages/SellerProfile';
 import ManufacturerProfile from './pages/ManufacturerProfile';
 import Sellershoppage from './pages/Sellershoppage';
+import Websitemaker from './pages/Websitemaker';
 import { SellerProvider, useSeller } from './context/SellerContext';
 import './App.css'
 
@@ -84,6 +85,7 @@ function AppRoutes() {
         <Route path="/seller/profile" element={<ProtectedRoute><SellerProfile /></ProtectedRoute>} />
         <Route path="/:shopName/:sellerId" element={<Sellershoppage />} />
         <Route path="/seller/manufacturer-profile" element={<ProtectedRoute><ManufacturerProfile /></ProtectedRoute>} />
+        <Route path="/seller/website-maker" element={<ProtectedRoute><Websitemaker /></ProtectedRoute>} />
         {/* Catch-all route for any unauthorized seller paths */}
         <Route path="/seller/*" element={<Navigate to="/seller-signin" replace />} />
       </Routes>

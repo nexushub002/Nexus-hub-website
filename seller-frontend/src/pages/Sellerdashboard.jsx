@@ -47,6 +47,11 @@ const Sellerdashboard = () => {
   const { trackPageView, trackProductActivity, trackDashboardActivity } = useSellerTracking()
   const navigate = useNavigate()
   const PUBLIC_SHOP_BASE_URL = import.meta.env.VITE_PUBLIC_SHOP_BASE_URL || 'https://nexus-hub-fronted.vercel.app'
+  const websiteFeatures = [
+    'Tell your brand story with banners & highlights',
+    'Pin your top-performing products',
+    'Share a single public link with buyers'
+  ]
 
   // Track page view and load data on mount
   useEffect(() => {
@@ -303,6 +308,54 @@ const Sellerdashboard = () => {
                       <div className='mt-3 h-2 w-full rounded-md bg-gradient-to-r from-blue-100 to-transparent opacity-70'></div>
                     </div>
                   ))}
+                </div>
+
+                {/* Website Maker Section */}
+                <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl lg:rounded-2xl p-4 lg:p-5 shadow-sm`}>
+                  <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4'>
+                    <div>
+                      <div className='text-xs uppercase tracking-wide text-gray-500'>Website Maker</div>
+                      <div className='text-lg font-semibold mt-1'>Launch your Nexus Hub storefront</div>
+                      <p className='text-sm text-gray-500 mt-2'>
+                        Customize your shop details once and share a branded microsite with every buyer.
+                      </p>
+                    </div>
+                    <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${isDarkMode ? 'bg-white/10 text-white' : 'bg-blue-50 text-blue-700'}`}>
+                      <span>⚡</span>
+                      <span>Live in under 2 minutes</span>
+                    </div>
+                  </div>
+                  <div className='mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3'>
+                    {websiteFeatures.map((feature) => (
+                      <div
+                        key={feature}
+                        className={`flex items-start gap-2 p-3 rounded-lg text-sm ${isDarkMode ? 'bg-white/5 text-white/80' : 'bg-gray-50 text-gray-600'}`}
+                      >
+                        <span className='text-green-500 mt-0.5'>✓</span>
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className='mt-4 flex flex-wrap gap-3'>
+                    <button
+                      onClick={() => navigate('/seller/website-maker')}
+                      className='px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition'
+                    >
+                      Website Maker
+                    </button>
+                    <button
+                      onClick={handleOpenShopPage}
+                      disabled={!shopLink}
+                      className={`px-4 py-2 text-sm rounded-lg border transition ${shopLink ? 'border-blue-600 text-blue-600 hover:bg-blue-50' : 'border-gray-200 text-gray-400 cursor-not-allowed'}`}
+                    >
+                      Preview Website
+                    </button>
+                  </div>
+                  {!shopLink && (
+                    <p className='text-xs text-gray-500 mt-2'>
+                      Finish your Manufacturer Profile to auto-generate the public website link.
+                    </p>
+                  )}
                 </div>
 
                 {/* Shop Link */}
