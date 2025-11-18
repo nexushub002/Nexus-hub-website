@@ -209,29 +209,37 @@ const AddProduct = () => {
     }))
   }
 
-  const uploadImagesToCloudinary = async (imageFiles) => {
-    const uploadPromises = imageFiles.map(async (file) => {
-      const formData = new FormData()
-      formData.append('images', file)
-      
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/upload`;
+const uploadImagesToCloudinary = async (imageFiles) => {
+  const uploadPromises = imageFiles.map(async (file) => {
+    if (!file.type.startsWith('image/')) {
+      throw new Error(`${file.name} is not a valid image file`)
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error(`${file.name} exceeds the 10MB size limit`)
+    }
 
-      const response = await fetch(url, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData
-      })
-      
-      if (!response.ok) {
-        throw new Error('Failed to upload image')
-      }
-      
-      const data = await response.json()
-      return data.images[0] // Return the Cloudinary URL
-    })
+    const formData = new FormData()
+    formData.append('images', file)
     
-    return Promise.all(uploadPromises)
-  }
+    const url = `${import.meta.env.VITE_API_BASE_URL}/api/upload/images`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData
+    })
+
+    const data = await response.json().catch(() => ({}))
+    
+    if (!response.ok || !data.success || !Array.isArray(data.images) || !data.images.length) {
+      throw new Error(data.message || `Failed to upload ${file.name}`)
+    }
+    
+    return data.images[0] // Return the Cloudinary URL
+  })
+  
+  return Promise.all(uploadPromises)
+}
 
   const uploadVideosToCloudinary = async (videoFiles) => {
     const uploadPromises = videoFiles.map(async (file) => {
@@ -263,52 +271,36 @@ const AddProduct = () => {
     setMessage('')
     
     try {
-      // Check if seller is properly authenticated
       if (!seller || (!seller._id && !seller.id)) {
         throw new Error('Seller not authenticated. Please log in again.')
       }
 
-      // Validate required fields
       if (!form.name || !form.category || !form.subcategory || !form.price || !form.moq) {
         throw new Error('Please fill in all required fields (Name, Category, Subcategory, Price, MOQ)')
       }
 
-      // Upload images to Cloudinary first
       let imageUrls = []
       if (form.images.length > 0) {
         setMessage({ type: 'info', text: 'Uploading images...' })
-        try {
-          imageUrls = await uploadImagesToCloudinary(form.images)
-        } catch (error) {
-          throw new Error('Failed to upload images. Please try again.')
-        }
+        imageUrls = await uploadImagesToCloudinary(form.images)
       } else {
         throw new Error('Please upload at least one product image')
       }
 
-      // Upload videos to Cloudinary if any
       let videoUrls = []
       if (form.videos.length > 0) {
         setMessage({ type: 'info', text: 'Uploading videos...' })
-        try {
-          videoUrls = await uploadVideosToCloudinary(form.videos)
-        } catch (error) {
-          console.warn('Video upload failed:', error)
-          // Don't throw error for videos, they are optional
-        }
+        videoUrls = await uploadVideosToCloudinary(form.videos)
       }
 
-      // Resolve normalized keys for category and subcategory
       const categoryKey = CATEGORY_KEY_MAP[form.category] || toKey(form.category)
       const subcategoryKey = (SUBCATEGORY_KEY_MAP[form.category] && SUBCATEGORY_KEY_MAP[form.category][form.subcategory])
         ? SUBCATEGORY_KEY_MAP[form.category][form.subcategory]
         : toKey(form.subcategory)
 
-      // Get seller ID - use only sellerId (unique ID like NXS123456)
       const sellerId = seller.sellerId
-      
       if (!sellerId) {
-        throw new Error('Seller ID not found. Please login again.');
+        throw new Error('Seller ID not found. Please login again.')
       }
 
       const productData = {
@@ -319,29 +311,26 @@ const AddProduct = () => {
         subcategoryKey,
         description: form.description?.trim() || '',
         price: Number(form.price),
-        priceRangeMin: Number(form.priceRangeMin) || undefined,
-        priceRangeMax: Number(form.priceRangeMax) || undefined,
-        moq: Math.max(1, Number(form.moq) || 1), // Ensure MOQ is at least 1
+        priceRangeMin: form.priceRangeMin ? Number(form.priceRangeMin) : undefined,
+        priceRangeMax: form.priceRangeMax ? Number(form.priceRangeMax) : undefined,
+        moq: Math.max(1, Number(form.moq) || 1),
         sampleAvailable: !!form.sampleAvailable,
         samplePrice: form.samplePrice ? Number(form.samplePrice) : undefined,
-        sellerId: sellerId, // Send the seller's unique ID (string)
+        sellerId,
         hsCode: form.hsCode?.trim(),
         warranty: form.warranty?.trim(),
         returnPolicy: form.returnPolicy?.trim(),
         customization: !!form.customization,
         images: imageUrls,
-        videos: videoUrls // Send uploaded video URLs
+        videos: videoUrls
       };
       
-      console.log('Product data being sent:', productData);
-
       const url = `${import.meta.env.VITE_API_BASE_URL}/api/products`;
 
       const res = await fetch(url, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Accept': 'application/json'
         },
         credentials: 'include',
@@ -350,39 +339,17 @@ const AddProduct = () => {
       
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        console.error('Error response from server:', errorData);
         throw new Error(errorData.message || 'Failed to create product');
       }
       
-      const data = await res.json();
+      await res.json();
       
-      // Show success message with a nice toast notification
-      setMessage({ type: 'success', text: 'Product created successfully! Redirecting to My Products...' })
-      
-      // Clear the form
+      setMessage({ type: 'success', text: 'Product created successfully!' })
       setForm(initialState)
-      
-    //   // Redirect to My Products page after a short delay
-    //   setTimeout(() => {
-    //     // Use React Router's navigation if available, otherwise use window.location
-    //     if (window.history && window.history.pushState) {
-    //       window.history.pushState(null, '', '/seller/my-products')
-    //       window.dispatchEvent(new Event('popstate'))
-    //     } else {
-    //       window.location.href = '/seller/my-products'
-    //     }
-    //   }, 1500)
-    // } catch (err) {
-    //   // Handle different types of errors
-    //   const errorMessage = err.response?.data?.message || err.message || 'An error occurred while creating the product'
-    //   setMessage({ type: 'error', text: errorMessage })
-      
-      // Log the full error for debugging
-      console.error('Product creation error:', {
-        error: err,
-        response: err.response?.data,
-        stack: err.stack
-      })
+    } catch (err) {
+      const errorMessage = err?.message || 'An error occurred while creating the product'
+      setMessage({ type: 'error', text: errorMessage })
+      console.error('Product creation error:', err)
     } finally {
       setSubmitting(false)
     }

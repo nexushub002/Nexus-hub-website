@@ -46,7 +46,7 @@ const Sellerdashboard = () => {
   const { seller, isAuthenticated, loading } = useSeller()
   const { trackPageView, trackProductActivity, trackDashboardActivity } = useSellerTracking()
   const navigate = useNavigate()
-  const PUBLIC_SHOP_BASE_URL = import.meta.env.VITE_PUBLIC_SHOP_BASE_URL || 'https://nexus-hub-fronted.vercel.app'
+  const PUBLIC_SHOP_BASE_URL = import.meta.env.VITE_SELLER_FRONTEND_URL || 'https://seller-nexus-hub.vercel.app'
   const websiteFeatures = [
     'Tell your brand story with banners & highlights',
     'Pin your top-performing products',

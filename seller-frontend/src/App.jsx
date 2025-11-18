@@ -6,6 +6,7 @@ import SellerSignin from './pages/SellerSignin';
 import AddProduct from './pages/AddProduct';
 import Sellerdashboard from './pages/Sellerdashboard';
 import MyProducts from './pages/MyProducts';
+import EditProduct from './pages/EditProduct';
 import MyOrders from './pages/MyOrders';
 import SellerProfile from './pages/SellerProfile';
 import ManufacturerProfile from './pages/ManufacturerProfile';
@@ -81,6 +82,7 @@ function AppRoutes() {
         <Route path="/seller/dashboard" element={<ProtectedRoute><Sellerdashboard /></ProtectedRoute>} />
         <Route path="/seller/add-product" element={<ProtectedRoute><AddProduct /></ProtectedRoute>} />
         <Route path="/seller/my-products" element={<ProtectedRoute><MyProducts /></ProtectedRoute>} />
+        <Route path="/seller/my-products/:productId/edit" element={<ProtectedRoute><EditProduct /></ProtectedRoute>} />
         <Route path="/seller/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
         <Route path="/seller/profile" element={<ProtectedRoute><SellerProfile /></ProtectedRoute>} />
         <Route path="/:shopName/:sellerId" element={<Sellershoppage />} />
