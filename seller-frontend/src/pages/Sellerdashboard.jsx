@@ -203,8 +203,8 @@ const Sellerdashboard = () => {
   }, [])
 
   return (
-    <div className={`${isDarkMode ? 'bg-[#eef1f7]/0 text-white' : 'bg-[#f5f7fb] text-[#0f172a]'} min-h-screen mobile-dashboard-container`}> 
-      <div className='flex'>
+    <div className={`${isDarkMode ? 'bg-[#0d1321] text-white' : 'bg-[#f5f7fb] text-[#0f172a]'} min-h-screen mobile-dashboard-container px-2 sm:px-4`}> 
+      <div className='w-full lg:flex'>
         <Sidebar
           isDarkMode={isDarkMode}
           onToggleTheme={handleToggleTheme}
@@ -213,7 +213,7 @@ const Sellerdashboard = () => {
           onMobileMenuToggle={setIsMobileMenuOpen}
         />
 
-        <main className='flex-1 p-3 sm:p-4 lg:p-6 lg:ml-0 pb-20 lg:pb-6 transition-all duration-300'>
+        <main className='flex-1 w-full max-w-[1200px] mx-auto p-3 sm:p-4 lg:p-6 lg:ml-0 pb-24 lg:pb-6 transition-all duration-300'>
           {/* Mobile Header with Hamburger */}
           <div className='lg:hidden flex items-center justify-between mb-4 p-3 bg-white rounded-lg shadow-sm mobile-touch-target fade-in'>
             <button
@@ -263,26 +263,28 @@ const Sellerdashboard = () => {
           </div>
 
           {/* Navigation Tabs */}
-          <div className='flex items-center space-x-1 mb-4 lg:mb-6 overflow-x-auto pb-2 mobile-nav-tabs scroll-smooth'>
-            {[
-              { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-              { id: 'inquiries', label: 'Inquiries', icon: '📧' },
-              { id: 'orders', label: 'Orders', icon: '🛒' },
-              { id: 'analytics', label: 'Analytics', icon: '📈' }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className={`flex items-center space-x-2 px-3 lg:px-4 py-2 rounded-lg transition-all duration-200 whitespace-nowrap mobile-touch-target ${
-                  activeTab === tab.id
-                    ? isDarkMode ? 'bg-white/20 text-white shadow-md' : 'bg-blue-100 text-blue-700 shadow-md'
-                    : isDarkMode ? 'text-white/70 hover:bg-white/10 hover:scale-105' : 'text-gray-600 hover:bg-gray-100 hover:scale-105'
-                }`}
-              >
-                <span>{tab.icon}</span>
-                <span className="font-medium text-sm lg:text-base">{tab.label}</span>
-              </button>
-            ))}
+          <div className='mb-4 lg:mb-6'>
+            <div className='grid grid-cols-2 sm:grid-cols-4 gap-2'>
+              {[
+                { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+                { id: 'inquiries', label: 'Inquiries', icon: '📧' },
+                { id: 'orders', label: 'Orders', icon: '🛒' },
+                { id: 'analytics', label: 'Analytics', icon: '📈' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`flex items-center justify-center gap-1 px-3 lg:px-4 py-2 rounded-lg transition-all duration-200 text-sm mobile-touch-target ${
+                    activeTab === tab.id
+                      ? isDarkMode ? 'bg-white/20 text-white shadow-md' : 'bg-blue-100 text-blue-700 shadow-md'
+                      : isDarkMode ? 'text-white/70 hover:bg-white/10 hover:scale-105' : 'text-gray-600 hover:bg-gray-100 hover:scale-105'
+                  }`}
+                >
+                  <span>{tab.icon}</span>
+                  <span className="font-medium text-sm lg:text-base truncate">{tab.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Content Area */}
@@ -291,14 +293,14 @@ const Sellerdashboard = () => {
               {/* Main center column spans 2 */}
               <div className='xl:col-span-2 space-y-4 lg:space-y-6'>
                 {/* KPI cards */}
-                <div className='grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 lg:gap-4'>
                   {[
                     { label: 'Total Products', value: dashboardStats.totalProducts, change: '+12%', icon: '📦' },
                     { label: 'Active Products', value: dashboardStats.activeProducts, change: '+8%', icon: '✅' },
                     { label: 'Total Orders', value: dashboardStats.totalOrders, change: '+15%', icon: '🛒' },
                     { label: 'Revenue', value: `₹${dashboardStats.totalRevenue.toLocaleString()}`, change: '+23%', icon: '💰' }
                   ].map((k) => (
-                    <div key={k.label} className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl lg:rounded-2xl p-3 lg:p-4 shadow-sm mobile-card hover:shadow-md transition-all duration-200 hover:scale-105`}>
+                    <div key={k.label} className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-3 sm:p-4 shadow-sm mobile-card hover:shadow-md transition-all duration-200 hover:scale-[1.02]`}>
                       <div className='flex items-center justify-between mb-2'>
                         <div className='text-xs lg:text-sm opacity-70'>{k.label}</div>
                         <span className='text-lg lg:text-xl'>{k.icon}</span>
@@ -360,8 +362,8 @@ const Sellerdashboard = () => {
 
                 {/* Shop Link */}
                 <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl lg:rounded-2xl p-4 lg:p-5 shadow-sm`}>
-                  <div className='flex items-center justify-between mb-3'>
-                    <div>
+                  <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3'>
+                    <div className='space-y-1'>
                       <div className='text-xs uppercase tracking-wide text-gray-500'>Shop Link</div>
                       <div className='text-lg font-semibold'>
                         {shopName ? shopName : 'Set your shop name'}
@@ -372,7 +374,7 @@ const Sellerdashboard = () => {
                     </div>
                     <button
                       onClick={fetchShopLink}
-                      className='text-xs font-semibold text-blue-600 hover:text-blue-700'
+                      className='text-xs font-semibold text-blue-600 hover:text-blue-700 self-start'
                     >
                       Refresh
                     </button>
@@ -423,10 +425,10 @@ const Sellerdashboard = () => {
                       View All →
                     </button>
                   </div>
-                  <div className='space-y-3'>
+                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
                     {products.slice(0, 3).map((product) => (
                       <div key={product._id} className='flex items-center space-x-3 p-3 rounded-lg bg-gray-50/50'>
-                        <div className='w-12 h-12 rounded-lg bg-gray-200 flex-shrink-0'>
+                        <div className='w-14 h-14 rounded-lg bg-gray-200 flex-shrink-0'>
                           {product.images && product.images[0] ? (
                             <img src={product.images[0]} alt={product.name} className='w-full h-full object-cover rounded-lg' />
                           ) : (
@@ -495,7 +497,7 @@ const Sellerdashboard = () => {
               </div>
 
               {/* Right sidebar panel */}
-              <div className='space-y-4 lg:space-y-6'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4 lg:gap-6'>
                 <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-xl lg:rounded-2xl p-4 lg:p-5 shadow-sm`}>
                   <div className='flex items-center gap-3 mb-4'>
                     <div className='relative cursor-pointer' onClick={() => navigate('/seller/profile')}>

@@ -9,6 +9,21 @@ const Sellershoppage = () => {
   const [error, setError] = useState('');
   const [currentBanner, setCurrentBanner] = useState(0);
 
+  const buyerAppBaseUrl = useMemo(() => {
+    const envUrl = (import.meta.env.VITE_FRONTED_URL || '').trim();
+    if (envUrl) return envUrl.replace(/\/$/, '');
+    if (typeof window !== 'undefined') {
+      const { protocol, hostname } = window.location;
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return `${protocol}//${hostname}:5173`;
+      }
+      if (hostname.includes('vercel.app')) {
+        return `https://nexus-hub-fronted.vercel.app`;
+      }
+    }
+    return 'https://nexus-hub-fronted.vercel.app';
+  }, []);
+
   useEffect(() => {
     const fetchSellerData = async () => {
       if (!sellerId) {
@@ -80,6 +95,17 @@ const Sellershoppage = () => {
   const goToNext = () => {
     if (!bannerImages.length) return;
     setCurrentBanner((prev) => (prev + 1) % bannerImages.length);
+  };
+
+  const openProductDetails = (productId) => {
+    window.open(`${buyerAppBaseUrl}/product-detail/${productId}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleProductKeyDown = (event, productId) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openProductDetails(productId);
+    }
   };
 
   if (loading) {
@@ -194,7 +220,16 @@ const Sellershoppage = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map((product) => (
-                <div key={product._id} className="bg-white border rounded-xl shadow hover:shadow-md transition p-4">
+                <div
+                  key={product._id}
+                  className="bg-white border rounded-xl shadow hover:shadow-lg transition p-4 cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
+                  onClick={() => openProductDetails(product._id)}
+                  onKeyDown={(event) => handleProductKeyDown(event, product._id)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`View details for ${product.name}`}
+                  title="View product in buyer storefront"
+                >
                   <div className="h-40 rounded-lg bg-gray-100 flex items-center justify-center mb-3 overflow-hidden">
                     {product.images?.[0] ? (
                       <img

@@ -194,11 +194,11 @@ const InquiryManagement = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h2 className="text-2xl font-bold text-gray-900">Inquiry Management</h2>
         <button
           onClick={fetchInquiries}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2"
         >
           <span className="material-symbols-outlined text-sm">refresh</span>
           Refresh
@@ -206,8 +206,8 @@ const InquiryManagement = () => {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Inquiries</p>
@@ -219,7 +219,7 @@ const InquiryManagement = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Today's Inquiries</p>
@@ -231,7 +231,7 @@ const InquiryManagement = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Pending</p>
@@ -243,7 +243,7 @@ const InquiryManagement = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Replied</p>
@@ -258,8 +258,8 @@ const InquiryManagement = () => {
 
       {/* Filter Tabs */}
       <div className="bg-white rounded-lg shadow-sm border">
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
+        <div className="border-b border-gray-200 overflow-x-auto">
+          <nav className="flex min-w-max sm:min-w-0 sm:justify-between space-x-6 px-4 sm:px-6">
             {[
               { key: 'all', label: 'All Inquiries', count: stats.total },
               { key: 'pending', label: 'Pending', count: stats.pending },
@@ -298,8 +298,8 @@ const InquiryManagement = () => {
             </div>
           ) : (
             inquiries.map((inquiry) => (
-              <div key={inquiry._id} className="p-6">
-                <div className="flex items-start justify-between">
+              <div key={inquiry._id} className="p-4 sm:p-6">
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                   <div className="flex-1">
                     {/* Product Info */}
                     <div className="flex items-center gap-4 mb-4">
@@ -321,7 +321,7 @@ const InquiryManagement = () => {
                     {/* Buyer Info */}
                     <div className="bg-gray-50 rounded-lg p-4 mb-4">
                       <h4 className="font-medium text-gray-900 mb-2">Buyer Information</h4>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                         <div>
                           <span className="text-gray-600">Name:</span>
                           <span className="ml-2 font-medium">{inquiry.buyerName}</span>
@@ -368,7 +368,7 @@ const InquiryManagement = () => {
                   </div>
 
                   {/* Status and Actions */}
-                  <div className="ml-6 flex flex-col items-end gap-3">
+                  <div className="lg:ml-6 flex items-start lg:items-end justify-between lg:flex-col gap-3">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(inquiry.status)}`}>
                       {inquiry.status.charAt(0).toUpperCase() + inquiry.status.slice(1)}
                     </span>
@@ -377,7 +377,7 @@ const InquiryManagement = () => {
                       {formatDate(inquiry.inquiryDate)}
                     </p>
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2 justify-start lg:justify-end">
                       {inquiry.status === 'pending' && (
                         <button
                           onClick={() => {
@@ -492,7 +492,7 @@ const InquiryManagement = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
                 <button
                   onClick={() => {
                     setReplyModal(false);

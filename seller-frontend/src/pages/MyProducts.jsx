@@ -94,7 +94,7 @@ const MyProducts = () => {
           <p className="text-gray-500 mb-4">You haven't added any products yet. Use the "Add Product" option from the sidebar to create your first product.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {products.map((product) => (
             <div key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="h-48 bg-gray-200 flex items-center justify-center">

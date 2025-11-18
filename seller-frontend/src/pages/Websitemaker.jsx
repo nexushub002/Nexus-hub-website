@@ -203,27 +203,27 @@ const Websitemaker = () => {
 
   return (
     <div className={`${isDarkMode ? 'bg-[#0f172a] text-white' : 'bg-[#f5f7fb] text-[#0f172a]'} min-h-screen`}>
-      <div className="flex">
+      <div className="w-full lg:flex">
         <Sidebar
           isDarkMode={isDarkMode}
           onToggleTheme={handleToggleTheme}
           onSwitchRole={handleSwitchRole}
         />
 
-        <main className="flex-1 p-4 sm:p-6 space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-gray-500">Website Maker</p>
-              <h1 className="text-2xl font-semibold mt-1">Launch your Nexus Hub storefront</h1>
-              <p className="text-sm text-gray-500 mt-2">
+        <main className="flex-1 w-full max-w-5xl mx-auto px-3 sm:px-6 py-6 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white/70 dark:bg-white/10 rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-[0.4em] text-gray-500">Website Maker</p>
+              <h1 className="text-2xl sm:text-3xl font-semibold leading-snug">Launch your Nexus Hub storefront</h1>
+              <p className="text-sm text-gray-500">
                 Upload up to four hero banners, highlight your products, and share one beautiful link with buyers.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:items-center sm:justify-end">
               <button
                 onClick={() => shopLink && window.open(shopLink, '_blank', 'noopener,noreferrer')}
                 disabled={!shopLink}
-                className={`px-4 py-2 rounded-lg border text-sm ${
+                className={`w-full sm:w-auto px-4 py-2 rounded-lg border text-sm text-center ${
                   shopLink
                     ? 'border-blue-600 text-blue-600 hover:bg-blue-50'
                     : 'border-gray-200 text-gray-400 cursor-not-allowed'
@@ -233,7 +233,7 @@ const Websitemaker = () => {
               </button>
               <button
                 onClick={fetchManufacturerProfile}
-                className="px-4 py-2 rounded-lg text-sm bg-gray-100 hover:bg-gray-200 text-gray-700"
+                className="w-full sm:w-auto px-4 py-2 rounded-lg text-sm bg-gray-100 hover:bg-gray-200 text-gray-700"
               >
                 Refresh
               </button>
@@ -252,7 +252,7 @@ const Websitemaker = () => {
             </div>
           )}
 
-          <div className={`${isDarkMode ? 'bg-white/5' : 'bg-white'} rounded-2xl p-6 shadow-sm space-y-6`}>
+          <div className={`${isDarkMode ? 'bg-white/5' : 'bg-white'} rounded-2xl p-4 sm:p-6 shadow-sm space-y-6`}>
             <div className="grid gap-3 sm:grid-cols-3">
               {WEBSITE_FEATURES.map((feature) => (
                 <div

@@ -356,15 +356,15 @@ const uploadImagesToCloudinary = async (imageFiles) => {
   }
 
   return (
-    <div className={`${isDarkMode ? 'bg-[#eef1f7]/0 text-white' : 'bg-[#f5f7fb] text-[#0f172a]'} min-h-screen`}>
-      <div className='flex'>
+    <div className={`${isDarkMode ? 'bg-[#0d1321] text-white' : 'bg-[#f5f7fb] text-[#0f172a]'} min-h-screen`}>
+      <div className='flex w-full'>
         <Sidebar
           isDarkMode={isDarkMode}
           onToggleTheme={handleToggleTheme}
           onSwitchRole={handleSwitchRole}
         />
 
-        <main className='flex-1 p-6'>
+        <main className='flex-1 w-full max-w-5xl mx-auto px-3 sm:px-6 py-6 space-y-6'>
           {/* Top bar */}
           <div className='flex items-center justify-between mb-6'>
             <div className='text-2xl font-semibold'>
@@ -373,7 +373,7 @@ const uploadImagesToCloudinary = async (imageFiles) => {
           </div>
 
           {/* Add Product Form */}
-          <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-6 shadow-sm`}>
+          <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-4 sm:p-6 shadow-sm`}>
             <h1 className='text-xl font-semibold mb-4'>Create New Product</h1>
             {message && (
               <div className={`mb-4 p-3 rounded-lg text-sm ${
@@ -385,7 +385,7 @@ const uploadImagesToCloudinary = async (imageFiles) => {
               </div>
             )}
             
-            <form onSubmit={handleSubmit} className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <form onSubmit={handleSubmit} className='grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4'>
               <input 
                 className={`px-3 py-2 rounded border ${isDarkMode ? 'bg-white/10 border-white/20' : 'bg-white border-gray-300'}`} 
                 name='name' 
@@ -490,7 +490,7 @@ const uploadImagesToCloudinary = async (imageFiles) => {
                 value={form.description} 
                 onChange={handleChange} 
               />
-              <div className='flex items-center gap-4 md:col-span-2'>
+              <div className='flex flex-col sm:flex-row items-start sm:items-center gap-4 md:col-span-2'>
                 <label className='flex items-center gap-2 text-sm'>
                   <input 
                     type='checkbox' 
@@ -543,7 +543,7 @@ const uploadImagesToCloudinary = async (imageFiles) => {
                 {form.images.length > 0 && (
                   <div className='mt-4'>
                     <h4 className='text-sm font-medium mb-2'>Selected Images ({form.images.length})</h4>
-                    <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+                    <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3'>
                       {form.images.map((file, index) => (
                         <div key={index} className='relative group'>
                           <img
@@ -600,7 +600,7 @@ const uploadImagesToCloudinary = async (imageFiles) => {
                 {form.videos.length > 0 && (
                   <div className='mt-4'>
                     <h4 className='text-sm font-medium mb-2'>Selected Videos ({form.videos.length})</h4>
-                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                       {form.videos.map((file, index) => (
                         <div key={index} className='relative group border rounded-lg p-4 bg-gray-50'>
                           <div className='flex items-center gap-3'>
@@ -632,10 +632,10 @@ const uploadImagesToCloudinary = async (imageFiles) => {
                 )}
               </div>
 
-              <div className='md:col-span-2'>
+              <div className='md:col-span-2 pt-2'>
                 <button 
                   disabled={submitting} 
-                  className='px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50 font-semibold'
+                  className='w-full sm:w-auto px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50 font-semibold'
                 >
                   {submitting ? 'Creating Product...' : 'Create Product'}
                 </button>

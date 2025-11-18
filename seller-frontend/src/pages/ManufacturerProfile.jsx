@@ -518,23 +518,23 @@ const ManufacturerProfile = () => {
   }
 
   return (
-    <div className={`${isDarkMode ? 'bg-[#eef1f7]/0 text-white' : 'bg-[#f5f7fb] text-[#0f172a]'} min-h-screen`}>
-      <div className='flex'>
+    <div className={`${isDarkMode ? 'bg-[#0d1321] text-white' : 'bg-[#f5f7fb] text-[#0f172a]'} min-h-screen`}>
+      <div className='w-full lg:flex'>
         <Sidebar
           isDarkMode={isDarkMode}
           onToggleTheme={handleToggleTheme}
           onSwitchRole={handleSwitchRole}
         />
 
-        <main className='flex-1 p-6'>
+        <main className='flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 py-6 space-y-4 sm:space-y-6'>
           {/* Top bar */}
-          <div className='flex items-center justify-between mb-6'>
+          <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4'>
             <div className='text-2xl font-semibold'>
               Manufacturer Profile - {seller?.name || seller?.email || 'Seller'}
             </div>
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition'
+              className='w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center'
             >
               {isEditing ? 'Cancel Edit' : 'Edit Profile'}
             </button>
@@ -551,7 +551,7 @@ const ManufacturerProfile = () => {
           )}
 
           {manufacturerData && (
-            <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-6 shadow-sm space-y-8`}>
+            <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-4 sm:p-6 shadow-sm space-y-8`}>
               
               {/* Seller Information Section */}
               <div className="border-b pb-6">
