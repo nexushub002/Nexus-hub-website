@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
+
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
@@ -8,8 +9,7 @@ import { buildApiUrl } from '../config/api';
 
 const Navbar = () => {
 
-  const { user, setUser } = useContext(UserContext);
-  const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const { user, setUser, showLoginPopup, openLoginPopup, closeLoginPopup } = useContext(UserContext);
   const [inputValue, setInputValue] = useState('');
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -294,7 +294,8 @@ const Navbar = () => {
         <div className="flex items-center space-x-6 text-gray-700">
           {/* Account */}
           {!user ? (
-            <div className="flex items-center cursor-pointer" onClick={() => setShowLoginPopup(true)}>
+            <div className="flex items-center cursor-pointer" onClick={openLoginPopup}>
+
               <span className="material-symbols-outlined mr-1">person</span>
               <span className="text-sm">Account</span>
               <span className="material-symbols-outlined text-xs ml-1">keyboard_arrow_down</span>
@@ -532,10 +533,11 @@ const Navbar = () => {
           className="flex flex-col items-center cursor-pointer p-2"
           onClick={() => {
             if (!user) {
-              setShowLoginPopup(true);
+              openLoginPopup();
             } else {
               navigate('/myprofile');
             }
+
           }}
         >
           <span className="material-symbols-outlined text-gray-600 text-xl mb-1">account_circle</span>
@@ -546,12 +548,13 @@ const Navbar = () => {
       {/* New Login Popup */}
       <LoginPopup
         isOpen={showLoginPopup}
-        onClose={() => setShowLoginPopup(false)}
+        onClose={closeLoginPopup}
         onLoginSuccess={(loggedInUser) => {
           setUser(loggedInUser);
-          setShowLoginPopup(false);
+          closeLoginPopup();
         }}
       />
+
     </div>
 
   )

@@ -5,6 +5,7 @@ export const UserContext = createContext();
 
 export default function UserProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
 
   // Fetch session user on page load
   useEffect(() => {
@@ -27,7 +28,15 @@ export default function UserProvider({ children }) {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider
+      value={{
+        user,
+        setUser,
+        showLoginPopup,
+        openLoginPopup: () => setShowLoginPopup(true),
+        closeLoginPopup: () => setShowLoginPopup(false)
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

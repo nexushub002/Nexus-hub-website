@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { buildApiUrl } from '../config/api';
+import { UserContext } from '../context/UserContext';
 
 const FeaturedSectionsTailwind = () => {
   const [topRankingProducts, setTopRankingProducts] = useState([]);
@@ -13,6 +14,7 @@ const FeaturedSectionsTailwind = () => {
   
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const { user, openLoginPopup } = useContext(UserContext);
 
   
 
@@ -78,6 +80,12 @@ const FeaturedSectionsTailwind = () => {
   const handleWishlistClick = async (e, product) => {
     e.stopPropagation();
     try {
+      if (!user) {
+        if (openLoginPopup) {
+          openLoginPopup();
+        }
+        return;
+      }
       if (isInWishlist(product._id)) {
         await removeFromWishlist(product._id);
       } else {

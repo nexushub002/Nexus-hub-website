@@ -15,7 +15,7 @@ export const useWishlist = () => {
 export const WishlistProvider = ({ children }) => {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { user } = useContext(UserContext);
+  const { user, openLoginPopup } = useContext(UserContext);
 
   // API base URL
 
@@ -35,7 +35,12 @@ export const WishlistProvider = ({ children }) => {
   const fetchWishlist = async () => {
     setLoading(true);
     try {
-      const userId = user?._id || "60f7b3b3b3b3b3b3b3b3b3b3"; // Default test user ID
+      if (!user) {
+        setWishlistItems([]);
+        return;
+      }
+
+      const userId = user._id;
 
       const url = buildApiUrl(`/api/wishlist?userId=${userId}`);
 
@@ -60,6 +65,13 @@ export const WishlistProvider = ({ children }) => {
   };
 
   const addToWishlist = async (product) => {
+    if (!user) {
+      if (openLoginPopup) {
+        openLoginPopup();
+      }
+      return { success: false, message: 'Please login to use wishlist.' };
+    }
+
     setLoading(true);
     try {
       console.log('Adding to wishlist:', product._id);
@@ -73,7 +85,7 @@ export const WishlistProvider = ({ children }) => {
         headers: getAuthHeaders(),
         body: JSON.stringify({ 
           productId: product._id,
-          userId: user?._id || "60f7b3b3b3b3b3b3b3b3b3b3" // Default test user ID
+          userId: user._id
         })
       });
 
@@ -114,9 +126,16 @@ export const WishlistProvider = ({ children }) => {
   };
 
   const removeFromWishlist = async (productId) => {
+    if (!user) {
+      if (openLoginPopup) {
+        openLoginPopup();
+      }
+      return { success: false, message: 'Please login to use wishlist.' };
+    }
+
     setLoading(true);
     try {
-      const userId = user?._id || "60f7b3b3b3b3b3b3b3b3b3b3"; // Default test user ID
+      const userId = user._id;
 
       const url = buildApiUrl(`/api/wishlist/remove/${productId}?userId=${userId}`);
 
@@ -151,7 +170,7 @@ export const WishlistProvider = ({ children }) => {
 
     setLoading(true);
     try {
-      const url = buildApiUrl('/api/wishlist/clear');
+      const url = buildApiUrl(`/api/wishlist/clear?userId=${user._id}`);
 
       const response = await fetch(url, {
         method: 'DELETE',

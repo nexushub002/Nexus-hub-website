@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
+import { UserContext } from '../context/UserContext';
+
 // import './ProductCard.css';
 
 const ProductCard = ({ product }) => {
@@ -11,6 +13,7 @@ const ProductCard = ({ product }) => {
     
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
     const { addToCart } = useCart();
+    const { user, openLoginPopup } = useContext(UserContext);
 
     if (!product) {
         return (
@@ -56,6 +59,14 @@ const ProductCard = ({ product }) => {
 
     const handleWishlistClick = async (e) => {
         e.stopPropagation();
+        if (!user) {
+            if (openLoginPopup) {
+                openLoginPopup();
+            }
+            setShowMessage('Please login to use wishlist.');
+            setTimeout(() => setShowMessage(''), 2000);
+            return;
+        }
         try {
             let result;
             if (isInWishlist(_id)) {

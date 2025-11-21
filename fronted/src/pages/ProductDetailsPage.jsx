@@ -1,11 +1,12 @@
 import { useParams, Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Navbar from "../components/Navbar";
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import SendInquiryModal from "../components/SendInquiryModal";
 import "./ProductDetailsPage.css";
 import { buildApiUrl } from "../config/api";
+import { UserContext } from "../context/UserContext";
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
@@ -20,6 +21,7 @@ const ProductDetailsPage = () => {
   
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart: addProductToCart } = useCart();
+  const { user, openLoginPopup } = useContext(UserContext);
 
   // Fetch product
   useEffect(() => {
@@ -74,6 +76,17 @@ const ProductDetailsPage = () => {
 
   const handleWishlistToggle = async () => {
     if (!product) return;
+
+    if (!user) {
+      if (openLoginPopup) {
+        openLoginPopup();
+      }
+      setWishlistMessage({ text: 'Please login to use wishlist.', type: 'error' });
+      setTimeout(() => {
+        setWishlistMessage('');
+      }, 1500);
+      return;
+    }
 
     try {
       let result;
