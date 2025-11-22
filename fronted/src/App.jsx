@@ -5,7 +5,6 @@ import { CartProvider } from "./context/CartContext";
 import CartPanel from "./components/CartPanel";
 import Homepage from './pages/Homepage' 
 import ProductDetailsPage from './pages/ProductDetailsPage'
-import SellerProfilePage from './pages/SellerProfilePage'
 import Myprofile from "./pages/Myprofile";
 import SearchResultPage from "./pages/SearchResultPage";
 import WishlistPage from "./pages/WishlistPage";
@@ -32,8 +31,8 @@ function App() {
               <Route path="/top-deals" element={<TopDealsPage />} />
               <Route path="/new-arrivals" element={<NewArrivalsPage />} />
               <Route path="/product-detail/:id" element={<ProductDetailsPage />} />
-              <Route path="/seller/:sellerId" element={<SellerProfilePage />} />
-              <Route path="/:shopName/:sellerId" element={<SellerProfilePage />} />
+              
+              
               <Route path="/myprofile" element={<Myprofile />} />
               <Route path="/search" element={<SearchResultPage />} />
               <Route path="/wishlist" element={<WishlistPage />} />

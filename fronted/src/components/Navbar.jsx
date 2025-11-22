@@ -19,6 +19,7 @@ const Navbar = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const searchRef = useRef(null);
+  const accountDropdownRef = useRef(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -93,6 +94,18 @@ const Navbar = () => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Handle clicking outside account dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (accountDropdownRef.current && !accountDropdownRef.current.contains(event.target)) {
+        setShowAccountDropdown(false);
       }
     };
 
@@ -301,23 +314,20 @@ const Navbar = () => {
               <span className="material-symbols-outlined text-xs ml-1">keyboard_arrow_down</span>
             </div>
           ) : (
-            <div className="relative">
+            <div className="relative" ref={accountDropdownRef}>
               <div 
                 className="flex items-center cursor-pointer"
-                onMouseEnter={() => setShowAccountDropdown(true)}
-                onMouseLeave={() => setShowAccountDropdown(false)}
+                onClick={() => setShowAccountDropdown(prev => !prev)}
               >
                 <span className="material-symbols-outlined mr-1">person</span>
                 <span className="text-sm">Account</span>
-                <span className="material-symbols-outlined text-xs ml-1">keyboard_arrow_down</span>
+                <span className={`material-symbols-outlined text-xs ml-1 transition-transform ${showAccountDropdown ? 'rotate-180' : ''}`}>keyboard_arrow_down</span>
               </div>
               
               {/* Account Dropdown */}
               {showAccountDropdown && (
                 <div 
                   className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-lg border z-50"
-                  onMouseEnter={() => setShowAccountDropdown(true)}
-                  onMouseLeave={() => setShowAccountDropdown(false)}
                 >
                   <div className="p-4 border-b">
                     <div className="flex items-center space-x-3">
@@ -334,21 +344,30 @@ const Navbar = () => {
                   <div className="py-2">
                     <div 
                       className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3"
-                      onClick={() => navigate('/myprofile')}
+                      onClick={() => {
+                        navigate('/myprofile');
+                        setShowAccountDropdown(false);
+                      }}
                     >
                       <span className="material-symbols-outlined text-gray-500">person</span>
                       <span className="text-sm">My Profile</span>
                     </div>
                     <div 
                       className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3"
-                      onClick={() => navigate('/orders')}
+                      onClick={() => {
+                        navigate('/orders');
+                        setShowAccountDropdown(false);
+                      }}
                     >
                       <span className="material-symbols-outlined text-gray-500">shopping_bag</span>
                       <span className="text-sm">Orders</span>
                     </div>
                     <div 
                       className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between"
-                      onClick={() => navigate('/wishlist')}
+                      onClick={() => {
+                        navigate('/wishlist');
+                        setShowAccountDropdown(false);
+                      }}
                     >
                       <div className="flex items-center space-x-3">
                         <span className="material-symbols-outlined text-gray-500">favorite</span>
@@ -362,7 +381,10 @@ const Navbar = () => {
                     </div>
                     <div 
                       className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3"
-                      onClick={() => navigate('/help')}
+                      onClick={() => {
+                        navigate('/help');
+                        setShowAccountDropdown(false);
+                      }}
                     >
                       <span className="material-symbols-outlined text-gray-500">help</span>
                       <span className="text-sm">Help & Support</span>
@@ -370,7 +392,10 @@ const Navbar = () => {
                     <div className="border-t my-2"></div>
                     <div 
                       className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3 text-red-600"
-                      onClick={handleLogout}
+                      onClick={() => {
+                        handleLogout();
+                        setShowAccountDropdown(false);
+                      }}
                     >
                       <span className="material-symbols-outlined">logout</span>
                       <span className="text-sm">Logout</span>

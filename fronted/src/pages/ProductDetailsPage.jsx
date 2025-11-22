@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useState, useEffect, useContext } from "react";
 import Navbar from "../components/Navbar";
 import { useWishlist } from '../context/WishlistContext';
@@ -18,6 +18,7 @@ const ProductDetailsPage = () => {
   const [wishlistMessage, setWishlistMessage] = useState('');
   const [cartMessage, setCartMessage] = useState('');
   const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
+  const [shopLinkCopied, setShopLinkCopied] = useState(false);
   
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart: addProductToCart } = useCart();
@@ -72,6 +73,39 @@ const ProductDetailsPage = () => {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  // Generate unique shop link
+  const getShopLink = () => {
+    const sellerInfo = product?.sellerInfo || product?.sellerProfile;
+    if (!sellerInfo) return null;
+
+    const shopName = sellerInfo.shopName || sellerInfo.companyName?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+    const sellerId = sellerInfo.sellerId || product?.sellerId;
+    
+    if (!shopName || !sellerId) return null;
+
+    // Clean shop name for URL (remove special characters, spaces)
+    const cleanShopName = shopName.trim().replace(/[^A-Za-z0-9]/g, '').toLowerCase();
+    
+    if (!cleanShopName) return null;
+
+    // Use seller frontend URL from environment variable
+    const baseUrl = import.meta.env.VITE_SELLER_FRONTEND_URL;
+    return `${baseUrl}/${cleanShopName}/${sellerId}`;
+  };
+
+  const handleCopyShopLink = async () => {
+    const link = getShopLink();
+    if (!link) return;
+
+    try {
+      await navigator.clipboard.writeText(link);
+      setShopLinkCopied(true);
+      setTimeout(() => setShopLinkCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy link:', err);
+    }
   };
 
   const handleWishlistToggle = async () => {
@@ -215,62 +249,10 @@ const ProductDetailsPage = () => {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Product Information Section */}
-        <div className="info-section">
-          {/* Product Header */}
-          <div className="product-header">
-            <div className="breadcrumb">
-              <span>{category}</span>
-              <span className="separator">›</span>
-              <span>{subcategory}</span>
-            </div>
-            <h1 className="product-title">{name}</h1>
-            <div className="product-meta">
-              <span className="product-id">Product ID: {id}</span>
-              <span className="listed-date">Listed on {formatDate(createdAt)}</span>
-            </div>
-          </div>
-
-          {/* Pricing Section */}
-          <div className="pricing-section">
-            <div className="main-price">
-              <span className="price-label">Price:</span>
-              <span className="price-value">{formatPrice(price)}</span>
-            </div>
-            {priceRange && priceRange.min && priceRange.max && (
-              <div className="price-range">
-                <span className="range-label">Price Range:</span>
-                <span className="range-value">
-                  {formatPrice(priceRange.min)} - {formatPrice(priceRange.max)}
-                </span>
-              </div>
-            )}
-            <div className="moq-info">
-              <span className="moq-label">Minimum Order Quantity:</span>
-              <span className="moq-value">{moq} pieces</span>
-            </div>
-          </div>
-
-          {/* Sample Information */}
-          {sampleAvailable && (
-            <div className="sample-section">
-              <div className="sample-badge">
-                <span className="material-symbols-outlined">science</span>
-                Sample Available
-              </div>
-              {samplePrice && (
-                <div className="sample-price">
-                  Sample Price: {formatPrice(samplePrice)}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Seller Information */}
+          {/* Seller Information - Desktop Only (>= 768px) */}
           {(product.sellerInfo || product.sellerProfile) && (
-            <div className="seller-section">
+            <div className="seller-section-desktop">
               <h3>Seller Information</h3>
               <div className="seller-card">
                 <div className="seller-header">
@@ -331,21 +313,210 @@ const ProductDetailsPage = () => {
                   </div>
                 )}
 
+                {/* Unique Shop Link */}
+                {getShopLink() && (
+                  <div className="seller-shop-link">
+                    <h5>Digital Shop Link</h5>
+                    <div className="shop-link-container">
+                      <div className="shop-link-display">
+                        <span className="material-symbols-outlined">link</span>
+                        <a 
+                          href={getShopLink()} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="shop-link-url"
+                        >
+                          {getShopLink()}
+                        </a>
+                      </div>
+                      <button 
+                        onClick={handleCopyShopLink}
+                        className="btn-copy-link"
+                        title="Copy link"
+                      >
+                        <span className="material-symbols-outlined">
+                          {shopLinkCopied ? 'check' : 'content_copy'}
+                        </span>
+                        {shopLinkCopied ? 'Copied!' : 'Copy'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="seller-actions">
-                  <Link 
-                    to={`/seller/${product.sellerInfo?.sellerId || product.sellerProfile?.sellerId || product.sellerId}`}
-                    className="btn-outline"
-                  >
-                    <span className="material-symbols-outlined">store</span>
-                    View Seller Profile
-                  </Link>
-                  <Link 
-                    to={`/seller/${product.sellerInfo?.sellerId || product.sellerProfile?.sellerId || product.sellerId}`}
-                    className="btn-outline"
-                  >
-                    <span className="material-symbols-outlined">inventory_2</span>
-                    View All Products
-                  </Link>
+                  {getShopLink() && (
+                    <a 
+                      href={getShopLink()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-outline btn-shop-link"
+                    >
+                      <span className="material-symbols-outlined">storefront</span>
+                      Visit Digital Shop
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Product Information Section */}
+        <div className="info-section">
+          {/* Product Header */}
+          <div className="product-header">
+            <div className="breadcrumb">
+              <span>{category}</span>
+              <span className="separator">›</span>
+              <span>{subcategory}</span>
+            </div>
+            <h1 className="product-title">{name}</h1>
+            <div className="product-meta">
+              <span className="product-id">Product ID: {id}</span>
+              <span className="listed-date">Listed on {formatDate(createdAt)}</span>
+            </div>
+          </div>
+
+          {/* Pricing Section */}
+          <div className="pricing-section">
+            <div className="main-price">
+              <span className="price-label">Price:</span>
+              <span className="price-value">{formatPrice(price)}</span>
+            </div>
+            {priceRange && priceRange.min && priceRange.max && (
+              <div className="price-range">
+                <span className="range-label">Price Range:</span>
+                <span className="range-value">
+                  {formatPrice(priceRange.min)} - {formatPrice(priceRange.max)}
+                </span>
+              </div>
+            )}
+            <div className="moq-info">
+              <span className="moq-label">Minimum Order Quantity:</span>
+              <span className="moq-value">{moq} pieces</span>
+            </div>
+          </div>
+
+          {/* Sample Information */}
+          {sampleAvailable && (
+            <div className="sample-section">
+              <div className="sample-badge">
+                <span className="material-symbols-outlined">science</span>
+                Sample Available
+              </div>
+              {samplePrice && (
+                <div className="sample-price">
+                  Sample Price: {formatPrice(samplePrice)}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Seller Information - Mobile Only (< 768px) */}
+          {(product.sellerInfo || product.sellerProfile) && (
+            <div className="seller-section-mobile">
+              <h3>Seller Information</h3>
+              <div className="seller-card">
+                <div className="seller-header">
+                  {(product.sellerInfo?.companyLogo?.url || product.sellerProfile?.companyLogo?.url) && (
+                    <img 
+                      src={product.sellerInfo?.companyLogo?.url || product.sellerProfile?.companyLogo?.url} 
+                      alt="Company Logo" 
+                      className="seller-logo"
+                    />
+                  )}
+                  <div className="seller-details">
+                    <h4>{product.sellerInfo?.companyName || product.sellerProfile?.companyName}</h4>
+                    <div className="seller-meta">
+                      <span className="seller-id">
+                        Seller ID: {product.sellerInfo?.sellerId || product.sellerProfile?.sellerId || product.sellerId}
+                      </span>
+                      {(product.sellerInfo?.verified || product.sellerProfile?.verified) && (
+                        <span className="verified-badge">
+                          <span className="material-symbols-outlined">verified</span>
+                          Verified Seller
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="seller-stats">
+                  <div className="stat-item">
+                    <span className="stat-value">{product.sellerInfo?.totalProducts || 'N/A'}</span>
+                    <span className="stat-label">Total Products</span>
+                  </div>
+                  {(product.sellerInfo?.yearOfEstablishment || product.sellerProfile?.yearOfEstablishment) && (
+                    <div className="stat-item">
+                      <span className="stat-value">{product.sellerInfo?.yearOfEstablishment || product.sellerProfile?.yearOfEstablishment}</span>
+                      <span className="stat-label">Established</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Contact Information */}
+                <div className="seller-contact">
+                  <h5>Contact Information</h5>
+                  <div className="contact-details">
+                    <div className="contact-item">
+                      <span className="material-symbols-outlined">phone</span>
+                      <span>{product.sellerInfo?.contactPerson?.phone || product.sellerProfile?.contactPerson?.phone || product.sellerInfo?.phone || product.sellerProfile?.phone || 'Not available'}</span>
+                    </div>
+                    <div className="contact-item">
+                      <span className="material-symbols-outlined">email</span>
+                      <span>{product.sellerInfo?.contactPerson?.email || product.sellerProfile?.contactPerson?.email || product.sellerInfo?.email || product.sellerProfile?.email || 'Not available'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {(product.sellerInfo?.aboutCompany || product.sellerProfile?.aboutCompany) && (
+                  <div className="seller-description">
+                    <p>{product.sellerInfo?.aboutCompany || product.sellerProfile?.aboutCompany}</p>
+                  </div>
+                )}
+
+                {/* Unique Shop Link */}
+                {getShopLink() && (
+                  <div className="seller-shop-link">
+                    <h5>Digital Shop Link</h5>
+                    <div className="shop-link-container">
+                      <div className="shop-link-display">
+                        <span className="material-symbols-outlined">link</span>
+                        <a 
+                          href={getShopLink()} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="shop-link-url"
+                        >
+                          {getShopLink()}
+                        </a>
+                      </div>
+                      <button 
+                        onClick={handleCopyShopLink}
+                        className="btn-copy-link"
+                        title="Copy link"
+                      >
+                        <span className="material-symbols-outlined">
+                          {shopLinkCopied ? 'check' : 'content_copy'}
+                        </span>
+                        {shopLinkCopied ? 'Copied!' : 'Copy'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="seller-actions">
+                  {getShopLink() && (
+                    <a 
+                      href={getShopLink()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-outline btn-shop-link"
+                    >
+                      <span className="material-symbols-outlined">storefront</span>
+                      Visit Digital Shop
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
