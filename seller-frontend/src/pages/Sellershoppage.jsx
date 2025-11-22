@@ -313,181 +313,218 @@ const Sellershoppage = () => {
 
         {/* Two Column Layout */}
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left Sidebar */}
-          <aside className="w-full lg:w-80 flex-shrink-0">
-            <div className="bg-white rounded-2xl shadow-sm p-6 space-y-6 sticky top-4">
-              {/* Categories/Filter Section */}
+          {/* Left Sidebar - Optimized */}
+          <aside className="w-full lg:w-72 flex-shrink-0">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 space-y-5 sticky top-4">
+              {/* Categories/Filter Section - Most Important */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Categories</h3>
-                <div className="space-y-1">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setSelectedCategory(cat)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                        selectedCategory === cat
-                          ? 'bg-blue-50 text-blue-700 font-medium'
-                          : 'text-gray-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      <span className="capitalize">{cat === 'all' ? 'All items' : cat}</span>
-                      <span className="text-gray-400 ml-2">
-                        ({cat === 'all' ? products.length : products.filter(p => p.category === cat).length})
-                      </span>
-                    </button>
-                  ))}
+                <h3 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">Filter by Category</h3>
+                <div className="space-y-0.5">
+                  {categories.map((cat) => {
+                    const count = cat === 'all' ? products.length : products.filter(p => p.category === cat).length;
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => setSelectedCategory(cat)}
+                        className={`w-full text-left px-3 py-2.5 rounded-md text-sm transition-all duration-200 ${
+                          selectedCategory === cat
+                            ? 'bg-blue-600 text-white font-medium shadow-sm'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="capitalize">{cat === 'all' ? 'All items' : cat}</span>
+                          <span className={`text-xs ${selectedCategory === cat ? 'text-blue-100' : 'text-gray-400'}`}>
+                            {count}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Contact Shop Owner */}
-              <div>
-                <button
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
-                  onClick={() => {
-                    window.open(`${buyerAppBaseUrl}/product-detail?contact=${sellerId}`, '_blank');
-                  }}
-                >
-                  <span className="material-symbols-outlined">chat_bubble</span>
-                  Contact shop owner
-                </button>
-              </div>
+              {/* Shop Credentials - Two Part Design */}
+              {(certificates.length > 0 || factoryVideos.length > 0 || seller.aboutCompany) && (
+                <div className="border-t border-gray-200 pt-4">
+                  <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Shop Credentials</h3>
+                  
+                  {/* Part 1: Documents & Media */}
+                  {(certificates.length > 0 || factoryVideos.length > 0) && (
+                    <div className="mb-4">
+                      <h4 className="text-xs font-semibold text-gray-600 mb-2.5">Documents & Media</h4>
+                      <div className="space-y-2">
+                        {certificates.length > 0 && (
+                          <button
+                            onClick={() => openSectionPage('certificates', certificates)}
+                            className="w-full flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-blue-50 to-blue-50/50 border border-blue-200 hover:border-blue-400 hover:from-blue-100 hover:to-blue-100/50 transition-all group shadow-sm"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center group-hover:bg-blue-600 transition-colors shadow-sm">
+                                <span className="material-symbols-outlined text-white text-lg">description</span>
+                              </div>
+                              <div className="text-left">
+                                <div className="text-sm font-semibold text-gray-800">Certificates</div>
+                                <div className="text-xs text-gray-500">{certificates.length} certificate{certificates.length !== 1 ? 's' : ''}</div>
+                              </div>
+                            </div>
+                            <span className="material-symbols-outlined text-blue-600 group-hover:text-blue-700 text-lg">arrow_forward</span>
+                          </button>
+                        )}
 
-              {/* Shop Performance Metrics */}
-              <div className="border-t pt-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Shop Performance</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Total Products</span>
-                    <span className="font-semibold text-gray-800">{products.length}</span>
-                  </div>
-                  {seller.verified && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="material-symbols-outlined text-green-600 text-lg">verified</span>
-                      <span className="text-gray-600">Verified Seller</span>
+                        {factoryVideos.length > 0 && (
+                          <button
+                            onClick={() => openSectionPage('factory-video', factoryVideos)}
+                            className="w-full flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-purple-50 to-purple-50/50 border border-purple-200 hover:border-purple-400 hover:from-purple-100 hover:to-purple-100/50 transition-all group shadow-sm"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 bg-purple-500 rounded-lg flex items-center justify-center group-hover:bg-purple-600 transition-colors shadow-sm">
+                                <span className="material-symbols-outlined text-white text-lg">videocam</span>
+                              </div>
+                              <div className="text-left">
+                                <div className="text-sm font-semibold text-gray-800">Factory Video</div>
+                                <div className="text-xs text-gray-500">{factoryVideos.length} video{factoryVideos.length !== 1 ? 's' : ''}</div>
+                              </div>
+                            </div>
+                            <span className="material-symbols-outlined text-purple-600 group-hover:text-purple-700 text-lg">arrow_forward</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )}
-                  {seller.yearOfEstablishment && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Established</span>
-                      <span className="font-semibold text-gray-800">{seller.yearOfEstablishment}</span>
+
+                  {/* Part 2: Company Information */}
+                  {seller.aboutCompany && (
+                    <div>
+                      <h4 className="text-xs font-semibold text-gray-600 mb-2.5">Company Information</h4>
+                      <button
+                        onClick={() => openSectionPage('about', { aboutCompany: seller.aboutCompany })}
+                        className="w-full flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-green-50 to-green-50/50 border border-green-200 hover:border-green-400 hover:from-green-100 hover:to-green-100/50 transition-all group shadow-sm"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 bg-green-500 rounded-lg flex items-center justify-center group-hover:bg-green-600 transition-colors shadow-sm">
+                            <span className="material-symbols-outlined text-white text-lg">business</span>
+                          </div>
+                          <div className="text-left">
+                            <div className="text-sm font-semibold text-gray-800">About Company</div>
+                            <div className="text-xs text-gray-500">Learn more</div>
+                          </div>
+                        </div>
+                        <span className="material-symbols-outlined text-green-600 group-hover:text-green-700 text-lg">arrow_forward</span>
+                      </button>
                     </div>
                   )}
-                </div>
-              </div>
-
-              {/* Certificates Section */}
-              {certificates.length > 0 && (
-                <div className="border-t pt-4">
-                  <button
-                    onClick={() => openSectionPage('certificates', certificates)}
-                    className="w-full text-left text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide cursor-pointer flex items-center justify-between hover:text-blue-600 transition-colors"
-                  >
-                    <span>Certificates</span>
-                    <span className="material-symbols-outlined text-lg">open_in_new</span>
-                  </button>
-                  <p className="text-xs text-gray-500 mb-2">{certificates.length} certificate(s) available</p>
-                </div>
-              )}
-
-              {/* Factory Video Section */}
-              {factoryVideos.length > 0 && (
-                <div className="border-t pt-4">
-                  <button
-                    onClick={() => openSectionPage('factory-video', factoryVideos)}
-                    className="w-full text-left text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide cursor-pointer flex items-center justify-between hover:text-blue-600 transition-colors"
-                  >
-                    <span>Factory Video</span>
-                    <span className="material-symbols-outlined text-lg">open_in_new</span>
-                  </button>
-                  <p className="text-xs text-gray-500 mb-2">{factoryVideos.length} video(s) available</p>
-                </div>
-              )}
-
-              {/* About Company Section */}
-              {seller.aboutCompany && (
-                <div className="border-t pt-4">
-                  <button
-                    onClick={() => openSectionPage('about', { aboutCompany: seller.aboutCompany })}
-                    className="w-full text-left text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide cursor-pointer flex items-center justify-between hover:text-blue-600 transition-colors"
-                  >
-                    <span>About Company</span>
-                    <span className="material-symbols-outlined text-lg">open_in_new</span>
-                  </button>
-                  <p className="text-xs text-gray-500 line-clamp-2">{seller.aboutCompany.substring(0, 100)}...</p>
                 </div>
               )}
 
-              {/* Additional Information */}
-              <div className="border-t pt-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Information</h3>
-                <div className="space-y-2 text-sm">
-                  {seller.companyAddress && (
-                    <div>
-                      <span className="text-gray-500">Address:</span>
-                      <p className="text-gray-700">{seller.companyAddress}</p>
-                    </div>
-                  )}
-                  {seller.factoryAddress && (
-                    <div>
-                      <span className="text-gray-500">Factory:</span>
-                      <p className="text-gray-700">{seller.factoryAddress}</p>
-                    </div>
-                  )}
-                  {seller.gstNumber && (
-                    <div>
-                      <span className="text-gray-500">GST:</span>
-                      <p className="text-gray-700 font-mono">{seller.gstNumber}</p>
-                    </div>
-                  )}
-                  {seller.website && (
-                    <div>
+              {/* Quick Info - Only Essential */}
+              {(seller.website || seller.gstNumber) && (
+                <div className="border-t border-gray-200 pt-4">
+                  <h3 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">Quick Info</h3>
+                  <div className="space-y-2.5">
+                    {seller.website && (
                       <a
                         href={seller.website}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline flex items-center gap-1"
+                        className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 hover:underline"
                       >
-                        <span>Website</span>
-                        <span className="material-symbols-outlined text-sm">open_in_new</span>
+                        <span className="material-symbols-outlined text-base">language</span>
+                        <span className="truncate">Visit Website</span>
+                        <span className="material-symbols-outlined text-sm ml-auto">open_in_new</span>
                       </a>
-                    </div>
-                  )}
+                    )}
+                    {seller.gstNumber && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <span className="material-symbols-outlined text-base text-gray-400">badge</span>
+                        <span className="font-mono text-xs">GST: {seller.gstNumber}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-
-              {/* Report Shop */}
-              <div className="border-t pt-4">
-                <button className="text-xs text-gray-500 hover:text-gray-700 underline">
-                  Report this shop
-                </button>
-              </div>
+              )}
             </div>
           </aside>
 
           {/* Right Side - Products Grid */}
           <main className="flex-1 min-w-0">
             <div className="bg-white rounded-2xl shadow-sm p-6">
-              {/* Header with Search */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                <h2 className="text-xl font-semibold">
-                  {selectedCategory === 'all' ? 'All items' : selectedCategory}
-                </h2>
-                <div className="flex items-center gap-4">
-                  <div className="relative flex-1 sm:flex-initial sm:w-64">
+              {/* Header with Enhanced Search */}
+              <div className="mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {selectedCategory === 'all' ? 'All items' : selectedCategory}
+                  </h2>
+                  <div className="text-sm text-gray-500 whitespace-nowrap">
+                    {searchQuery ? (
+                      <span>
+                        <span className="font-semibold text-gray-700">{filteredProducts.length}</span> result{filteredProducts.length !== 1 ? 's' : ''} for "{searchQuery}"
+                      </span>
+                    ) : (
+                      <span>
+                        <span className="font-semibold text-gray-700">{filteredProducts.length}</span> item{filteredProducts.length !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Enhanced Search Bar - Integrated Design */}
+                <div className="relative group">
+                  <div className="relative flex items-center">
                     <input
                       type="text"
-                      placeholder={`Search all ${products.length} items`}
+                      placeholder={`search all ${products.length} items...`}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full pl-20 pr-12 py-3.5 bg-white border-2 border-blue-500 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all duration-200 shadow-sm"
                     />
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      search
-                    </span>
+                    {/* Integrated Search Label/Icon */}
+                    <div className="absolute left-4 flex items-center pointer-events-none">
+                      <span className="text-blue-600 font-medium text-sm">search</span>
+                    </div>
+                    {/* Clear Button */}
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-3 z-10 p-1.5 rounded-lg hover:bg-gray-100 transition-colors group/clear"
+                        aria-label="Clear search"
+                        title="Clear search"
+                      >
+                        <span className="material-symbols-outlined text-gray-400 group-hover/clear:text-gray-600 text-lg">
+                          close
+                        </span>
+                      </button>
+                    )}
                   </div>
-                  <span className="text-sm text-gray-500 whitespace-nowrap">
-                    {filteredProducts.length} items
-                  </span>
+                  
+                  {/* Quick Search Section */}
+                  {!searchQuery && filteredProducts.length > 0 && categories.length > 1 && (
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-gray-600 font-medium">Quick search:</span>
+                      {categories.slice(1, Math.min(5, categories.length)).map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => {
+                            setSelectedCategory(cat);
+                            setSearchQuery(cat);
+                          }}
+                          className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors font-medium capitalize"
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Search Results Indicator */}
+                  {searchQuery && (
+                    <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+                      <span className="material-symbols-outlined text-blue-600 text-base">filter_alt</span>
+                      <span>
+                        Showing results for: <span className="font-semibold text-gray-900">"{searchQuery}"</span>
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
