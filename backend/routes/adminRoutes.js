@@ -287,6 +287,7 @@ router.put("/sellers/:sellerId/profile", verifyAdmin, async (req, res) => {
     const updateData = { ...req.body };
     
     console.log("Updating seller profile for sellerId:", sellerId);
+    console.log("Update data received:", updateData);
     
     // Remove fields that shouldn't be updated
     delete updateData.sellerId;
@@ -307,12 +308,49 @@ router.put("/sellers/:sellerId/profile", verifyAdmin, async (req, res) => {
       });
     }
 
+    // Handle contactPerson object update
+    if (updateData.contactPerson && typeof updateData.contactPerson === 'object') {
+      // Merge contactPerson fields
+      updateData.contactPerson = {
+        ...(seller.contactPerson || {}),
+        ...updateData.contactPerson,
+      };
+    }
+
+    // Validate shop name if it's being changed
+    if (updateData.shopName && updateData.shopName.trim() !== '') {
+      const normalizedShopName = updateData.shopName.trim().toLowerCase();
+      const currentShopName = seller.shopName ? seller.shopName.toLowerCase() : '';
+
+      // Only check if shop name is actually changing
+      if (normalizedShopName !== currentShopName) {
+        const existingSeller = await Seller.findOne({
+          shopName: new RegExp(`^${normalizedShopName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"),
+          _id: { $ne: seller._id },
+        });
+
+        if (existingSeller) {
+          return res.status(400).json({
+            success: false,
+            message: "This shop name is already taken by another seller. Please choose a different name.",
+          });
+        }
+      }
+    }
+
     // Update seller profile
     const updatedSeller = await Seller.findOneAndUpdate(
       { sellerId },
       { $set: updateData },
       { new: true, runValidators: true }
     ).select('-password');
+
+    if (!updatedSeller) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update seller profile",
+      });
+    }
 
     console.log("Seller profile updated successfully:", updatedSeller.companyName || updatedSeller.name);
 
@@ -326,6 +364,58 @@ router.put("/sellers/:sellerId/profile", verifyAdmin, async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error updating seller profile",
+      error: error.message,
+    });
+  }
+});
+
+// Check Shop Name Availability (for admin)
+router.get("/check-shop-name", verifyAdmin, async (req, res) => {
+  try {
+    const { shopName, excludeSellerId } = req.query;
+
+    if (!shopName || shopName.trim() === '') {
+      return res.json({
+        success: true,
+        available: true,
+        message: "Shop name is empty",
+      });
+    }
+
+    // Normalize shop name (trim and lowercase for comparison)
+    const normalizedShopName = shopName.trim().toLowerCase();
+
+    // Build query to check if shop name exists
+    let query = { shopName: new RegExp(`^${normalizedShopName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") };
+
+    // Exclude current seller if provided
+    if (excludeSellerId) {
+      const excludeSeller = await Seller.findOne({ sellerId: excludeSellerId });
+      if (excludeSeller) {
+        query._id = { $ne: excludeSeller._id };
+      }
+    }
+
+    const existingSeller = await Seller.findOne(query);
+
+    if (existingSeller) {
+      return res.json({
+        success: true,
+        available: false,
+        message: "Shop name is already taken",
+      });
+    }
+
+    res.json({
+      success: true,
+      available: true,
+      message: "Shop name is available",
+    });
+  } catch (error) {
+    console.error("Error checking shop name:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error checking shop name availability",
       error: error.message,
     });
   }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 
@@ -18,6 +18,10 @@ const SellerProfileView = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editFormData, setEditFormData] = useState({});
   const [saving, setSaving] = useState(false);
+  const [shopNameError, setShopNameError] = useState('');
+  const [checkingShopName, setCheckingShopName] = useState(false);
+  const [shopNameValid, setShopNameValid] = useState(true);
+  const shopNameCheckTimeoutRef = useRef(null);
 
   useEffect(() => {
     if (sellerId) {
@@ -31,12 +35,12 @@ const SellerProfileView = () => {
   }, [sellerId]);
 
   useEffect(() => {
-    if (seller && !isEditing) {
-      // Initialize form data when seller is loaded
+    if (seller) {
+      // Initialize form data when seller is loaded or when entering edit mode
       setEditFormData({
         name: seller.name || '',
         email: seller.email || '',
-        phone: seller.phone || '',
+        phone: seller.phone || seller.mobile || '',
         companyName: seller.companyName || '',
         shopName: seller.shopName || '',
         yearOfEstablishment: seller.yearOfEstablishment || '',
@@ -61,7 +65,7 @@ const SellerProfileView = () => {
         },
       });
     }
-  }, [seller, isEditing]);
+  }, [seller]);
 
   const fetchSellerProfile = async () => {
     try {
@@ -108,6 +112,195 @@ const SellerProfileView = () => {
       }
     } catch (error) {
       console.error('Error fetching seller products:', error);
+    }
+  };
+
+  const checkShopNameAvailability = async (shopName) => {
+    if (!shopName || shopName.trim() === '') {
+      setShopNameError('');
+      setShopNameValid(true);
+      return;
+    }
+
+    // If shop name hasn't changed, it's valid
+    if (shopName.trim().toLowerCase() === (seller?.shopName || '').toLowerCase()) {
+      setShopNameError('');
+      setShopNameValid(true);
+      return;
+    }
+
+    setCheckingShopName(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/admin/check-shop-name?shopName=${encodeURIComponent(shopName.trim())}&excludeSellerId=${sellerId}`,
+        {
+          credentials: 'include',
+        }
+      );
+
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        if (data.available) {
+          setShopNameError('');
+          setShopNameValid(true);
+        } else {
+          setShopNameError('This shop name is already taken by another seller');
+          setShopNameValid(false);
+        }
+      } else {
+        setShopNameError('Unable to verify shop name availability');
+        setShopNameValid(false);
+      }
+    } catch (error) {
+      console.error('Error checking shop name:', error);
+      setShopNameError('Error checking shop name availability');
+      setShopNameValid(false);
+    } finally {
+      setCheckingShopName(false);
+    }
+  };
+
+  const handleShopNameChange = (value) => {
+    setEditFormData({ ...editFormData, shopName: value });
+    setShopNameError('');
+    setShopNameValid(true);
+    
+    // Clear previous timeout
+    if (shopNameCheckTimeoutRef.current) {
+      clearTimeout(shopNameCheckTimeoutRef.current);
+    }
+    
+    // Debounce the check - wait 500ms after user stops typing
+    shopNameCheckTimeoutRef.current = setTimeout(() => {
+      checkShopNameAvailability(value);
+    }, 500);
+  };
+
+  const handleSaveProfile = async () => {
+    // Validate shop name before saving
+    if (editFormData.shopName && editFormData.shopName.trim() !== '') {
+      if (!shopNameValid) {
+        alert('Please fix the shop name error before saving');
+        return;
+      }
+      // Do a final check before saving
+      await checkShopNameAvailability(editFormData.shopName);
+      if (!shopNameValid) {
+        alert('Shop name is already taken. Please choose a different name.');
+        return;
+      }
+    }
+
+    try {
+      setSaving(true);
+      console.log('Saving profile for sellerId:', sellerId);
+      console.log('Form data:', editFormData);
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/admin/sellers/${sellerId}/profile`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(editFormData),
+        }
+      );
+
+      const data = await response.json();
+      console.log('Save response:', data);
+      
+      if (response.ok && data.success) {
+        // Update seller state with new data
+        setSeller(data.seller);
+        setIsEditing(false);
+        setShopNameError('');
+        setShopNameValid(true);
+        // Refresh the profile to show updated information
+        await fetchSellerProfile();
+        alert('Seller profile updated successfully! Changes will be reflected in the seller dashboard.');
+      } else {
+        alert(data.message || 'Failed to update seller profile');
+        console.error('Error saving:', data);
+      }
+    } catch (error) {
+      console.error('Error updating seller profile:', error);
+      alert('Error updating seller profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    // Reset form data to original seller data
+    if (seller) {
+      setEditFormData({
+        name: seller.name || '',
+        email: seller.email || '',
+        phone: seller.phone || seller.mobile || '',
+        companyName: seller.companyName || '',
+        shopName: seller.shopName || '',
+        yearOfEstablishment: seller.yearOfEstablishment || '',
+        numberOfEmployees: seller.numberOfEmployees || '',
+        companyAddress: seller.companyAddress || '',
+        factoryAddress: seller.factoryAddress || '',
+        website: seller.website || '',
+        aboutCompany: seller.aboutCompany || '',
+        gstNumber: seller.gstNumber || '',
+        pan: seller.pan || '',
+        cin: seller.cin || '',
+        contactPerson: seller.contactPerson ? {
+          name: seller.contactPerson.name || '',
+          designation: seller.contactPerson.designation || '',
+          phone: seller.contactPerson.phone || '',
+          email: seller.contactPerson.email || '',
+        } : {
+          name: '',
+          designation: '',
+          phone: '',
+          email: '',
+        },
+      });
+    }
+  };
+
+  const handleEditClick = () => {
+    console.log('Edit button clicked, entering edit mode');
+    // Ensure form data is initialized before entering edit mode
+    if (seller) {
+      setEditFormData({
+        name: seller.name || '',
+        email: seller.email || '',
+        phone: seller.phone || seller.mobile || '',
+        companyName: seller.companyName || '',
+        shopName: seller.shopName || '',
+        yearOfEstablishment: seller.yearOfEstablishment || '',
+        numberOfEmployees: seller.numberOfEmployees || '',
+        companyAddress: seller.companyAddress || '',
+        factoryAddress: seller.factoryAddress || '',
+        website: seller.website || '',
+        aboutCompany: seller.aboutCompany || '',
+        gstNumber: seller.gstNumber || '',
+        pan: seller.pan || '',
+        cin: seller.cin || '',
+        contactPerson: seller.contactPerson ? {
+          name: seller.contactPerson.name || '',
+          designation: seller.contactPerson.designation || '',
+          phone: seller.contactPerson.phone || '',
+          email: seller.contactPerson.email || '',
+        } : {
+          name: '',
+          designation: '',
+          phone: '',
+          email: '',
+        },
+      });
+      setIsEditing(true);
+    } else {
+      console.error('Cannot enter edit mode: seller data not loaded');
     }
   };
 
@@ -215,7 +408,7 @@ const SellerProfileView = () => {
                 )}
                 {!isEditing ? (
                   <button
-                    onClick={() => setIsEditing(true)}
+                    onClick={handleEditClick}
                     className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
                   >
                     <span className="material-symbols-outlined text-sm">edit</span>
@@ -225,8 +418,8 @@ const SellerProfileView = () => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={handleSaveProfile}
-                      disabled={saving}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                      disabled={saving || !shopNameValid}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {saving ? (
                         <>
@@ -411,13 +604,40 @@ const SellerProfileView = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Shop Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Shop Name
+                      {checkingShopName && (
+                        <span className="ml-2 text-xs text-gray-500">(Checking...)</span>
+                      )}
+                    </label>
                     <input
                       type="text"
                       value={editFormData.shopName || ''}
-                      onChange={(e) => setEditFormData({ ...editFormData, shopName: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        handleShopNameChange(value);
+                      }}
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                        shopNameError
+                          ? 'border-red-300 focus:ring-red-500'
+                          : shopNameValid && editFormData.shopName && !checkingShopName
+                          ? 'border-green-300 focus:ring-green-500'
+                          : 'border-gray-300 focus:ring-purple-500'
+                      }`}
+                      placeholder="Enter unique shop name"
                     />
+                    {shopNameError && (
+                      <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-sm">error</span>
+                        {shopNameError}
+                      </p>
+                    )}
+                    {!shopNameError && shopNameValid && editFormData.shopName && !checkingShopName && (
+                      <p className="mt-1 text-sm text-green-600 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-sm">check_circle</span>
+                        Shop name is available
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div>

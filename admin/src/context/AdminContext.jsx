@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 const AdminContext = createContext();
 
@@ -14,6 +14,7 @@ export const AdminProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const isCheckingRef = useRef(false);
 
   // Check authentication on mount
   useEffect(() => {
@@ -21,9 +22,21 @@ export const AdminProvider = ({ children }) => {
   }, []);
 
   const checkAuth = async () => {
+    // Prevent multiple simultaneous checks
+    if (isCheckingRef.current) {
+      return;
+    }
+
     try {
+      isCheckingRef.current = true;
+      setLoading(true);
+
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/admin/verify`, {
         credentials: 'include',
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
       });
 
       if (response.ok) {
@@ -36,6 +49,7 @@ export const AdminProvider = ({ children }) => {
           setAdmin(null);
         }
       } else {
+        // If verify fails, clear authentication
         setIsAuthenticated(false);
         setAdmin(null);
       }
@@ -45,6 +59,7 @@ export const AdminProvider = ({ children }) => {
       setAdmin(null);
     } finally {
       setLoading(false);
+      isCheckingRef.current = false;
     }
   };
 
