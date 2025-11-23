@@ -141,17 +141,38 @@ const Sellershoppage = () => {
     return filtered;
   }, [products, selectedCategory, searchQuery]);
 
-  // Get factory videos from documents
+  // Get factory videos from factoryVideos array and documents
   const factoryVideos = useMemo(() => {
-    if (!seller?.documents) return [];
-    return seller.documents.filter(doc => 
-      doc.resourceType === 'video' || 
-      doc.format === 'mp4' || 
-      doc.format === 'mov' ||
-      doc.originalName?.toLowerCase().includes('factory') ||
-      doc.originalName?.toLowerCase().includes('video')
-    );
-  }, [seller?.documents]);
+    const videos = [];
+    
+    // Add factory videos from dedicated factoryVideos array
+    if (seller?.factoryVideos && Array.isArray(seller.factoryVideos)) {
+      seller.factoryVideos.forEach(video => {
+        if (video?.url) {
+          videos.push({
+            url: video.url,
+            originalName: video.originalName || 'Factory Video',
+            format: video.format || 'video',
+            uploadedAt: video.uploadedAt
+          });
+        }
+      });
+    }
+    
+    // Add videos from documents (for backward compatibility)
+    if (seller?.documents) {
+      const docVideos = seller.documents.filter(doc => 
+        doc.resourceType === 'video' || 
+        doc.format === 'mp4' || 
+        doc.format === 'mov' ||
+        doc.originalName?.toLowerCase().includes('factory') ||
+        doc.originalName?.toLowerCase().includes('video')
+      );
+      videos.push(...docVideos);
+    }
+    
+    return videos;
+  }, [seller?.factoryVideos, seller?.documents]);
 
   // Get certificates
   const certificates = useMemo(() => {
@@ -178,8 +199,8 @@ const Sellershoppage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-800">
         <div className="text-center space-y-2">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-gray-600">Loading shop...</p>
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto" />
+          <p className="mt-4 text-gray-600">Loading shop...</p>
         </div>
       </div>
     );

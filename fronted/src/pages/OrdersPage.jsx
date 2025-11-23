@@ -54,10 +54,9 @@ const OrdersPage = () => {
         )}
 
         {loading ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-40 bg-white rounded-2xl border border-gray-100 shadow-sm animate-pulse" />
-            ))}
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p className="mt-4 text-gray-600">Loading orders...</p>
           </div>
         ) : orders.length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center text-gray-600">

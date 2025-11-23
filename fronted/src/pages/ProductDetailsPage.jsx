@@ -178,9 +178,11 @@ const ProductDetailsPage = () => {
     return (
       <div>
         <Navbar />
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading product details...</p>
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p className="mt-4 text-gray-600">Loading product details...</p>
+          </div>
         </div>
       </div>
     );
@@ -265,10 +267,7 @@ const ProductDetailsPage = () => {
                   )}
                   <div className="seller-details">
                     <h4>{product.sellerInfo?.companyName || product.sellerProfile?.companyName}</h4>
-                    <div className="seller-meta">
-                      <span className="seller-id">
-                        Seller ID: {product.sellerInfo?.sellerId || product.sellerProfile?.sellerId || product.sellerId}
-                      </span>
+                    <div className="seller-meta"> 
                       {(product.sellerInfo?.verified || product.sellerProfile?.verified) && (
                         <span className="verified-badge">
                           <span className="material-symbols-outlined">verified</span>
@@ -307,13 +306,13 @@ const ProductDetailsPage = () => {
                   </div>
                 </div>
 
-                {(product.sellerInfo?.aboutCompany || product.sellerProfile?.aboutCompany) && (
+                {/* {(product.sellerInfo?.aboutCompany || product.sellerProfile?.aboutCompany) && (
                   <div className="seller-description">
                     <p>{product.sellerInfo?.aboutCompany || product.sellerProfile?.aboutCompany}</p>
                   </div>
-                )}
+                )} */}
 
-                {/* Unique Shop Link */}
+                {/* Unique Shop Link
                 {getShopLink() && (
                   <div className="seller-shop-link">
                     <h5>Digital Shop Link</h5>
@@ -341,7 +340,7 @@ const ProductDetailsPage = () => {
                       </button>
                     </div>
                   </div>
-                )}
+                )} */}
 
                 <div className="seller-actions">
                   {getShopLink() && (

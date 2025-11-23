@@ -133,6 +133,15 @@ const sellerSchema = new mongoose.Schema(
       uploadedAt: { type: Date, default: Date.now }
     }], // Cloudinary URLs with metadata for certifications
     
+    // Factory Videos (max 3)
+    factoryVideos: [{
+      url: { type: String, required: true },
+      originalName: { type: String },
+      format: { type: String },
+      resourceType: { type: String, default: "video" },
+      uploadedAt: { type: Date, default: Date.now }
+    }], // Cloudinary URLs with metadata for factory videos (max 3)
+    
     // Extra Information
     aboutCompany: { type: String },
     website: { type: String },

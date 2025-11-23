@@ -163,17 +163,10 @@ function TopRankingPage() {
   if (loading) {
     return (
       <div className="w-full"> 
-        <div className="h-56 bg-gradient-to-b from-gray-100 to-white" />
-        <div className="max-w-7xl mx-auto px-4 -mt-40">
-          <div className="animate-pulse space-y-6">
-            <div className="h-10 w-48 bg-gray-200 rounded" />
-            <div className="h-10 bg-gray-200 rounded" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-40 bg-gray-100 rounded" />
-              ))}
-            </div>
-          </div>
+        <Navbar />
+        <div className="flex flex-col items-center justify-center min-h-screen py-20">
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-600">Loading top rankings...</p>
         </div>
       </div>
     );

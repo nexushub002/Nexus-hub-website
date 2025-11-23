@@ -31,8 +31,6 @@ function App() {
               <Route path="/top-deals" element={<TopDealsPage />} />
               <Route path="/new-arrivals" element={<NewArrivalsPage />} />
               <Route path="/product-detail/:id" element={<ProductDetailsPage />} />
-              
-              
               <Route path="/myprofile" element={<Myprofile />} />
               <Route path="/search" element={<SearchResultPage />} />
               <Route path="/wishlist" element={<WishlistPage />} />

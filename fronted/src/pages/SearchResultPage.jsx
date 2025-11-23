@@ -57,9 +57,9 @@ const SearchResultPage = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p>Searching for products...</p>
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p className="mt-4 text-gray-600">Searching for products...</p>
           </div>
         )}
 

@@ -916,6 +916,132 @@ router.put("/website-banners", verifySeller, async (req, res) => {
 });
 
 // ----------------------
+// ADD FACTORY VIDEOS (max 3 total)
+// ----------------------
+router.post("/factory-videos", verifySeller, async (req, res) => {
+  try {
+    const { factoryVideos } = req.body;
+
+    if (!Array.isArray(factoryVideos) || factoryVideos.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Factory videos array is required",
+      });
+    }
+
+    const seller = await Seller.findById(req.seller._id);
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: "Seller not found",
+      });
+    }
+
+    // Check current count and limit
+    const currentCount = seller.factoryVideos?.length || 0;
+    const newVideosCount = factoryVideos.length;
+    const totalCount = currentCount + newVideosCount;
+
+    if (totalCount > 3) {
+      return res.status(400).json({
+        success: false,
+        message: `You can upload a maximum of 3 factory videos. Currently you have ${currentCount}, and trying to add ${newVideosCount}. Maximum allowed is 3.`,
+      });
+    }
+
+    // Validate each video has URL
+    const sanitizedVideos = factoryVideos.map((video) => {
+      if (!video || !video.url) {
+        throw new Error("Each factory video must include a URL.");
+      }
+      return {
+        url: video.url,
+        originalName: video.originalName || "factory-video",
+        format: video.format || "video",
+        resourceType: video.resourceType || "video",
+        uploadedAt: video.uploadedAt ? new Date(video.uploadedAt) : new Date(),
+      };
+    });
+
+    // Add new videos to existing ones
+    if (!seller.factoryVideos) {
+      seller.factoryVideos = [];
+    }
+    seller.factoryVideos.push(...sanitizedVideos);
+    await seller.save();
+
+    res.json({
+      success: true,
+      message: `${sanitizedVideos.length} factory video(s) added successfully`,
+      factoryVideos: seller.factoryVideos
+    });
+  } catch (error) {
+    console.error("Error adding factory videos:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error adding factory videos",
+      error: error.message
+    });
+  }
+});
+
+// ----------------------
+// DELETE FACTORY VIDEO
+// ----------------------
+router.delete("/factory-videos/:videoId", verifySeller, async (req, res) => {
+  try {
+    const { videoId } = req.params;
+    const seller = await Seller.findById(req.seller._id);
+    
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: "Seller not found",
+      });
+    }
+
+    if (!seller.factoryVideos || seller.factoryVideos.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No factory videos found",
+      });
+    }
+
+    // Find and remove the video by matching URL or index
+    const initialLength = seller.factoryVideos.length;
+    seller.factoryVideos = seller.factoryVideos.filter((video, index) => {
+      // Try to match by _id if it exists, otherwise by index
+      if (video._id) {
+        return video._id.toString() !== videoId;
+      }
+      return index.toString() !== videoId;
+    });
+
+    if (seller.factoryVideos.length === initialLength) {
+      return res.status(404).json({
+        success: false,
+        message: "Factory video not found",
+      });
+    }
+
+    await seller.save();
+
+    res.json({
+      success: true,
+      message: "Factory video deleted successfully",
+      factoryVideos: seller.factoryVideos
+    });
+  } catch (error) {
+    console.error("Error deleting factory video:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting factory video",
+      error: error.message
+    });
+  }
+});
+
+// ----------------------
 // UPLOAD WEBSITE BANNERS (Cloudinary + Mongo)
 // ----------------------
 export default router;

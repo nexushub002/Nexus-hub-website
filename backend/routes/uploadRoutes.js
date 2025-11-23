@@ -1,6 +1,6 @@
 // routes/uploadRoutes.js
 import express from "express";
-import { uploadImages, uploadVideos, uploadDocuments, uploadCertificates, uploadLogo } from "../middleware/upload.js";
+import { uploadImages, uploadVideos, uploadDocuments, uploadCertificates, uploadLogo, uploadFactoryVideo } from "../middleware/upload.js";
 
 const router = express.Router();
 
@@ -146,6 +146,38 @@ router.post("/logo", uploadLogo.single("logo"), async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: "Error uploading logo" 
+    });
+  }
+});
+
+// ✅ Upload factory videos to Cloudinary (max 3)
+router.post("/factory-videos", uploadFactoryVideo.array("factoryVideos", 3), async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "No factory videos uploaded" 
+      });
+    }
+
+    // Extract Cloudinary URLs from uploaded files
+    const factoryVideos = req.files.map(file => ({
+      url: file.path,
+      originalName: file.originalname,
+      format: file.format,
+      resourceType: file.resource_type || "video"
+    }));
+
+    res.json({ 
+      success: true, 
+      factoryVideos: factoryVideos,
+      message: `${factoryVideos.length} factory video(s) uploaded successfully`
+    });
+  } catch (error) {
+    console.error("Factory video upload error:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Error uploading factory videos" 
     });
   }
 });

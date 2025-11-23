@@ -52,8 +52,19 @@ const logoStorage = new CloudinaryStorage({
   },
 });
 
+// Setup storage for factory video
+const factoryVideoStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "manufacturer/factory-videos",
+    resource_type: "video", // restrict to videos
+    allowed_formats: ["mp4", "mov", "avi", "mkv", "webm"],
+  },
+});
+
 export const uploadImages = multer({ storage: imageStorage });
 export const uploadVideos = multer({ storage: videoStorage });
 export const uploadDocuments = multer({ storage: documentStorage });
 export const uploadCertificates = multer({ storage: certificateStorage });
 export const uploadLogo = multer({ storage: logoStorage });
+export const uploadFactoryVideo = multer({ storage: factoryVideoStorage });

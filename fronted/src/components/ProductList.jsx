@@ -35,11 +35,9 @@ const ProductList = () => {
 
   if (loading) {
     return (
-      <div className="products-grid">
-        {/* Show skeleton loading cards */}
-        {Array.from({ length: 10 }).map((_, index) => (
-          <ProductCard key={`skeleton-${index}`} product={null} />
-        ))}
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-600">Loading products...</p>
       </div>
     );
   }

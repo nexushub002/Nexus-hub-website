@@ -10,6 +10,7 @@ const ManufacturerProfile = () => {
   const [uploadingDocuments, setUploadingDocuments] = useState(false);
   const [uploadingCertificates, setUploadingCertificates] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingFactoryVideos, setUploadingFactoryVideos] = useState(false);
   const [message, setMessage] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [shopNameStatus, setShopNameStatus] = useState(null); // null | checking | available | taken | current | error
@@ -501,10 +502,110 @@ const ManufacturerProfile = () => {
     }
   };
 
+  const uploadFactoryVideos = async (files) => {
+    setUploadingFactoryVideos(true);
+    try {
+      const fileArray = Array.from(files);
+      
+      // Validate video files
+      for (const file of fileArray) {
+        if (!file.type.startsWith('video/')) {
+          setMessage(`${file.name} is not a valid video file`);
+          return;
+        }
+        
+        // Check file size (max 100MB per video)
+        if (file.size > 100 * 1024 * 1024) {
+          setMessage(`${file.name} is too large. Maximum size is 100MB per video`);
+          return;
+        }
+      }
+
+      // Check current count
+      const currentCount = manufacturerData?.factoryVideos?.length || 0;
+      if (currentCount + fileArray.length > 3) {
+        setMessage(`You can upload a maximum of 3 factory videos. Currently you have ${currentCount}, and trying to add ${fileArray.length}. Maximum allowed is 3.`);
+        return;
+      }
+
+      const formData = new FormData();
+      fileArray.forEach(file => {
+        formData.append('factoryVideos', file);
+      });
+      
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/upload/factory-videos`;
+
+      const uploadResponse = await fetch(url , {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      });
+
+      const uploadData = await uploadResponse.json();
+      if (uploadData.success) {
+        // Add factory videos to manufacturer profile
+        const updateUrl = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/factory-videos`;
+
+        const updateResponse = await fetch(updateUrl , {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({ factoryVideos: uploadData.factoryVideos })
+        });
+
+        const updateData = await updateResponse.json();
+        if (updateData.success) {
+          setManufacturerData(prev => ({
+            ...prev,
+            factoryVideos: updateData.factoryVideos
+          }));
+          setMessage(`${uploadData.factoryVideos.length} factory video(s) uploaded successfully`);
+        } else {
+          setMessage(updateData.message || 'Error updating factory videos');
+        }
+      } else {
+        setMessage(uploadData.message || 'Error uploading factory videos');
+      }
+    } catch (error) {
+      console.error('Error uploading factory videos:', error);
+      setMessage('Error uploading factory videos');
+    } finally {
+      setUploadingFactoryVideos(false);
+    }
+  };
+
+  const deleteFactoryVideo = async (videoIndex) => {
+    try {
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/seller-profile/factory-videos/${videoIndex}`;
+
+      const response = await fetch(url , {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setManufacturerData(prev => ({
+          ...prev,
+          factoryVideos: data.factoryVideos || []
+        }));
+        setMessage('Factory video deleted successfully');
+      } else {
+        setMessage(data.message || 'Error deleting factory video');
+      }
+    } catch (error) {
+      console.error('Error deleting factory video:', error);
+      setMessage('Error deleting factory video');
+    }
+  };
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-lg">Loading...</div>
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-600">Loading...</p>
       </div>
     );
   }
@@ -1037,6 +1138,83 @@ const ManufacturerProfile = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Factory Videos Section */}
+              <div className="border-b pb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-semibold">Factory Videos</h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {manufacturerData.factoryVideos?.length || 0} / 3 videos uploaded
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="file"
+                      accept="video/*"
+                      multiple
+                      onChange={(e) => e.target.files.length > 0 && uploadFactoryVideos(e.target.files)}
+                      className="hidden"
+                      id="factory-videos-upload"
+                      disabled={uploadingFactoryVideos || (manufacturerData.factoryVideos?.length || 0) >= 3}
+                    />
+                    <label
+                      htmlFor="factory-videos-upload"
+                      className={`cursor-pointer px-4 py-2 rounded-lg transition ${
+                        uploadingFactoryVideos || (manufacturerData.factoryVideos?.length || 0) >= 3
+                          ? 'bg-gray-400 cursor-not-allowed'
+                          : 'bg-indigo-600 hover:bg-indigo-700'
+                      } text-white`}
+                    >
+                      {uploadingFactoryVideos 
+                        ? 'Uploading...' 
+                        : (manufacturerData.factoryVideos?.length || 0) >= 3
+                          ? 'Maximum Reached (3/3)'
+                          : 'Upload Factory Videos'}
+                    </label>
+                  </div>
+                </div>
+                
+                {manufacturerData.factoryVideos && manufacturerData.factoryVideos.length > 0 ? (
+                  <div className="mt-4 space-y-4">
+                    {manufacturerData.factoryVideos.map((video, index) => (
+                      <div key={index} className="bg-gray-100 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <p className="font-medium">{video.originalName || `Factory Video ${index + 1}`}</p>
+                            <p className="text-sm text-gray-500">
+                              {video.format?.toUpperCase()} • 
+                              Uploaded: {new Date(video.uploadedAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => deleteFactoryVideo(index)}
+                            className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                        <div className="mt-4">
+                          <video 
+                            src={video.url} 
+                            controls 
+                            className="w-full max-w-2xl rounded-lg"
+                            style={{ maxHeight: '500px' }}
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-4 p-8 border-2 border-dashed border-gray-300 rounded-lg text-center">
+                    <span className="material-symbols-outlined text-4xl text-gray-400 mb-2">videocam</span>
+                    <p className="text-gray-500">No factory videos uploaded yet</p>
+                    <p className="text-sm text-gray-400 mt-1">Upload up to 3 videos showcasing your factory (Max 100MB each)</p>
+                  </div>
+                )}
               </div>
 
               {/* Save Button */}

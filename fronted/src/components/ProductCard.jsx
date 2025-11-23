@@ -145,9 +145,7 @@ const ProductCard = ({ product }) => {
                 <div className="product-details">
                     
                     {/* Product Name */}
-                    <h3 className="product-name" title={name}>
-                        {name}
-                    </h3>
+                    <h3 className="font-semibold text-lg mb-2 truncate">{product.name}</h3>
 
                     {/* Price */}
                     <div className="product-price">

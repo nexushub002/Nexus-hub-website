@@ -72,8 +72,9 @@ const MyProducts = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-lg">Loading your products...</div>
+      <div className="flex flex-col items-center justify-center h-64">
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-600">Loading your products...</p>
       </div>
     );
   }
@@ -111,7 +112,6 @@ const MyProducts = () => {
               
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2 truncate">{product.name}</h3>
-                <p className="text-gray-600 text-sm mb-2 line-clamp-2">{product.description}</p>
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-2xl font-bold text-blue-600">₹{product.price?.toLocaleString()}</span>
                   <span className="text-sm text-gray-500">MOQ: {product.moq || 1}</span>

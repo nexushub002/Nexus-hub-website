@@ -143,9 +143,9 @@ const ProductList = ({ isDarkMode = false, onEditProduct }) => {
   if (loading) {
     return (
       <div className={`${isDarkMode ? 'bg-white/10' : 'bg-white'} rounded-2xl p-6 shadow-sm`}>
-        <div className="flex items-center justify-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2">Loading products...</span>
+        <div className="flex flex-col items-center justify-center h-32">
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-600">Loading products...</p>
         </div>
       </div>
     );

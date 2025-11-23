@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import { buildApiUrl } from '../config/api';
+import '../components/ProductCard.css';
 
 const CATEGORY_CONFIG = {
   'apparel-accessories': {
@@ -126,10 +127,9 @@ const CategoryLandingPage = () => {
         )}
 
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <ProductCard key={`cat-skeleton-${i}`} product={null} />
-            ))}
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p className="mt-4 text-gray-600">Loading products...</p>
           </div>
         ) : items.length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center text-gray-600">
@@ -138,10 +138,12 @@ const CategoryLandingPage = () => {
             <div className="text-sm">Try selecting a specific subcategory above.</div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {items.map((p) => (
-              <ProductCard key={p._id} product={p} />
-            ))}
+          <div className="w-full py-1">
+            <div className="products grid grid-cols-2 md:grid-cols-4 gap-2">
+              {items.map((p) => (
+                <ProductCard key={p._id} product={p} />
+              ))}
+            </div>
           </div>
         )}
       </div>

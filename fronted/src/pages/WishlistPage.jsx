@@ -44,9 +44,9 @@ const WishlistPage = () => {
     return (
       <div>
         <Navbar />
-        <div className="wishlist-loading">
-          <div className="loading-spinner"></div>
-          <p>Loading wishlist...</p>
+        <div className="flex flex-col items-center justify-center min-h-screen py-20">
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-600">Loading wishlist...</p>
         </div>
       </div>
     );

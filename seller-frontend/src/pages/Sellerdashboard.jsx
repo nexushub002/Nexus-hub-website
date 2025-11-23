@@ -176,8 +176,9 @@ const Sellerdashboard = () => {
   // Show loading state while checking authentication
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-lg">Loading dashboard...</div>
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-600">Loading dashboard...</p>
       </div>
     )
   }
