@@ -43,7 +43,7 @@ import Cart from "./models/Cart.js";
 
   // Enable CORS
   app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "https://nexus-hub-fronted.vercel.app", "https://sellernexus-hub.vercel.app"], // frontend + seller frontend
+    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "https://nexus-hub-fronted.vercel.app", "https://sellernexus-hub.vercel.app"], // frontend + seller frontend + admin frontend
     credentials: true
   }));
 
@@ -229,9 +229,10 @@ import Cart from "./models/Cart.js";
 
 
    // Import routes
-  import sellerAuthRoutes from "./routes/sellerAuthRoutes.js";
-  import sellerProfileRoutes from "./routes/sellerProfileRoutes.js";
-  import sellerActivityRoutes from "./routes/sellerActivityRoutes.js";
+import sellerAuthRoutes from "./routes/sellerAuthRoutes.js";
+import sellerProfileRoutes from "./routes/sellerProfileRoutes.js";
+import sellerActivityRoutes from "./routes/sellerActivityRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
   //use seller routes
   app.use("/api/seller/auth", sellerAuthRoutes);
@@ -968,6 +969,7 @@ import Cart from "./models/Cart.js";
   app.use("/api/orders", orderRoutes);
   app.use("/api/inquiries", inquiryRoutes);
   app.use("/api/products-new", newProductRoutes);
+  app.use("/api/admin", adminRoutes);
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {

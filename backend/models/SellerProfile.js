@@ -158,6 +158,7 @@ const sellerSchema = new mongoose.Schema(
       default: false, // set true once email/phone verification is done
     },
     verified: { type: Boolean, default: false }, // admin verification (from manufacturer)
+    suspended: { type: Boolean, default: false }, // admin can suspend seller account
     
     // Products array to store all product IDs created by this seller
     products: [
