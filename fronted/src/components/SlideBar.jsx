@@ -11,7 +11,7 @@ const SlideBar = () => {
   const slides = [
     { 
       id: 1, 
-      url: "/Sliderbar_images/122911c45334a187.webp", 
+      url: "/Sliderbar_images/first_image.png", 
       alt: "Big Savings Sale",
       title: "Big Savings Sale",
       subtitle: "Up to 80% Off",
@@ -19,7 +19,7 @@ const SlideBar = () => {
     },
     { 
       id: 2, 
-      url: "/Sliderbar_images/707b1aae8941c3cc.webp", 
+      url: "/Sliderbar_images/second_image.png", 
       alt: "Electronics Deal",
       title: "Electronics Mega Sale",
       subtitle: "Best Prices Guaranteed",
@@ -27,7 +27,7 @@ const SlideBar = () => {
     },
     { 
       id: 3, 
-      url: "/Sliderbar_images/f12b23456036aa64.webp", 
+      url: "/Sliderbar_images/third_image.png", 
       alt: "Fashion Collection",
       title: "New Fashion Collection",
       subtitle: "Trending Styles",
