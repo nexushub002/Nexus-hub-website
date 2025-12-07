@@ -7,6 +7,14 @@
   import axios from "axios";
   dotenv.config();
 
+import Twilio from 'twilio';
+
+if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+  console.warn('⚠️ Twilio env vars missing: set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN in .env');
+}
+
+const client = Twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
 import productRoutes from "./routes/productRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
@@ -65,143 +73,172 @@ import Cart from "./models/Cart.js";
   }));
 
   // Function to send SMS using Fast2SMS (Free service)
-  const sendSMS = async (phone, otp) => {
-    try {
-      // Fast2SMS API configuration
-      const apiKey = process.env.FAST2SMS_API_KEY || "YOUR_FAST2SMS_API_KEY"; // Add this to your .env file
-      const message = `Your NexusHub verification code is: ${otp}. Valid for 5 minutes. Do not share this code with anyone.`;
+  // const sendSMS = async (phone, otp) => {
+  //   try {
+  //     // Fast2SMS API configuration
+  //     const apiKey = process.env.FAST2SMS_API_KEY || "YOUR_FAST2SMS_API_KEY"; // Add this to your .env file
+  //     const message = `Your NexusHub verification code is: ${otp}. Valid for 5 minutes. Do not share this code with anyone.`;
       
-      // If no API key is provided, just log the OTP (for development)
-      if (!process.env.FAST2SMS_API_KEY || apiKey === "YOUR_FAST2SMS_API_KEY") {
-        console.log(`🔐 OTP for ${phone}: ${otp} (Valid for 5 minutes)`);
-        console.log(`📱 SMS Message: ${message}`);
-        return { success: true, message: "OTP logged to console (development mode)" };
-      }
+  //     // If no API key is provided, just log the OTP (for development)
+  //     if (!process.env.FAST2SMS_API_KEY || apiKey === "YOUR_FAST2SMS_API_KEY") {
+  //       console.log(`🔐 OTP for ${phone}: ${otp} (Valid for 5 minutes)`);
+  //       console.log(`📱 SMS Message: ${message}`);
+  //       return { success: true, message: "OTP logged to console (development mode)" };
+  //     }
 
-      // Send actual SMS using Fast2SMS
-      const response = await axios.post('https://www.fast2sms.com/dev/bulkV2', {
-        route: 'v3',
-        sender_id: 'TXTIND',
-        message: message,
-        language: 'english',
-        flash: 0,
-        numbers: phone
-      }, {
-        headers: {
-          'authorization': apiKey,
-          'Content-Type': 'application/json'
-        }
-      });
+  //     // Send actual SMS using Fast2SMS
+  //     const response = await axios.post('https://www.fast2sms.com/dev/bulkV2', {
+  //       route: 'v3',
+  //       sender_id: 'TXTIND',
+  //       message: message,
+  //       language: 'english',
+  //       flash: 0,
+  //       numbers: phone
+  //     }, {
+  //       headers: {
+  //         'authorization': apiKey,
+  //         'Content-Type': 'application/json'
+  //       }
+  //     });
 
-      if (response.data.return) {
-        return { success: true, message: "OTP sent successfully" };
-      } else {
-        throw new Error(response.data.message || "Failed to send SMS");
-      }
-    } catch (error) {
-      console.error("❌ SMS sending error:", error.message);
-      // Fallback to console logging if SMS fails
-      console.log(`🔐 Fallback - OTP for ${phone}: ${otp} (Valid for 5 minutes)`);
-      return { success: true, message: "OTP logged to console (SMS service unavailable)" };
-    }
-  };
+  //     if (response.data.return) {
+  //       return { success: true, message: "OTP sent successfully" };
+  //     } else {
+  //       throw new Error(response.data.message || "Failed to send SMS");
+  //     }
+  //   } catch (error) {
+  //     console.error("❌ SMS sending error:", error.message);
+  //     // Fallback to console logging if SMS fails
+  //     console.log(`🔐 Fallback - OTP for ${phone}: ${otp} (Valid for 5 minutes)`);
+  //     return { success: true, message: "OTP logged to console (SMS service unavailable)" };
+  //   }
+  // };
 
   // 1. Send OTP
   app.post("/api/auth/send-otp", async (req, res) => {
-    try {
-      const { phone } = req.body;
+  //   try {
+  //     const { phone } = req.body;
 
-      if (!phone) return res.status(400).json({ message: "Phone Number is required" });
+  //     if (!phone) return res.status(400).json({ message: "Phone Number is required" });
 
-      // Validate phone number format (10 digits starting with 6-9)
-      const phoneRegex = /^[6-9]\d{9}$/;
-      if (!phoneRegex.test(phone)) {
-        return res.status(400).json({ message: "Please enter a valid 10-digit mobile number" });
-      }
+  //     // Validate phone number format (10 digits starting with 6-9)
+  //     const phoneRegex = /^[6-9]\d{9}$/;
+  //     if (!phoneRegex.test(phone)) {
+  //       return res.status(400).json({ message: "Please enter a valid 10-digit mobile number" });
+  //     }
 
-      // Delete any existing OTPs for this phone number
-      await Otp.deleteMany({ phone });
+  //     // Delete any existing OTPs for this phone number
+  //     await Otp.deleteMany({ phone });
 
-      // Generate 6-digit OTP
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  //     // Generate 6-digit OTP
+  //     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-      // Save OTP in DB (valid for 5 minutes)
-      await Otp.create({
-        phone,
-        otp,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000)
-      });
+  //     // Save OTP in DB (valid for 5 minutes)
+  //     await Otp.create({
+  //       phone,
+  //       otp,
+  //       expiresAt: new Date(Date.now() + 5 * 60 * 1000)
+  //     });
 
-      // Send SMS using Fast2SMS or fallback to console
-      const smsResult = await sendSMS(phone, otp);
+  //     // Send SMS using Fast2SMS or fallback to console
+  //     const smsResult = await sendSMS(phone, otp);
       
-      res.json({ 
-        message: smsResult.message,
-        success: true 
-      });
-    } catch (err) {
-      console.error("❌ Send OTP error:", err);
-      res.status(500).json({ message: "Error sending OTP", error: err.message });
+  //     res.json({ 
+  //       message: smsResult.message,
+  //       success: true 
+  //     });
+  //   } catch (err) {
+  //     console.error("❌ Send OTP error:", err);
+  //     res.status(500).json({ message: "Error sending OTP", error: err.message });
+  //   }
+  // });
+
+  try {
+    const { phone } = req.body;
+    if (!phone) return res.status(400).json({ message: 'Phone required' });
+
+    if (!client) {
+      console.error('Twilio client not initialized');
+      return res.status(500).json({ message: 'SMS service unavailable. Please try later.' });
     }
-  });
+
+    // Accept both E.164 (+91...) or plain 10-digit; convert to E.164 for India
+    const cleaned = phone.replace(/\D/g, ''); // remove non-digits
+    if (!/^[6-9]\d{9}$/.test(cleaned)) {
+      return res.status(400).json({ message: 'Invalid Indian phone number format' });
+    }
+    const to = `+91${cleaned}`;
+
+    // Create verification (Twilio generates and sends OTP)
+    const verification = await client.verify
+      .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+      .verifications.create({ to, channel: 'sms' });
+
+    return res.json({ success: true, sid: verification.sid, message: 'OTP sent' });
+  } catch (err) {
+    console.error('sendOtpVerify error:', err);
+    // Twilio trial may block unverified numbers and will return a helpful message in err.message
+    return res.status(500).json({ message: err.message || 'Failed to send OTP' });
+  }
+});
 
   // 2. Verify OTP
   app.post("/api/auth/verify-otp", async (req, res) => {
     try {
-      console.log("🔔 Verify OTP request body:", req.body);
-      const { phone, otp } = req.body;
+    console.log("🔔 Verify OTP request body:", req.body);
+    const { phone, otp } = req.body;
 
-      if (!phone || !otp) {
-        return res.status(400).json({ message: "Phone number and OTP are required" });
-      }
-
-      // Validate phone number format
-      const phoneRegex = /^[6-9]\d{9}$/;
-      if (!phoneRegex.test(phone)) {
-        return res.status(400).json({ message: "Invalid phone number format" });
-      }
-
-      // Validate OTP format (6 digits)
-      const otpRegex = /^\d{6}$/;
-      if (!otpRegex.test(otp)) {
-        return res.status(400).json({ message: "OTP must be 6 digits" });
-      }
-
-      console.log("Received phone:", phone, "otp:", otp);
-
-      const validOtp = await Otp.findOne({ phone, otp });
-      console.log("OTP lookup result:", validOtp);
-
-      if (!validOtp) {
-        return res.status(400).json({ message: "Invalid OTP. Please check and try again." });
-      }
-      
-      if (validOtp.expiresAt < new Date()) {
-        // Clean up expired OTP
-        await Otp.deleteMany({ phone });
-        return res.status(400).json({ message: "OTP has expired. Please request a new one." });
-      }
-
-      let user = await User.findOne({ phone });
-      if (!user) {
-        user = await User.create({ phone });
-      }
-
-      req.session.userId = user._id;
-      req.session.role = user.role;
-
-      // Clean up used OTP
-      await Otp.deleteMany({ phone });
-
-      res.json({ message: "Login successful", user });
-    } catch (err) {
-      console.error("❌ Verify OTP error:", err);
-      res.status(500).json({
-        message: "Error verifying OTP",
-        error: err.message
-      });
+    if (!phone || !otp) {
+      return res.status(400).json({ message: "Phone number and OTP are required" });
     }
-  });
+
+    // Validate phone number format (10-digit Indian)
+    const cleaned = phone.replace(/\D/g, '');
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(cleaned)) {
+      return res.status(400).json({ message: "Invalid phone number format" });
+    }
+
+    // Validate OTP format (6 digits)
+    const otpRegex = /^\d{4,6}$/; // Twilio may use 4-6 digit codes depending on config; adjust if your service uses 6
+    if (!otpRegex.test(otp)) {
+      return res.status(400).json({ message: "OTP must be 4-6 digits" });
+    }
+
+    const to = `+91${cleaned}`;
+
+    // Ask Twilio to check the verification code
+    const verificationCheck = await client.verify
+      .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+      .verificationChecks.create({ to, code: otp });
+
+    console.log('Twilio verificationCheck:', verificationCheck);
+
+    if (verificationCheck.status !== 'approved') {
+      return res.status(400).json({ message: "Invalid OTP. Please check and try again." });
+    }
+
+    // OTP valid, handle user creation / session
+    let user = await User.findOne({ phone: cleaned }); // store phone as 10-digit string in your DB if you prefer
+    if (!user) {
+      user = await User.create({ phone: cleaned });
+    }
+
+    // Set session (or return JWT)
+    req.session.userId = user._id;
+    req.session.role = user.role;
+
+    // Return success and user object (omit sensitive fields)
+    res.json({ message: "Login successful", user });
+  } catch (err) {
+    console.error("❌ Verify OTP error:", err);
+    // If Twilio returns an error, err.message often contains the reason (e.g., 'Access to this resource is denied')
+    res.status(500).json({
+      message: "Error verifying OTP",
+      error: err.message
+    });
+  }
+});
 
   // Get current user (session)
   app.get("/api/auth/me", async (req, res) => {
