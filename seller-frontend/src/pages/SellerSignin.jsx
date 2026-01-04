@@ -52,14 +52,14 @@ const SellerSignin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex">
+    <div className="min-h-screen bg-white flex">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/20"></div>
+      <div className="hidden lg:flex lg:w-1/2 bg-blue-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10 flex flex-col justify-center px-12 text-white">
           <div className="mb-8">
             <h1 className="text-5xl font-bold mb-4">
-              Welcome Back to <span className="text-yellow-300">NexusHub</span>
+              Welcome back to <span className="text-white">NexusHub</span>
             </h1>
             <p className="text-xl text-blue-100 leading-relaxed">
               Continue growing your business with India's leading B2B marketplace
@@ -90,15 +90,15 @@ const SellerSignin = () => {
 
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-white/80 rounded-full"></div>
                 <span className="text-blue-100">Manage your inventory</span>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-white/80 rounded-full"></div>
                 <span className="text-blue-100">Track orders & payments</span>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-white/80 rounded-full"></div>
                 <span className="text-blue-100">Analyze sales performance</span>
               </div>
             </div>
@@ -128,6 +128,8 @@ const SellerSignin = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back!</h2>
             <p className="text-gray-600">Sign in to your seller account</p>
           </div>
+
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 sm:p-8">
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -220,10 +222,11 @@ const SellerSignin = () => {
               </div>
             )}
 
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             >
               {loading ? (
                 <div className="flex items-center justify-center space-x-2">
@@ -235,6 +238,7 @@ const SellerSignin = () => {
               )}
             </button>
           </form>
+          </div>
 
           {/* Divider */}
           <div className="mt-8 mb-6">

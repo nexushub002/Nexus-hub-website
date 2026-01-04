@@ -135,8 +135,8 @@ const Footer = () => {
                 </svg>
               </div>
               <div>
-                <p>123 Commerce Street</p>
-                <p>Business District, City 12345</p>
+                <p style={{ color: 'blue' }}>5, Mahavir Nagar, Society, Yogi chowk</p>
+                <p style={{ color: 'blue' }}>Surat, Gujrat 395006</p>
               </div>
             </div>
             <div className="contact-item">
@@ -146,8 +146,9 @@ const Footer = () => {
                 </svg>
               </div>
               <div>
-                <p>+1 (555) 123-4567</p>
-                <p>Mon-Fri: 9AM-6PM</p>
+                <p style={{ color: 'blue' }} >Contact Us</p>
+                <p style={{ color: 'blue' }}>+91 9067070031</p>
+                <p style={{ color: 'blue' }}>Mon-Fri: 9AM-6PM</p>
               </div>
             </div>
             <div className="contact-item">
@@ -157,8 +158,8 @@ const Footer = () => {
                 </svg>
               </div>
               <div>
-                <p>support@nexushub.com</p>
-                <p>24/7 Support Available</p>
+                <p style={{ color: 'blue' }}>nexushub002@gmail.com</p>
+                <p style={{ color: 'blue' }}>24/7 Support Available</p>
               </div>
             </div>
           </div>

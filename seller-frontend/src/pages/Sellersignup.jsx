@@ -219,14 +219,14 @@ const Sellersignup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex">
+    <div className="min-h-screen bg-white flex">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/20"></div>
+      <div className="hidden lg:flex lg:w-1/2 bg-blue-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10 flex flex-col justify-center px-12 text-white">
           <div className="mb-8">
             <h1 className="text-5xl font-bold mb-4">
-              Join <span className="text-yellow-300">NexusHub</span>
+              Join <span className="text-white">NexusHub</span>
             </h1>
             <p className="text-xl text-blue-100 leading-relaxed">
               India's fastest-growing B2B marketplace. Start selling to millions of buyers today.
@@ -274,8 +274,8 @@ const Sellersignup = () => {
         
         {/* Decorative Elements */}
         <div className="absolute top-20 right-20 w-32 h-32 bg-white/10 rounded-full"></div>
-        <div className="absolute bottom-20 right-32 w-20 h-20 bg-yellow-300/20 rounded-full"></div>
-        <div className="absolute top-1/2 right-10 w-16 h-16 bg-purple-300/20 rounded-full"></div>
+        <div className="absolute bottom-20 right-32 w-20 h-20 bg-white/10 rounded-full"></div>
+        <div className="absolute top-1/2 right-10 w-16 h-16 bg-white/10 rounded-full"></div>
       </div>
 
       {/* Right Side - Form */}
@@ -295,6 +295,8 @@ const Sellersignup = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Create Your Account</h2>
             <p className="text-gray-600">Join thousands of successful sellers</p>
           </div>
+
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 sm:p-8">
 
           {/* Progress Indicator */}
           <div className="flex items-center justify-center mb-8">
@@ -669,7 +671,7 @@ const Sellersignup = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
+                className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
               >
                 {loading ? (
                   <div className="flex items-center justify-center space-x-2">
@@ -684,6 +686,8 @@ const Sellersignup = () => {
               </button>
             </div>
           </form>
+
+          </div>
 
           {/* Footer */}
           <div className="mt-8 text-center">
