@@ -206,15 +206,37 @@ const Sellerdashboard = () => {
   return (
     <div className={`${isDarkMode ? 'bg-[#0d1321] text-white' : 'bg-[#f5f7fb] text-[#0f172a]'} min-h-screen mobile-dashboard-container px-2 sm:px-4`}> 
       <div className='w-full lg:flex'>
-        <Sidebar
-          isDarkMode={isDarkMode}
-          onToggleTheme={handleToggleTheme}
-          onSwitchRole={handleSwitchRole}
-          isMobileMenuOpen={isMobileMenuOpen}
-          onMobileMenuToggle={setIsMobileMenuOpen}
-        />
-
-        <main className='flex-1 w-full max-w-[1200px] mx-auto p-3 sm:p-4 lg:p-6 lg:ml-0 pb-24 lg:pb-6 transition-all duration-300'>
+        {isMobileMenuOpen && (
+          <div className='fixed inset-0 z-50 lg:hidden'>
+            <div 
+              className='absolute inset-0 bg-black/50'
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <div className='absolute left-0 top-0 h-full w-64 sm:w-72'>
+              <Sidebar
+                isDarkMode={isDarkMode}
+                onToggleTheme={handleToggleTheme}
+                onSwitchRole={handleSwitchRole}
+                isMobileMenuOpen={isMobileMenuOpen}
+                onMobileMenuToggle={setIsMobileMenuOpen}
+              />
+            </div>
+          </div>
+        )}
+        <div className='hidden lg:block'>
+          <Sidebar
+            isDarkMode={isDarkMode}
+            onToggleTheme={handleToggleTheme}
+            onSwitchRole={handleSwitchRole}
+            isMobileMenuOpen={isMobileMenuOpen}
+            onMobileMenuToggle={setIsMobileMenuOpen}
+          />
+        </div>
+        <main className={`
+            flex-1 w-full max-w-[1200px] mx-auto px-3 pt-3 pb-24 lg:px-6 lg:py-6 lg:ml-0 lg:pb-6 
+            transition-all duration-300
+            ${isMobileMenuOpen ? 'lg:static' : ''}
+          `}>
           {/* Mobile Header with Hamburger */}
           <div className='lg:hidden flex items-center justify-between mb-4 p-3 bg-white rounded-lg shadow-sm mobile-touch-target fade-in'>
             <button

@@ -54,7 +54,7 @@ const Sidebar = ({ isDarkMode, onToggleTheme, onSwitchRole, isMobileMenuOpen, on
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-white bg-opacity-50 z-40 lg:hidden"
           onClick={() => onMobileMenuToggle(false)}
         />
       )}
