@@ -39,7 +39,7 @@ const Navbar = () => {
   useEffect(() => {
     const fetchSuggestions = setTimeout(async () => {
       const query = inputValue.trim();
-      
+
       if (query && query.length > 1) {
         setIsSearching(true);
         try {
@@ -47,13 +47,13 @@ const Navbar = () => {
 
           const response = await fetch(url);
           const products = await response.json();
-          
+
           // Extract unique suggestions from product names and categories
           const suggestions = [...new Set([
             ...products.map(p => p.name),
             ...products.map(p => p.category)
           ])].slice(0, 5);
-          
+
           setSearchSuggestions(suggestions);
           setShowSuggestions(true);
         } catch (error) {
@@ -69,25 +69,6 @@ const Navbar = () => {
 
     return () => clearTimeout(fetchSuggestions);
   }, [inputValue]);
-
-  // Navigate to search results
-  useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      const query = inputValue.trim();
-
-      if (query) {
-        // Always push new query to /search even if already there
-        navigate(`/search?q=${encodeURIComponent(query)}`);
-      } else {
-        // If cleared input, go back to homepage
-        if (location.pathname.startsWith("/search")) {
-          navigate("/");
-        }
-      }
-    }, 10000); // Longer debounce for navigation: 800ms
-
-    return () => clearTimeout(delayDebounce);
-  }, [inputValue, navigate, location]);
 
   // Handle clicking outside search to close suggestions
   useEffect(() => {
@@ -126,13 +107,13 @@ const Navbar = () => {
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setSelectedSuggestionIndex(prev => 
+        setSelectedSuggestionIndex(prev =>
           prev < searchSuggestions.length - 1 ? prev + 1 : 0
         );
         break;
       case 'ArrowUp':
         e.preventDefault();
-        setSelectedSuggestionIndex(prev => 
+        setSelectedSuggestionIndex(prev =>
           prev > 0 ? prev - 1 : searchSuggestions.length - 1
         );
         break;
@@ -182,8 +163,8 @@ const Navbar = () => {
 
   return (
     <div>
-      
-      
+
+
       {/* Desktop Navigation Bar */}
       <div className="nav bg-white px-4 py-1 md:px-6 md:py-5 flex justify-between items-center  border-b border-black/50 hidden md:flex">
         <div className="flex items-center flex-1 min-w-0">
@@ -278,17 +259,19 @@ const Navbar = () => {
                 {searchSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    className={`px-4 py-3 cursor-pointer flex items-center border-b border-gray-100 last:border-b-0 transition-colors ${
-                      index === selectedSuggestionIndex 
-                        ? 'bg-blue-50 text-blue-700' 
+                    className={`px-4 py-3 cursor-pointer flex items-center ${index === selectedSuggestionIndex
+                        ? 'bg-blue-50 text-blue-700'
                         : 'hover:bg-gray-50 text-gray-700'
-                    }`}
-                    onClick={() => handleSuggestionClick(suggestion)}
+                      }`}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleSuggestionClick(suggestion);
+                    }}
                     onMouseEnter={() => setSelectedSuggestionIndex(index)}
                   >
-                    <span className={`material-symbols-outlined mr-3 text-sm ${
-                      index === selectedSuggestionIndex ? 'text-blue-500' : 'text-gray-400'
-                    }`}>search</span>
+
+                    <span className={`material-symbols-outlined mr-3 text-sm ${index === selectedSuggestionIndex ? 'text-blue-500' : 'text-gray-400'
+                      }`}>search</span>
                     <span className="text-sm flex-1">{suggestion}</span>
                     {index === selectedSuggestionIndex && (
                       <span className="material-symbols-outlined text-blue-500 text-sm ml-2">arrow_forward</span>
@@ -315,7 +298,7 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="relative" ref={accountDropdownRef}>
-              <div 
+              <div
                 className="flex items-center cursor-pointer"
                 onClick={() => setShowAccountDropdown(prev => !prev)}
               >
@@ -323,10 +306,10 @@ const Navbar = () => {
                 <span className="text-sm">Account</span>
                 <span className={`material-symbols-outlined text-xs ml-1 transition-transform ${showAccountDropdown ? 'rotate-180' : ''}`}>keyboard_arrow_down</span>
               </div>
-              
+
               {/* Account Dropdown */}
               {showAccountDropdown && (
-                <div 
+                <div
                   className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-lg border z-50"
                 >
                   <div className="p-4 border-b">
@@ -340,9 +323,9 @@ const Navbar = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="py-2">
-                    <div 
+                    <div
                       className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3"
                       onClick={() => {
                         navigate('/myprofile');
@@ -352,7 +335,7 @@ const Navbar = () => {
                       <span className="material-symbols-outlined text-gray-500">person</span>
                       <span className="text-sm">My Profile</span>
                     </div>
-                    <div 
+                    <div
                       className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3"
                       onClick={() => {
                         navigate('/orders');
@@ -362,7 +345,7 @@ const Navbar = () => {
                       <span className="material-symbols-outlined text-gray-500">shopping_bag</span>
                       <span className="text-sm">Orders</span>
                     </div>
-                    <div 
+                    <div
                       className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between"
                       onClick={() => {
                         navigate('/wishlist');
@@ -379,7 +362,7 @@ const Navbar = () => {
                         </span>
                       )}
                     </div>
-                    <div 
+                    <div
                       className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3"
                       onClick={() => {
                         navigate('/help');
@@ -390,7 +373,7 @@ const Navbar = () => {
                       <span className="text-sm">Help & Support</span>
                     </div>
                     <div className="border-t my-2"></div>
-                    <div 
+                    <div
                       className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center space-x-3 text-red-600"
                       onClick={() => {
                         handleLogout();
@@ -417,8 +400,8 @@ const Navbar = () => {
           </div>
 
           {/* Become a Seller */}
-          <div 
-            className="flex items-center cursor-pointer" 
+          <div
+            className="flex items-center cursor-pointer"
 
             onClick={() => window.location.href = `${import.meta.env.VITE_SELLER_FRONTEND_URL}`}
           >
@@ -427,12 +410,12 @@ const Navbar = () => {
           </div>
 
           {/* More options */}
-          
+
         </div>
       </div>
 
       {/* Mobile Categories Row */}
-      
+
       {/* Mobile Navigation Header */}
       <div className="md:hidden bg-white px-3 py-2 border-b border-black/50">
         <div className="flex items-center space-x-3">
@@ -489,17 +472,15 @@ const Navbar = () => {
                 {searchSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    className={`px-4 py-3 cursor-pointer flex items-center border-b border-gray-100 last:border-b-0 transition-colors ${
-                      index === selectedSuggestionIndex 
-                        ? 'bg-blue-50 text-blue-700' 
+                    className={`px-4 py-3 cursor-pointer flex items-center border-b border-gray-100 last:border-b-0 transition-colors ${index === selectedSuggestionIndex
+                        ? 'bg-blue-50 text-blue-700'
                         : 'hover:bg-gray-50 text-gray-700'
-                    }`}
+                      }`}
                     onClick={() => handleSuggestionClick(suggestion)}
                     onMouseEnter={() => setSelectedSuggestionIndex(index)}
                   >
-                    <span className={`material-symbols-outlined mr-3 text-sm ${
-                      index === selectedSuggestionIndex ? 'text-blue-500' : 'text-gray-400'
-                    }`}>search</span>
+                    <span className={`material-symbols-outlined mr-3 text-sm ${index === selectedSuggestionIndex ? 'text-blue-500' : 'text-gray-400'
+                      }`}>search</span>
                     <span className="text-sm flex-1">{suggestion}</span>
                     {index === selectedSuggestionIndex && (
                       <span className="material-symbols-outlined text-blue-500 text-sm ml-2">arrow_forward</span>
@@ -517,7 +498,7 @@ const Navbar = () => {
 
       {/* Mobile Bottom Navigation */}
       <div className="md:hidden bg-white py-2 flex justify-around items-center text-xs fixed bottom-0 left-0 w-full border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-50">
-        <div 
+        <div
           className="flex flex-col items-center cursor-pointer p-2"
           onClick={() => navigate('/')}
         >
@@ -525,7 +506,7 @@ const Navbar = () => {
           <span className="text-gray-600">Home</span>
         </div>
 
-        <div 
+        <div
           className="flex flex-col items-center cursor-pointer p-2"
           onClick={() => navigate('/categories')}
         >
@@ -533,7 +514,7 @@ const Navbar = () => {
           <span className="text-gray-600">Category</span>
         </div>
 
-        <div 
+        <div
           className="flex flex-col items-center cursor-pointer p-2"
           onClick={() => window.location.href = `${import.meta.env.VITE_SELLER_FRONTEND_URL}`}
         >
@@ -541,7 +522,7 @@ const Navbar = () => {
           <span className="text-gray-600">Sell</span>
         </div>
 
-        <div 
+        <div
           className="flex flex-col items-center cursor-pointer p-2 relative"
           onClick={toggleCart}
         >
@@ -554,7 +535,7 @@ const Navbar = () => {
           <span className="text-gray-600">Cart</span>
         </div>
 
-        <div 
+        <div
           className="flex flex-col items-center cursor-pointer p-2"
           onClick={() => {
             if (!user) {
