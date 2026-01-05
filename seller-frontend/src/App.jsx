@@ -13,6 +13,7 @@ import ManufacturerProfile from './pages/ManufacturerProfile';
 import Sellershoppage from './pages/Sellershoppage';
 import ShopSectionPage from './pages/ShopSectionPage';
 import Websitemaker from './pages/Websitemaker';
+import CompanyProfile from './pages/CompanyProfile';
 import { SellerProvider, useSeller } from './context/SellerContext';
 import './App.css'
 
@@ -86,6 +87,7 @@ function AppRoutes() {
         <Route path="/seller/my-products/:productId/edit" element={<ProtectedRoute><EditProduct /></ProtectedRoute>} />
         <Route path="/seller/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
         <Route path="/seller/profile" element={<ProtectedRoute><SellerProfile /></ProtectedRoute>} />
+        <Route path="/company-profile/:sellerId" element={<CompanyProfile />} />
         <Route path="/:shopName/:sellerId" element={<Sellershoppage />} />
         <Route path="/shop-section" element={<ShopSectionPage />} />
         <Route path="/seller/manufacturer-profile" element={<ProtectedRoute><ManufacturerProfile /></ProtectedRoute>} />

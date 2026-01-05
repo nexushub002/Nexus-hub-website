@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import ProductCard from '../components/ProductCard';
 
 const Sellershoppage = () => {
   const { shopName, sellerId } = useParams();
@@ -219,9 +220,45 @@ const Sellershoppage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
+      {/* Navigation Menu */}
+      <nav className="bg-white shadow-sm sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-8">
+              <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                Home
+              </Link>
+              <button 
+                onClick={() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+              >
+                Products
+              </button>
+              <button 
+                onClick={() => navigate(`/company-profile/${sellerId}`)}
+                className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+              >
+                Company Profile
+              </button>
+              <button 
+                onClick={() => document.getElementById('new-trends-section')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+              >
+                New Trends
+              </button>
+            </div>
+            <div className="flex items-center space-x-4">
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                Contact Seller
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       {/* Banner Section */}
       {bannerImages.length > 0 && (
-        <section className="mb-8">
+        <section className="mb-8" id="home-section">
           <div className="relative h-64 sm:h-72 md:h-[460px] w-full overflow-hidden bg-gray-200">
             {bannerImages.map((banner, index) => (
               <img
@@ -275,6 +312,38 @@ const Sellershoppage = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 pb-10">
+        {/* New Trends Section
+        <section id="new-trends-section" className="mb-8">
+          <div className="bg-white rounded-2xl shadow-sm p-6">
+            <h2 className="text-2xl font-bold mb-6">New Trends & Innovations</h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+                <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="material-symbols-outlined text-white text-2xl">eco</span>
+                </div>
+                <h3 className="font-semibold mb-2">Sustainable Products</h3>
+                <p className="text-gray-600 text-sm">Eco-friendly manufacturing processes and sustainable materials</p>
+              </div>
+              <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
+                <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="material-symbols-outlined text-white text-2xl">precision_manufacturing</span>
+                </div>
+                <h3 className="font-semibold mb-2">Advanced Technology</h3>
+                <p className="text-gray-600 text-sm">State-of-the-art production facilities and quality control</p>
+              </div>
+              <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
+                <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="material-symbols-outlined text-white text-2xl">local_shipping</span>
+                </div>
+                <h3 className="font-semibold mb-2">Global Supply Chain</h3>
+                <p className="text-gray-600 text-sm">Efficient logistics and worldwide distribution network</p>
+              </div>
+            </div>
+          </div>
+        </section>  */}
+
+        {/* Products Section */}
+        <section id="products-section">
         {/* Seller Information Row */}
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -556,58 +625,60 @@ const Sellershoppage = () => {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {filteredProducts.map((product) => (
-                    <div
-                      key={product._id}
-                      className="bg-white border rounded-xl shadow hover:shadow-lg transition p-4 cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
-                      onClick={() => openProductDetails(product._id)}
-                      onKeyDown={(event) => handleProductKeyDown(event, product._id)}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`View details for ${product.name}`}
-                      title="View product in buyer storefront"
-                    >
-                      <div className="h-48 rounded-lg bg-gray-100 flex items-center justify-center mb-3 overflow-hidden relative">
-                        {product.images?.[0] ? (
-                          <img
-                            src={product.images[0]}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-gray-400">No image</span>
-                        )}
-                        {product.priceRange && product.priceRange.min && product.priceRange.max && (
-                          <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
-                            {Math.round(((product.priceRange.max - product.priceRange.min) / product.priceRange.max) * 100)}% off
-                          </div>
-                        )}
-                      </div>
-                      <h3 className="font-semibold text-base mb-1 line-clamp-2">{product.name}</h3>
-                      <p className="text-xs text-gray-500 mb-2 capitalize">{product.category}</p>
-                      <div className="flex items-center justify-between text-sm">
-                        <div>
-                          <span className="font-semibold text-blue-600">₹{product.price?.toLocaleString()}</span>
-                          {product.priceRange && product.priceRange.min && product.priceRange.max && (
-                            <span className="text-gray-400 line-through ml-2">₹{product.priceRange.max?.toLocaleString()}</span>
-                          )}
-                        </div>
-                        <span className="text-gray-500">MOQ: {product.moq}</span>
-                      </div>
-                      {product.sampleAvailable && (
-                        <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
-                          <span className="material-symbols-outlined text-sm">science</span>
-                          Sample Available
-                        </div>
-                      )}
-                    </div>
+                    <ProductCard key={product._id} product={product} />
+                    // <div
+                    //   key={product._id}
+                    //   className="bg-white border rounded-xl shadow hover:shadow-lg transition p-4 cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
+                    //   onClick={() => openProductDetails(product._id)}
+                    //   onKeyDown={(event) => handleProductKeyDown(event, product._id)}
+                    //   role="button"
+                    //   tabIndex={0}
+                    //   aria-label={`View details for ${product.name}`}
+                    //   title="View product in buyer storefront"
+                    // >
+                    //   <div className="h-48 rounded-lg bg-gray-100 flex items-center justify-center mb-3 overflow-hidden relative">
+                    //     {product.images?.[0] ? (
+                    //       <img
+                    //         src={product.images[0]}
+                    //         alt={product.name}
+                    //         className="w-full h-full object-cover"
+                    //       />
+                    //     ) : (
+                    //       <span className="text-gray-400">No image</span>
+                    //     )}
+                    //     {product.priceRange && product.priceRange.min && product.priceRange.max && (
+                    //       <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
+                    //         {Math.round(((product.priceRange.max - product.priceRange.min) / product.priceRange.max) * 100)}% off
+                    //       </div>
+                    //     )}
+                    //   </div>
+                    //   <h3 className="font-semibold text-base mb-1 line-clamp-2">{product.name}</h3>
+                    //   <p className="text-xs text-gray-500 mb-2 capitalize">{product.category}</p>
+                    //   <div className="flex items-center justify-between text-sm">
+                    //     <div>
+                    //       <span className="font-semibold text-blue-600">₹{product.price?.toLocaleString()}</span>
+                    //       {product.priceRange && product.priceRange.min && product.priceRange.max && (
+                    //         <span className="text-gray-400 line-through ml-2">₹{product.priceRange.max?.toLocaleString()}</span>
+                    //       )}
+                    //     </div>
+                    //     <span className="text-gray-500">MOQ: {product.moq}</span>
+                    //   </div>
+                    //   {product.sampleAvailable && (
+                    //     <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
+                    //       <span className="material-symbols-outlined text-sm">science</span>
+                    //       Sample Available
+                    //     </div>
+                    //   )}
+                    // </div>
                   ))}
                 </div>
               )}
             </div>
           </main>
-        </div>
+          </div>
+        </section>
       </div>
     </div>
   );
