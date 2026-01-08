@@ -75,12 +75,12 @@ const ProductDetailsPage = () => {
     });
   };
 
-  // Generate unique shop link
+  // Generate unique shop link - points to seller's public shop page
   const getShopLink = () => {
     const sellerInfo = product?.sellerInfo || product?.sellerProfile;
     if (!sellerInfo) return null;
 
-    const shopName = sellerInfo.shopName || sellerInfo.companyName?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+    const shopName = sellerInfo.shopName || sellerInfo.companyName || '';
     const sellerId = sellerInfo.sellerId || product?.sellerId;
     
     if (!shopName || !sellerId) return null;
@@ -90,8 +90,28 @@ const ProductDetailsPage = () => {
     
     if (!cleanShopName) return null;
 
-    // Use seller frontend URL from environment variable
-    const baseUrl = import.meta.env.VITE_SELLER_FRONTEND_URL;
+    // Get seller frontend URL with fallback logic
+    const getSellerFrontendUrl = () => {
+      const envUrl = (import.meta.env.VITE_SELLER_FRONTEND_URL || '').trim();
+      if (envUrl) return envUrl.replace(/\/$/, ''); // Remove trailing slash
+      
+      // Fallback based on current environment
+      if (typeof window !== 'undefined') {
+        const { protocol, hostname } = window.location;
+        // Local development
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          return `${protocol}//${hostname}:5174`;
+        }
+        // Production - Vercel deployment
+        if (hostname.includes('vercel.app') || hostname.includes('nexus-hub')) {
+          return 'https://sellernexus-hub.vercel.app';
+        }
+      }
+      // Default fallback
+      return 'https://sellernexus-hub.vercel.app';
+    };
+
+    const baseUrl = getSellerFrontendUrl();
     return `${baseUrl}/${cleanShopName}/${sellerId}`;
   };
 
