@@ -149,14 +149,28 @@ productSchema.index({ sellerId: 1 });
 productSchema.index({ sellerProfile: 1 });
 
 // Text index to improve full-text search relevance across key product fields
+// Weights determine importance: higher weight = more relevance when matched
 productSchema.index(
   {
     name: "text",
     description: "text",
     tags: "text",
     searchKeywords: "text",
+    useCases: "text",
     category: "text",
     subcategory: "text",
+  },
+  {
+    weights: {
+      name: 10,           // Product name is most important
+      tags: 8,            // Tags are very relevant
+      searchKeywords: 7,  // Keywords for synonyms
+      category: 5,        // Category match
+      subcategory: 5,     // Subcategory match
+      useCases: 4,        // Use cases for context
+      description: 2,     // Description is broad, lower weight
+    },
+    name: "product_text_search_index"
   }
 );
 

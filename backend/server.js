@@ -9,11 +9,15 @@
 
 import Twilio from 'twilio';
 
-if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
-  console.warn('⚠️ Twilio env vars missing: set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN in .env');
-}
+let client = null;
 
-const client = Twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+// Only initialize Twilio if valid credentials are provided
+if (process.env.TWILIO_ACCOUNT_SID?.startsWith('AC') && process.env.TWILIO_AUTH_TOKEN) {
+  client = Twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  console.log('✅ Twilio initialized');
+} else {
+  console.warn('⚠️ Twilio not configured: OTP features will be disabled. Set valid TWILIO_ACCOUNT_SID (starts with AC) and TWILIO_AUTH_TOKEN in .env');
+}
 
 import productRoutes from "./routes/productRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
@@ -25,6 +29,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import inquiryRoutes from "./routes/inquiries.js";
 import newProductRoutes, { verifySeller } from "./routes/newProductRoutes.js";
 import Product from "./models/Product.js"; // You forgot to import Product
+import { processSearchQuery, buildFallbackQuery } from "./utils/searchUtils.js";
 import Otp from "./models/Otp.js";
 import User from "./models/User.js";
 import Seller from "./models/SellerProfile.js";
@@ -825,36 +830,179 @@ import adminRoutes from "./routes/adminRoutes.js";
     res.send("Backend is running 🚀");
   });
 
+  /**
+   * Enhanced Search Endpoint
+   * 
+   * Features:
+   * 1. Spelling mistake tolerance (e.g., "cottn saree" → "cotton saree")
+   * 2. Category-specific synonym expansion (Apparel vs Jewelry)
+   * 3. MongoDB text search with relevance scoring
+   * 4. Partial word matching support
+   * 5. Category-aware filtering
+   * 
+   * Query Parameters:
+   * - q: Search query (required)
+   * - category: Filter by category (optional: "Apparel & Accessories" or "Jewelry")
+   * - limit: Results per page (default: 20)
+   * - page: Page number (default: 1)
+   */
   app.get("/api/search", async (req, res) => {
-  try {
-    const q = req.query.q?.toLowerCase() || "";
-    const limit = parseInt(req.query.limit) || 0; // 0 means no limit
+    try {
+      const rawQuery = req.query.q?.trim() || "";
+      const selectedCategory = req.query.category || null;
+      const limit = parseInt(req.query.limit) || 20;
+      const page = parseInt(req.query.page) || 1;
 
-    if (!q) {
-      return res.status(400).json({ message: "Query is required" });
+      if (!rawQuery) {
+        return res.status(400).json({ message: "Query is required" });
+      }
+
+      // Step 1: Process query (correct spelling, detect category, expand synonyms)
+      const processed = processSearchQuery(rawQuery, selectedCategory);
+      
+      // Step 2: Build MongoDB text search query
+      const searchQuery = {
+        $text: { $search: processed.expandedQuery }
+      };
+
+      // Step 3: Add category filter if detected or specified
+      if (processed.category) {
+        searchQuery.category = processed.category;
+      }
+
+      // Step 4: Execute text search with relevance scoring
+      const products = await Product.find(searchQuery)
+        .select({ score: { $meta: "textScore" } })
+        .sort({ score: { $meta: "textScore" } }) // Best matches first
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .populate({
+          path: 'sellerProfile',
+          select: 'sellerId companyName companyLogo verified'
+        });
+
+      // Get total count for pagination
+      const total = await Product.countDocuments(searchQuery);
+
+      res.json({
+        success: true,
+        products,
+        search: {
+          originalQuery: rawQuery,
+          processedQuery: processed.correctedQuery,
+          expandedQuery: processed.expandedQuery,
+          detectedCategory: processed.category,
+          spellingCorrected: processed.corrected,
+        },
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      });
+    } catch (error) {
+      console.error("Search error:", error);
+      
+      // Fallback to regex search if text search fails
+      try {
+        const rawQuery = req.query.q?.trim() || "";
+        const selectedCategory = req.query.category || null;
+        const limit = parseInt(req.query.limit) || 20;
+        const page = parseInt(req.query.page) || 1;
+
+        // Process query for fallback
+        const processed = processSearchQuery(rawQuery, selectedCategory);
+        
+        // Build fallback regex query
+        const fallbackQuery = buildFallbackQuery(
+          processed.correctedQuery, 
+          processed.category
+        );
+        
+        const products = await Product.find(fallbackQuery)
+          .skip((page - 1) * limit)
+          .limit(limit)
+          .populate({
+            path: 'sellerProfile',
+            select: 'sellerId companyName companyLogo verified'
+          });
+
+        const total = await Product.countDocuments(fallbackQuery);
+
+        res.json({
+          success: true,
+          products,
+          search: {
+            originalQuery: rawQuery,
+            processedQuery: processed.correctedQuery,
+            detectedCategory: processed.category,
+            spellingCorrected: processed.corrected,
+          },
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit)
+          },
+          fallback: true // Indicates regex fallback was used
+        });
+      } catch (fallbackError) {
+        console.error("Fallback search error:", fallbackError);
+        res.status(500).json({ message: "Server error" });
+      }
     }
+  });
 
-    let query = Product.find({
-      $or: [
-        { name: { $regex: q, $options: "i" } },          // case-insensitive name match
-        { description: { $regex: q, $options: "i" } },   // case-insensitive description match
-        { category: { $regex: q, $options: "i" } }       // case-insensitive category match
-      ]
-    });
 
-    if (limit > 0) {
-      query = query.limit(limit);
+  /**
+   * Search Suggestions Endpoint
+   * Returns quick suggestions for autocomplete based on partial input
+   * Lightweight query for real-time suggestions
+   */
+  app.get("/api/search/suggestions", async (req, res) => {
+    try {
+      const q = req.query.q?.trim() || "";
+      const limit = parseInt(req.query.limit) || 8;
+
+      if (!q || q.length < 2) {
+        return res.json({ suggestions: [] });
+      }
+
+      // Process query for spelling correction
+      const processed = processSearchQuery(q, null);
+      
+      // Use regex for fast partial matching on product names
+      const regexPattern = new RegExp(processed.correctedQuery, 'i');
+      
+      const suggestions = await Product.find({
+        $or: [
+          { name: regexPattern },
+          { tags: regexPattern },
+          { category: regexPattern },
+          { subcategory: regexPattern }
+        ]
+      })
+      .select('name category subcategory')
+      .limit(limit)
+      .lean();
+
+      // Format suggestions with category context
+      const formattedSuggestions = suggestions.map(p => ({
+        text: p.name,
+        category: p.category,
+        subcategory: p.subcategory
+      }));
+
+      res.json({
+        suggestions: formattedSuggestions,
+        correctedQuery: processed.corrected ? processed.correctedQuery : null
+      });
+    } catch (error) {
+      console.error("Suggestions error:", error);
+      res.json({ suggestions: [] });
     }
-
-    const products = await query;
-
-    res.json(products);
-  } catch (error) {
-    console.error("Search error:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
+  });
 
   // Create product (JSON only, images as URLs). Associates sellerId as seller.
   app.post('/api/products', verifySeller, async (req, res) => {
@@ -877,6 +1025,9 @@ import adminRoutes from "./routes/adminRoutes.js";
         warranty,
         returnPolicy,
         customization,
+        tags = [],
+        searchKeywords = [],
+        useCases = [],
         images = [],
         videos = []
       } = req.body
@@ -917,6 +1068,9 @@ import adminRoutes from "./routes/adminRoutes.js";
         warranty,
         returnPolicy,
         customization,
+        tags: Array.isArray(tags) ? tags : [],
+        searchKeywords: Array.isArray(searchKeywords) ? searchKeywords : [],
+        useCases: Array.isArray(useCases) ? useCases : [],
         images,
         videos
       })
