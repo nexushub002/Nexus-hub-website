@@ -7,6 +7,7 @@ const CategoryListImproved = () => {
   const navigate = useNavigate();
 
   // Simplified categories data with better structure
+  // Note: Consumer Electronics category has been removed - focusing on Apparel & Accessories and Jewelry only
   const categories = {
     "Apparel & Accessories": {
       subcategories: [
@@ -23,22 +24,6 @@ const CategoryListImproved = () => {
       ],
       icon: "👕",
       color: "#3b82f6"
-    },
-    "Consumer Electronics": {
-      subcategories: [
-        "Mobile Phones & Accessories",
-        "Computers & Laptops",
-        "Audio & Video Equipment",
-        "Gaming Consoles & Accessories",
-        "Cameras & Photography",
-        "Home Appliances",
-        "Smart Home Devices",
-        "Wearable Technology",
-        "Electronic Components",
-        "Office Electronics"
-      ],
-      icon: "📱",
-      color: "#10b981"
     },
     "Jewelry": {
       subcategories: [
@@ -71,18 +56,6 @@ const CategoryListImproved = () => {
     "Jewelry & Accessories": "💎",
     "Sports & Activewear": "🏃",
     "Underwear & Lingerie": "👙",
-    
-    // Consumer Electronics
-    "Mobile Phones & Accessories": "📱",
-    "Computers & Laptops": "💻",
-    "Audio & Video Equipment": "🎧",
-    "Gaming Consoles & Accessories": "🎮",
-    "Cameras & Photography": "📷",
-    "Home Appliances": "🏠",
-    "Smart Home Devices": "🏡",
-    "Wearable Technology": "⌚",
-    "Electronic Components": "🔌",
-    "Office Electronics": "🖥️",
     
     // Jewelry
     "Rings": "💍",

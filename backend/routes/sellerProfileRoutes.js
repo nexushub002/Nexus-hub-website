@@ -509,21 +509,28 @@ router.get("/products/:sellerId", async (req, res) => {
     
     // Build query to get products by sellerId
     let query = { sellerId };
+    let sortCriteria = { createdAt: -1 };
     
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
+    // Use MongoDB text search for better relevance when search term is provided
+    if (search && search.trim()) {
+      query.$text = { $search: search.trim() };
+      // Sort by textScore (relevance) when searching, then by createdAt
+      sortCriteria = { score: { $meta: 'textScore' }, createdAt: -1 };
     }
     
     if (category) {
       query.category = category;
     }
 
-    const products = await Product.find(query)
+    // Build find query with textScore projection when searching
+    const findQuery = Product.find(query);
+    if (search && search.trim()) {
+      findQuery.select({ score: { $meta: 'textScore' } });
+    }
+    
+    const products = await findQuery
       .populate('sellerProfile', 'sellerId companyName verified companyLogo')
-      .sort({ createdAt: -1 })
+      .sort(sortCriteria)
       .limit(limit * 1)
       .skip((page - 1) * limit);
 
@@ -605,21 +612,28 @@ router.get("/products/:sellerId", async (req, res) => {
 
     // Build query to get products by sellerId
     let query = { sellerId };
+    let sortCriteria = { createdAt: -1 };
     
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
+    // Use MongoDB text search for better relevance when search term is provided
+    if (search && search.trim()) {
+      query.$text = { $search: search.trim() };
+      // Sort by textScore (relevance) when searching, then by createdAt
+      sortCriteria = { score: { $meta: 'textScore' }, createdAt: -1 };
     }
     
     if (category) {
       query.category = category;
     }
 
-    const products = await Product.find(query)
+    // Build find query with textScore projection when searching
+    const findQuery = Product.find(query);
+    if (search && search.trim()) {
+      findQuery.select({ score: { $meta: 'textScore' } });
+    }
+    
+    const products = await findQuery
       .populate('sellerProfile', 'sellerId companyName verified companyLogo')
-      .sort({ createdAt: -1 })
+      .sort(sortCriteria)
       .limit(limit * 1)
       .skip((page - 1) * limit);
 

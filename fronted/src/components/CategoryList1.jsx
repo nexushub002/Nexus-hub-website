@@ -6,6 +6,7 @@ const CategoryList1 = () => {
   const [selectedCategory, setSelectedCategory] = useState(null)
 
   // Category data with icons and subcategories
+  // Note: Consumer Electronics category has been removed - focusing on Apparel & Accessories and Jewelry only
   const categories = {
     "Apparel & Accessories": {
       icon: "https://rukminim1.flixcart.com/fk-p-flap/64/64/image/82b3ca5fb2301045.png?q=100",
@@ -21,22 +22,6 @@ const CategoryList1 = () => {
         { name: "Jewelry & Accessories", key: "Jewelry_Accessories" },
         { name: "Sports & Activewear", key: "Sports_Activewear" },
         { name: "Underwear & Lingerie", key: "Underwear_Lingerie" }
-      ]
-    },
-    "Consumer Electronics": {
-      icon: "https://rukminim1.flixcart.com/fk-p-flap/64/64/image/69c6589653afdb9a.png?q=100",
-      key: "Consumer_Electronics",
-      subcategories: [
-        { name: "Mobile Phones & accessories", key: "Mobile_Phones_Accessories" },
-        { name: "Computers & Laptops", key: "Computers_Laptops" },
-        { name: "Audio & Video Equipment", key: "Audio_Video_Equipment" },
-        { name: "Gaming Consoles & Accessories", key: "Gaming_Consoles_Accessories" },
-        { name: "Cameras & Photography", key: "Cameras_Photography" },
-        { name: "Home Appliances", key: "Home_Appliances" },
-        { name: "Smart Home Devices", key: "Smart_Home_Devices" },
-        { name: "Wearable Technology", key: "Wearable_Technology" },
-        { name: "Electronic Components", key: "Electronic_Components" },
-        { name: "Office Electronics", key: "Office_Electronics" }
       ]
     },
     "Jewelry": {

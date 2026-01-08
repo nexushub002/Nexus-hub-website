@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../compo/Sidebar';
 import { useSeller } from '../context/SellerContext';
 
+// Note: Consumer Electronics category has been removed - focusing on Apparel & Accessories and Jewelry only
 const CATEGORIES = {
   'Apparel & Accessories': [
     "Men's Clothing",
@@ -15,18 +16,6 @@ const CATEGORIES = {
     'Jewelry & Accessories',
     'Sports & Activewear',
     'Underwear & Lingerie'
-  ],
-  'Consumer Electronics': [
-    'Mobile Phones & Accessories',
-    'Computers & Laptops',
-    'Audio & Video Equipment',
-    'Gaming Consoles & Accessories',
-    'Cameras & Photography',
-    'Home Appliances',
-    'Smart Home Devices',
-    'Wearable Technology',
-    'Electronic Components',
-    'Office Electronics'
   ],
   Jewelry: [
     'Rings',
@@ -44,7 +33,6 @@ const CATEGORIES = {
 
 const CATEGORY_KEY_MAP = {
   'Apparel & Accessories': 'Apparel_Accessories',
-  'Consumer Electronics': 'Consumer_Electronics',
   Jewelry: 'Jewelry'
 };
 
@@ -60,18 +48,6 @@ const SUBCATEGORY_KEY_MAP = {
     'Jewelry & Accessories': 'Jewelry_Accessories',
     'Sports & Activewear': 'Sports_Activewear',
     'Underwear & Lingerie': 'Underwear_Lingerie'
-  },
-  'Consumer Electronics': {
-    'Mobile Phones & Accessories': 'Mobile_Phones_Accessories',
-    'Computers & Laptops': 'Computers_Laptops',
-    'Audio & Video Equipment': 'Audio_Video_Equipment',
-    'Gaming Consoles & Accessories': 'Gaming_Consoles_Accessories',
-    'Cameras & Photography': 'Cameras_Photography',
-    'Home Appliances': 'Home_Appliances',
-    'Smart Home Devices': 'Smart_Home_Devices',
-    'Wearable Technology': 'Wearable_Technology',
-    'Electronic Components': 'Electronic_Components',
-    'Office Electronics': 'Office_Electronics'
   },
   Jewelry: {
     Rings: 'Rings',

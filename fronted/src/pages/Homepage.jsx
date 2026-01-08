@@ -26,7 +26,7 @@ const Homepage = () => {
       <Navbar/>
       {isMobile && <CategoryList1/>}
       <SlideBar/>
-      {!isMobile && <CategoryListImproved/>}
+      
       <FeaturedSectionsImproved/>
       <TopDealsImproved/>
       <ProductList/>

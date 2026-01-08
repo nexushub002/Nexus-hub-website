@@ -4,7 +4,8 @@ import Navbar from '../components/Navbar';
 import { buildApiUrl } from '../config/api';
 
 // Top Ranking page - React + Tailwind implementation
-// - 3 main categories (from Product.js): Apparel & Accessories, Consumer Electronics, Jewelry
+// Note: Consumer Electronics category has been removed - focusing on Apparel & Accessories and Jewelry only
+// - 2 main categories (from Product.js): Apparel & Accessories, Jewelry
 // - For the selected category, render sections for each subcategory
 // - Each subcategory section shows top 3 products (by createdAt desc)
 // - Clicking subcategory title navigates to /browse/:categoryKey/:subcategoryKey
@@ -13,7 +14,6 @@ import { buildApiUrl } from '../config/api';
 // Normalized keys to match existing browse route
 const CATEGORY_KEY_MAP = {
   'Apparel & Accessories': 'Apparel_Accessories',
-  'Consumer Electronics': 'Consumer_Electronics',
   'Jewelry': 'Jewelry'
 };
 
@@ -29,18 +29,6 @@ const SUBCATEGORY_KEY_MAP = {
     'Jewelry & Accessories': 'Jewelry_Accessories',
     'Sports & Activewear': 'Sports_Activewear',
     'Underwear & Lingerie': 'Underwear_Lingerie'
-  },
-  'Consumer Electronics': {
-    'Mobile Phones & Accessories': 'Mobile_Phones_Accessories',
-    'Computers & Laptops': 'Computers_Laptops',
-    'Audio & Video Equipment': 'Audio_Video_Equipment',
-    'Gaming Consoles & Accessories': 'Gaming_Consoles_Accessories',
-    'Cameras & Photography': 'Cameras_Photography',
-    'Home Appliances': 'Home_Appliances',
-    'Smart Home Devices': 'Smart_Home_Devices',
-    'Wearable Technology': 'Wearable_Technology',
-    'Electronic Components': 'Electronic_Components',
-    'Office Electronics': 'Office_Electronics'
   },
   'Jewelry': {
     'Rings': 'Rings',

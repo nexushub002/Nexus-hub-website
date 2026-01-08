@@ -2,6 +2,7 @@
 import mongoose from "mongoose";
 
 // Define the allowed categories and their subcategories
+// Note: Consumer Electronics category has been removed - focusing on Apparel & Accessories and Jewelry only
 const CATEGORIES = {
   "Apparel & Accessories": [
     "Men's Clothing",
@@ -14,18 +15,6 @@ const CATEGORIES = {
     "Jewelry & Accessories",
     "Sports & Activewear",
     "Underwear & Lingerie"
-  ],
-  "Consumer Electronics": [
-    "Mobile Phones & Accessories",
-    "Computers & Laptops",
-    "Audio & Video Equipment",
-    "Gaming Consoles & Accessories",
-    "Cameras & Photography",
-    "Home Appliances",
-    "Smart Home Devices",
-    "Wearable Technology",
-    "Electronic Components",
-    "Office Electronics"
   ],
   "Jewelry": [
     "Rings",
@@ -76,6 +65,24 @@ const productSchema = new mongoose.Schema({
   description: {
     type: String,
     trim: true,
+  },
+  // Search enhancement fields
+  // tags: short descriptive labels (e.g. "eco-friendly", "summer", "B2B")
+  tags: {
+    type: [String],
+    index: true,
+    default: [],
+  },
+  // searchKeywords: extra keywords and synonyms for better matching (e.g. "hoodie", "pullover", "sweatshirt")
+  searchKeywords: {
+    type: [String],
+    index: true,
+    default: [],
+  },
+  // useCases: phrases describing how/where the product is used (e.g. "corporate gifting", "school uniform")
+  useCases: {
+    type: [String],
+    default: [],
   },
   price: {
     type: Number,
@@ -140,5 +147,17 @@ productSchema.index({ categoryKey: 1, subcategoryKey: 1 });
 // Index for seller queries
 productSchema.index({ sellerId: 1 });
 productSchema.index({ sellerProfile: 1 });
+
+// Text index to improve full-text search relevance across key product fields
+productSchema.index(
+  {
+    name: "text",
+    description: "text",
+    tags: "text",
+    searchKeywords: "text",
+    category: "text",
+    subcategory: "text",
+  }
+);
 
 export default mongoose.model("Product", productSchema);

@@ -17,6 +17,7 @@ const initialState = {
   warranty: '',
   returnPolicy: '',
   customization: false,
+  tags: [], // selected product tags used for search
   images: [], // Array of uploaded image files
   imageUrls: [], // Array of Cloudinary URLs after upload
   videos: [], // Array of uploaded video files
@@ -24,6 +25,7 @@ const initialState = {
 }
 
 // Define the same categories as in the backend
+// Note: Consumer Electronics category has been removed - focusing on Apparel & Accessories and Jewelry only
 const CATEGORIES = {
   "Apparel & Accessories": [
     "Men's Clothing",
@@ -36,18 +38,6 @@ const CATEGORIES = {
     "Jewelry & Accessories",
     "Sports & Activewear",
     "Underwear & Lingerie"
-  ],
-  "Consumer Electronics": [
-    "Mobile Phones & Accessories",
-    "Computers & Laptops",
-    "Audio & Video Equipment",
-    "Gaming Consoles & Accessories",
-    "Cameras & Photography",
-    "Home Appliances",
-    "Smart Home Devices",
-    "Wearable Technology",
-    "Electronic Components",
-    "Office Electronics"
   ],
   "Jewelry": [
     "Rings",
@@ -64,9 +54,9 @@ const CATEGORIES = {
 };
 
 // Normalized key mapping for API/storage
+// Note: Consumer Electronics category has been removed
 const CATEGORY_KEY_MAP = {
   'Apparel & Accessories': 'Apparel_Accessories',
-  'Consumer Electronics': 'Consumer_Electronics',
   'Jewelry': 'Jewelry'
 }
 
@@ -83,18 +73,6 @@ const SUBCATEGORY_KEY_MAP = {
     'Sports & Activewear': 'Sports_Activewear',
     'Underwear & Lingerie': 'Underwear_Lingerie'
   },
-  'Consumer Electronics': {
-    'Mobile Phones & Accessories': 'Mobile_Phones_Accessories',
-    'Computers & Laptops': 'Computers_Laptops',
-    'Audio & Video Equipment': 'Audio_Video_Equipment',
-    'Gaming Consoles & Accessories': 'Gaming_Consoles_Accessories',
-    'Cameras & Photography': 'Cameras_Photography',
-    'Home Appliances': 'Home_Appliances',
-    'Smart Home Devices': 'Smart_Home_Devices',
-    'Wearable Technology': 'Wearable_Technology',
-    'Electronic Components': 'Electronic_Components',
-    'Office Electronics': 'Office_Electronics'
-  },
   'Jewelry': {
     'Rings': 'Rings',
     'Necklaces & Pendants': 'Necklaces_Pendants',
@@ -107,6 +85,45 @@ const SUBCATEGORY_KEY_MAP = {
     'Tie Clips': 'Tie_Clips',
     'Jewelry Sets': 'Jewelry_Sets'
   }
+}
+
+// Category-specific tag configurations for better search relevance
+// Each category has its own relevant tags to prevent cross-category contamination
+
+const CATEGORY_TAG_CONFIG = {
+  'Apparel & Accessories': {
+    Material: ['cotton', 'silk', 'polyester', 'leather', 'wool', 'linen', 'denim', 'nylon'],
+    Usage: ['summer wear', 'winter wear', 'daily wear', 'formal wear', 'casual wear', 'sports wear'],
+    Season: ['spring', 'summer', 'fall', 'winter', 'all season'],
+    Business: ['bulk', 'wholesale', 'retail', 'export quality', 'custom orders']
+  },
+  'Jewelry': {
+    Metal: ['gold', 'silver', 'platinum', 'rose gold', 'sterling silver', 'brass', 'copper'],
+    Gemstone: ['diamond', 'ruby', 'emerald', 'sapphire', 'pearl', 'crystal', 'gemstone', 'semi-precious'],
+    JewelryType: ['handmade', 'machine made', 'traditional', 'modern', 'vintage style', 'contemporary'],
+    Occasion: ['wedding', 'party', 'daily wear', 'formal', 'casual', 'gift', 'anniversary'],
+    Business: ['bulk', 'wholesale', 'retail', 'export quality', 'custom orders']
+  }
+}
+
+// Helper to get tags for a specific category
+const getTagsForCategory = (category) => {
+  return CATEGORY_TAG_CONFIG[category] || {}
+}
+
+// Helper to get all tags for a category as a flat array (for validation)
+const getAllTagsForCategory = (category) => {
+  const tagGroups = getTagsForCategory(category)
+  return Object.values(tagGroups).flat()
+}
+
+// Tags that should be used for useCases field (usage/occasion/business related)
+const getUseCaseTags = (category) => {
+  const tagGroups = getTagsForCategory(category)
+  const useCaseGroups = ['Usage', 'Season', 'Occasion', 'Business']
+  return useCaseGroups
+    .filter(group => tagGroups[group])
+    .flatMap(group => tagGroups[group])
 }
 
 const toKey = (label) =>
@@ -162,7 +179,8 @@ const AddProduct = () => {
     setForm((f) => ({ 
       ...f, 
       category: category,
-      subcategory: '' // Reset subcategory when category changes
+      subcategory: '', // Reset subcategory when category changes
+      tags: [] // Clear tags when category changes to prevent cross-category tag mixing
     }))
   }
 
@@ -208,6 +226,26 @@ const AddProduct = () => {
       ...f,
       videos: f.videos.filter((_, i) => i !== index)
     }))
+  }
+
+  const handleTagToggle = (tag) => {
+    setForm((f) => {
+      // Validate tag belongs to current category
+      if (!f.category) {
+        return f // Can't select tags without a category
+      }
+      
+      const validTagsForCategory = getAllTagsForCategory(f.category)
+      if (!validTagsForCategory.includes(tag)) {
+        console.warn(`Tag "${tag}" is not valid for category "${f.category}"`)
+        return f // Don't add invalid tags
+      }
+      
+      const current = f.tags || []
+      const exists = current.includes(tag)
+      const nextTags = exists ? current.filter((t) => t !== tag) : [...current, tag]
+      return { ...f, tags: nextTags }
+    })
   }
 
 const uploadImagesToCloudinary = async (imageFiles) => {
@@ -280,6 +318,10 @@ const uploadImagesToCloudinary = async (imageFiles) => {
         throw new Error('Please fill in all required fields (Name, Category, Subcategory, Price, MOQ)')
       }
 
+      if (!form.tags || form.tags.length === 0) {
+        throw new Error('Please select at least one product tag to help buyers find this item')
+      }
+
       let imageUrls = []
       if (form.images.length > 0) {
         setMessage({ type: 'info', text: 'Uploading images...' })
@@ -304,6 +346,25 @@ const uploadImagesToCloudinary = async (imageFiles) => {
         throw new Error('Seller ID not found. Please login again.')
       }
 
+      // Validate and filter tags to ensure they belong to the selected category
+      const validTagsForCategory = getAllTagsForCategory(form.category)
+      const selectedTags = (form.tags || []).filter(tag => {
+        const isValid = validTagsForCategory.includes(tag)
+        if (!isValid) {
+          console.warn(`Removing invalid tag "${tag}" for category "${form.category}"`)
+        }
+        return isValid
+      })
+
+      if (selectedTags.length === 0) {
+        throw new Error('Please select at least one valid tag for this category')
+      }
+
+      // Generate searchKeywords (all tags lowercase) and useCases (category-specific)
+      const searchKeywords = selectedTags.map((t) => t.toLowerCase())
+      const useCaseTagsSet = new Set(getUseCaseTags(form.category))
+      const useCases = selectedTags.filter((t) => useCaseTagsSet.has(t))
+
       const productData = {
         name: form.name.trim(),
         category: form.category,
@@ -322,6 +383,9 @@ const uploadImagesToCloudinary = async (imageFiles) => {
         warranty: form.warranty?.trim(),
         returnPolicy: form.returnPolicy?.trim(),
         customization: !!form.customization,
+        tags: selectedTags,
+        searchKeywords,
+        useCases,
         images: imageUrls,
         videos: videoUrls
       };
@@ -491,6 +555,53 @@ const uploadImagesToCloudinary = async (imageFiles) => {
                 value={form.description} 
                 onChange={handleChange} 
               />
+
+              {/* Product Tags - Category-specific tags for better search relevance */}
+              <div className='md:col-span-2'>
+                <label className='block text-sm font-medium mb-1'>
+                  Product Tags <span className='text-red-500'>*</span>
+                </label>
+                <p className='text-xs text-gray-500 mb-3'>
+                  {form.category 
+                    ? `Choose tags that best describe this ${form.category} product. These help buyers find your product in search.`
+                    : 'Please select a category first to see relevant tags.'
+                  }
+                </p>
+                {form.category ? (
+                  <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+                    {Object.entries(getTagsForCategory(form.category)).map(([groupLabel, options]) => (
+                      <div key={groupLabel} className='border rounded-lg p-3 bg-gray-50'>
+                        <div className='text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide'>
+                          {groupLabel}
+                        </div>
+                        <div className='space-y-1.5'>
+                          {options.map((tag) => {
+                            const checked = form.tags?.includes(tag)
+                            return (
+                              <label
+                                key={tag}
+                                className='flex items-center gap-2 text-xs cursor-pointer select-none hover:bg-white px-2 py-1 rounded transition-colors'
+                              >
+                                <input
+                                  type='checkbox'
+                                  checked={checked}
+                                  onChange={() => handleTagToggle(tag)}
+                                  className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                                />
+                                <span className='capitalize text-gray-700'>{tag}</span>
+                              </label>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className='text-sm text-gray-400 italic p-4 bg-gray-50 rounded-lg text-center'>
+                    Select a category above to see relevant tags
+                  </div>
+                )}
+              </div>
               <div className='flex flex-col sm:flex-row items-start sm:items-center gap-4 md:col-span-2'>
                 <label className='flex items-center gap-2 text-sm'>
                   <input 

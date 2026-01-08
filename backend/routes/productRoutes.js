@@ -6,9 +6,9 @@ import { uploadImages, uploadVideos } from "../middleware/upload.js";
 const router = express.Router();
 
 // Mapping labels to normalized keys used in DB
+// Note: Consumer Electronics category has been removed - focusing on Apparel & Accessories and Jewelry only
 const CATEGORY_KEY_MAP = {
   'Apparel & Accessories': 'Apparel_Accessories',
-  'Consumer Electronics': 'Consumer_Electronics',
   'Jewelry': 'Jewelry'
 };
 
@@ -24,18 +24,6 @@ const SUBCATEGORY_KEY_MAP = {
     'Jewelry & Accessories': 'Jewelry_Accessories',
     'Sports & Activewear': 'Sports_Activewear',
     'Underwear & Lingerie': 'Underwear_Lingerie'
-  },
-  'Consumer Electronics': {
-    'Mobile Phones & Accessories': 'Mobile_Phones_Accessories',
-    'Computers & Laptops': 'Computers_Laptops',
-    'Audio & Video Equipment': 'Audio_Video_Equipment',
-    'Gaming Consoles & Accessories': 'Gaming_Consoles_Accessories',
-    'Cameras & Photography': 'Cameras_Photography',
-    'Home Appliances': 'Home_Appliances',
-    'Smart Home Devices': 'Smart_Home_Devices',
-    'Wearable Technology': 'Wearable_Technology',
-    'Electronic Components': 'Electronic_Components',
-    'Office Electronics': 'Office_Electronics'
   },
   'Jewelry': {
     'Rings': 'Rings',
@@ -79,8 +67,19 @@ router.post("/", async (req, res) => {
       warranty,
       returnPolicy,
       customization,
+      tags = [],
+      searchKeywords = [],
+      useCases = [],
       images, // Array of Cloudinary URLs
     } = req.body;
+
+    // Prevent creating products with Consumer Electronics category
+    if (category === 'Consumer Electronics' || categoryKey === 'Consumer_Electronics') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Consumer Electronics category is no longer available. Please select Apparel & Accessories or Jewelry.' 
+      });
+    }
 
     // Import Manufacturer model
     const Manufacturer = (await import("../models/Manufacture.js")).default;
@@ -131,6 +130,9 @@ router.post("/", async (req, res) => {
       warranty,
       returnPolicy,
       customization,
+      tags: Array.isArray(tags) ? tags : [],
+      searchKeywords: Array.isArray(searchKeywords) ? searchKeywords : [],
+      useCases: Array.isArray(useCases) ? useCases : [],
     });
     await product.save();
 
@@ -303,19 +305,36 @@ router.get("/all-with-manufacturers", async (req, res) => {
   try {
     const { page = 1, limit = 20, category, search } = req.query;
     
-    // Build query
+    // Build query - exclude Consumer Electronics category
     let query = {};
+    let sortCriteria = { createdAt: -1 };
+    
     if (category) {
+      // Ensure category is not Consumer Electronics
+      if (category === 'Consumer Electronics') {
+        return res.status(400).json({ success: false, message: 'Consumer Electronics category is no longer available' });
+      }
       query.category = category;
+    } else {
+      // Exclude Consumer Electronics from general listings
+      query.category = { $ne: 'Consumer Electronics' };
+      query.categoryKey = { $ne: 'Consumer_Electronics' };
     }
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
+    
+    // Use MongoDB text search for better relevance when search term is provided
+    if (search && search.trim()) {
+      query.$text = { $search: search.trim() };
+      // Sort by textScore (relevance) when searching, then by createdAt
+      sortCriteria = { score: { $meta: 'textScore' }, createdAt: -1 };
     }
 
-    const products = await Product.find(query)
+    // Build find query with textScore projection when searching
+    const findQuery = Product.find(query);
+    if (search && search.trim()) {
+      findQuery.select({ score: { $meta: 'textScore' } });
+    }
+    
+    const products = await findQuery
       .populate('seller', 'name email businessName phone')
       .populate({
         path: 'manufacturer',
@@ -323,7 +342,7 @@ router.get("/all-with-manufacturers", async (req, res) => {
       })
       .limit(limit * 1)
       .skip((page - 1) * limit)
-      .sort({ createdAt: -1 });
+      .sort(sortCriteria);
 
     const total = await Product.countDocuments(query);
 

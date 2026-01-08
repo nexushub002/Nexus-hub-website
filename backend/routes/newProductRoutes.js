@@ -68,6 +68,9 @@ router.post("/create", verifySeller, async (req, res) => {
       warranty,
       returnPolicy,
       customization,
+      tags = [],
+      searchKeywords = [],
+      useCases = [],
       images = [],
       videos = []
     } = req.body;
@@ -80,9 +83,17 @@ router.post("/create", verifySeller, async (req, res) => {
       });
     }
 
+    // Prevent creating products with Consumer Electronics category
+    if (category === 'Consumer Electronics' || categoryKey === 'Consumer_Electronics') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Consumer Electronics category is no longer available. Please select Apparel & Accessories or Jewelry.' 
+      });
+    }
+
     const seller = req.seller;
 
-    // Create product
+    // Create product with search enhancement fields
     const product = await Product.create({
       name,
       category,
@@ -101,6 +112,9 @@ router.post("/create", verifySeller, async (req, res) => {
       warranty,
       returnPolicy,
       customization,
+      tags: Array.isArray(tags) ? tags : [],
+      searchKeywords: Array.isArray(searchKeywords) ? searchKeywords : [],
+      useCases: Array.isArray(useCases) ? useCases : [],
       images,
       videos
     });
@@ -305,27 +319,42 @@ router.get("/all", async (req, res) => {
   try {
     const { page = 1, limit = 20, search, category, sellerId } = req.query;
     
-    // Build query
+    // Build query - exclude Consumer Electronics category
     let query = {};
+    let sortCriteria = { createdAt: -1 };
     
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
+    // Use MongoDB text search for better relevance when search term is provided
+    if (search && search.trim()) {
+      query.$text = { $search: search.trim() };
+      // Sort by textScore (relevance) when searching, then by createdAt
+      sortCriteria = { score: { $meta: 'textScore' }, createdAt: -1 };
     }
     
     if (category) {
+      // Prevent querying Consumer Electronics category
+      if (category === 'Consumer Electronics') {
+        return res.status(400).json({ success: false, message: 'Consumer Electronics category is no longer available' });
+      }
       query.category = category;
+    } else {
+      // Exclude Consumer Electronics from general listings
+      query.category = { $ne: 'Consumer Electronics' };
+      query.categoryKey = { $ne: 'Consumer_Electronics' };
     }
     
     if (sellerId) {
       query.sellerId = sellerId;
     }
 
-    const products = await Product.find(query)
+    // Build find query with textScore projection when searching
+    const findQuery = Product.find(query);
+    if (search && search.trim()) {
+      findQuery.select({ score: { $meta: 'textScore' } });
+    }
+    
+    const products = await findQuery
       .populate('sellerProfile', 'sellerId companyName verified companyLogo yearOfEstablishment')
-      .sort({ createdAt: -1 })
+      .sort(sortCriteria)
       .limit(limit * 1)
       .skip((page - 1) * limit);
 
