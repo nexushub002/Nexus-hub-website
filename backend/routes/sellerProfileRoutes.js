@@ -471,35 +471,6 @@ router.get("/shop-name/check", verifySeller, async (req, res) => {
 });
 
 // ----------------------
-// GET SELLER BY ID (Public)
-// ----------------------
-router.get("/public/:sellerId", async (req, res) => {
-  try {
-    const { sellerId } = req.params;
-    
-    const seller = await Seller.findOne({ sellerId })
-      .select('-password -email -phone') // Exclude sensitive information
-      .populate('products');
-    
-    if (!seller) {
-      return res.status(404).json({ success: false, message: "Seller not found" });
-    }
-
-    res.json({
-      success: true,
-      seller
-    });
-  } catch (error) {
-    console.error("Error fetching seller details:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching seller details",
-      error: error.message
-    });
-  }
-});
-
-// ----------------------
 // GET SELLER'S PRODUCTS
 // ----------------------
 router.get("/products/:sellerId", async (req, res) => {
@@ -588,6 +559,146 @@ router.get("/public/:sellerId", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error fetching seller profile",
+      error: error.message
+    });
+  }
+});
+
+// ----------------------
+// SELLER SHOP SEARCH (Advanced search within seller's products)
+// ----------------------
+router.get("/search/:sellerId", async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+    const rawQuery = req.query.q?.trim() || "";
+    const limit = parseInt(req.query.limit) || 50;
+    
+    // CRITICAL: Verify seller exists
+    const seller = await Seller.findOne({ sellerId });
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: "Seller not found"
+      });
+    }
+    
+    // If no query, return popular/featured products as fallback
+    if (!rawQuery) {
+      const popularProducts = await Product.find({ sellerId })
+        .populate('sellerProfile', 'sellerId companyName verified companyLogo')
+        .sort({ 
+          // Prioritize featured products, then by creation date
+          isBigDeal: -1,
+          isTrendyProduct: -1,
+          createdAt: -1 
+        })
+        .limit(limit);
+      
+      return res.json({
+        success: true,
+        products: popularProducts,
+        search: {
+          originalQuery: '',
+          processedQuery: '',
+          expandedQuery: '',
+          detectedCategory: null,
+          spellingCorrected: false,
+        },
+        fallback: true,
+        message: 'Showing popular products'
+      });
+    }
+    
+    // Import search utilities
+    const { processSearchQuery, buildSearchQuery, buildFallbackQuery } = await import('../utils/searchUtils.js');
+    
+    // Step 1: Process query (correct spelling, detect category, expand synonyms)
+    const processed = processSearchQuery(rawQuery, null);
+    
+    // Step 2: Build MongoDB text search query with sellerId filter (CRITICAL)
+    let searchQuery = {
+      sellerId, // ALWAYS filter by sellerId first - non-negotiable
+      $text: { $search: processed.expandedQuery }
+    };
+    
+    // Step 3: Add category filter if detected
+    if (processed.category) {
+      searchQuery.category = processed.category;
+    }
+    
+    // Step 4: Execute text search with relevance scoring
+    let products = await Product.find(searchQuery)
+      .select({ score: { $meta: "textScore" } })
+      .sort({ score: { $meta: "textScore" }, createdAt: -1 }) // Best matches first
+      .limit(limit)
+      .populate('sellerProfile', 'sellerId companyName verified companyLogo')
+      .populate('sellerCategory', 'name image');
+    
+    let total = await Product.countDocuments(searchQuery);
+    let usedFallback = false;
+    
+    // Step 5: Fallback strategy if no results
+    if (products.length === 0) {
+      usedFallback = true;
+      
+      // Try relaxed search (without synonym expansion)
+      const relaxedQuery = {
+        sellerId, // Still filter by sellerId
+        $text: { $search: processed.correctedQuery }
+      };
+      
+      if (processed.category) {
+        relaxedQuery.category = processed.category;
+      }
+      
+      products = await Product.find(relaxedQuery)
+        .select({ score: { $meta: "textScore" } })
+        .sort({ score: { $meta: "textScore" }, createdAt: -1 })
+        .limit(limit)
+        .populate('sellerProfile', 'sellerId companyName verified companyLogo')
+        .populate('sellerCategory', 'name image');
+      
+      total = await Product.countDocuments(relaxedQuery);
+      
+      // If still no results, show featured/popular products
+      if (products.length === 0) {
+        products = await Product.find({ sellerId })
+          .populate('sellerProfile', 'sellerId companyName verified companyLogo')
+          .populate('sellerCategory', 'name image')
+          .sort({ 
+            isBigDeal: -1,
+            isTrendyProduct: -1,
+            createdAt: -1 
+          })
+          .limit(limit);
+        
+        total = products.length;
+      }
+    }
+    
+    res.json({
+      success: true,
+      products,
+      search: {
+        originalQuery: rawQuery,
+        processedQuery: processed.correctedQuery,
+        expandedQuery: processed.expandedQuery,
+        detectedCategory: processed.category,
+        spellingCorrected: processed.corrected,
+      },
+      fallback: usedFallback,
+      total,
+      message: products.length === 0 
+        ? 'No products found. Showing popular products.' 
+        : usedFallback 
+          ? 'Showing related products' 
+          : 'Search completed successfully'
+    });
+  } catch (error) {
+    console.error("Error in seller shop search:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error performing search",
       error: error.message
     });
   }
