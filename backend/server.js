@@ -47,14 +47,28 @@ import Cart from "./models/Cart.js";
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-    
+    app.set("trust proxy", 1);
 
   // Enable CORS
   app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "https://nexus-hub-fronted.vercel.app", "https://sellernexus-hub.vercel.app"], // frontend + seller frontend + admin frontend
-    credentials: true
-  }));
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+    "http://localhost:4173",
+    "http://localhost:4174",
+    "https://nexus-hub-fronted.vercel.app",
+    "https://sellernexus-hub.vercel.app",
+    "https://nexus-hub.in",
+    "https://www.nexus-hub.in",
+    "https://seller.nexus-hub.in"
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
+// app.options("*", cors());
 
   // ✅ Session middleware
   app.use(session({
@@ -66,11 +80,17 @@ import Cart from "./models/Cart.js";
       ttl: 60 * 60 * 24 * 7 // 7 days (in seconds)
     }),
     cookie: {
-      httpOnly: true,
-      secure: false,   // ❌ false for localhost, ✅ true for production (HTTPS)
-      maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
-    }
+  httpOnly: true,
+  secure: true,           // MUST be true on Railway
+  sameSite: "none",       // REQUIRED for cross-site
+  maxAge: 1000 * 60 * 60 * 24 * 7
+}
   }));
+
+  app.use((req, res, next) => {
+  console.log("HIT:", req.method, req.url);
+  next();
+});
 
   // Function to send SMS using Fast2SMS (Free service)
   // const sendSMS = async (phone, otp) => {
@@ -822,7 +842,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 
   // to check backend is running or not
   app.get("/", (req, res) => {
-    res.send("Backend is running , succesfully Backend running🚀");
+    res.send("Backend is running 🚀");
   });
 
   app.get("/api/search", async (req, res) => {
