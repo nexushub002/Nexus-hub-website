@@ -822,7 +822,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 
   // to check backend is running or not
   app.get("/", (req, res) => {
-    res.send("Backend is running 🚀");
+    res.send("Backend is running , succesfully Backend running🚀");
   });
 
   app.get("/api/search", async (req, res) => {
